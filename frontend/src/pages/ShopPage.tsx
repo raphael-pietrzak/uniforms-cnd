@@ -3,13 +3,14 @@ import { useShop } from '../context/ShopContext';
 import ProductCard from '../components/shop/ProductCard';
 import ProductFilters from '../components/shop/ProductFilters';
 import { Product } from '../types';
-import { Grid, List, ArrowUpDown } from 'lucide-react';
+import { Grid, List, ArrowUpDown, SlidersHorizontal, X } from 'lucide-react';
 
 const ShopPage: React.FC = () => {
   const { products } = useShop();
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [sortOption, setSortOption] = useState<string>('default');
+  const [showFilters, setShowFilters] = useState<boolean>(false);
 
   const handleFilterChange = (filters: any) => {
     let filtered = [...products];
@@ -88,8 +89,28 @@ const ShopPage: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Boutique d'Uniformes Scolaires</h1>
 
-      {/* Filters */}
-      <ProductFilters onFilterChange={handleFilterChange} />
+      {/* Filters Toggle Button */}
+      <div className="mb-4">
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors"
+        >
+          {showFilters ? (
+            <>
+              <X size={18} />
+              <span>Masquer les filtres</span>
+            </>
+          ) : (
+            <>
+              <SlidersHorizontal size={18} />
+              <span>Afficher les filtres</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Filters - Conditionally rendered */}
+      {showFilters && <ProductFilters onFilterChange={handleFilterChange} />}
 
       {/* Toolbar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
