@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ShoppingCart, Menu, X, User } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
-import Button from '../ui/Button';
 import Logo from '../../assets/cnd_logo.svg';
 
 const Header: React.FC = () => {
@@ -46,15 +45,15 @@ const Header: React.FC = () => {
             
             {/* Navigation Bureau */}
             <nav className="hidden md:ml-6 md:flex md:space-x-8">
-              <Link to="/" className={isActive('/') ? activeLinkClass : inactiveLinkClass}>
+              {/* <Link to="/" className={isActive('/') ? activeLinkClass : inactiveLinkClass}>
                 Accueil
-              </Link>
+              </Link> */}
               <Link to="/shop" className={isActive('/shop') ? activeLinkClass : inactiveLinkClass}>
                 Boutique
               </Link>
-              <Link to="/info" className={isActive('/info') ? activeLinkClass : inactiveLinkClass}>
+              {/* <Link to="/info" className={isActive('/info') ? activeLinkClass : inactiveLinkClass}>
                 Informations
-              </Link>
+              </Link> */}
               {isAdmin && (
                 <Link to="/admin" className={isActive('/admin') ? activeLinkClass : inactiveLinkClass}>
                   Administration

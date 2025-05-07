@@ -86,7 +86,7 @@ const ShopPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">School Uniform Shop</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Boutique d'Uniformes Scolaires</h1>
 
       {/* Filters */}
       <ProductFilters onFilterChange={handleFilterChange} />
@@ -95,23 +95,23 @@ const ShopPage: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
         <div>
           <p className="text-gray-600">
-            Showing <span className="font-medium">{filteredProducts.length}</span> products
+            Affichage de <span className="font-medium">{filteredProducts.length}</span> produits
           </p>
         </div>
 
         <div className="flex space-x-4 items-center">
           <div className="flex items-center space-x-2">
-            <span className="text-gray-600 text-sm">Sort by:</span>
+            <span className="text-gray-600 text-sm">Trier par :</span>
             <select
               value={sortOption}
               onChange={(e) => handleSortChange(e.target.value)}
               className="border rounded-md p-1 text-sm"
             >
-              <option value="default">Default</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="name-asc">Name: A to Z</option>
-              <option value="name-desc">Name: Z to A</option>
+              <option value="default">Par défaut</option>
+              <option value="price-asc">Prix : Croissant</option>
+              <option value="price-desc">Prix : Décroissant</option>
+              <option value="name-asc">Nom : A à Z</option>
+              <option value="name-desc">Nom : Z à A</option>
             </select>
           </div>
 
@@ -121,7 +121,7 @@ const ShopPage: React.FC = () => {
               className={`p-2 ${
                 view === 'grid' ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-600'
               }`}
-              title="Grid View"
+              title="Vue en grille"
             >
               <Grid size={18} />
             </button>
@@ -130,7 +130,7 @@ const ShopPage: React.FC = () => {
               className={`p-2 ${
                 view === 'list' ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-600'
               }`}
-              title="List View"
+              title="Vue en liste"
             >
               <List size={18} />
             </button>
@@ -141,7 +141,7 @@ const ShopPage: React.FC = () => {
       {/* Product Grid or List */}
       {filteredProducts.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
+          <p className="text-gray-500 text-lg">Aucun produit ne correspond à vos critères.</p>
         </div>
       ) : view === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

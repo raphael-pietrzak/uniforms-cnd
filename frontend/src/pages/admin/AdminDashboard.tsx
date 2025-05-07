@@ -25,10 +25,10 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Tableau de Bord Admin</h1>
         <div className="flex space-x-3">
           <Button as={Link} to="/admin/products/new" variant="primary">
-            Add New Product
+            Ajouter un Nouveau Produit
           </Button>
         </div>
       </div>
@@ -42,16 +42,16 @@ const AdminDashboard: React.FC = () => {
                 <ShoppingBag size={24} />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Products</p>
+                <p className="text-sm font-medium text-gray-600">Total Produits</p>
                 <p className="text-2xl font-bold text-gray-900">{totalProducts}</p>
               </div>
             </div>
             <div className="mt-4 flex justify-between text-sm">
               <div>
-                <span className="text-green-600 font-medium">{inStockProducts}</span> in stock
+                <span className="text-green-600 font-medium">{inStockProducts}</span> en stock
               </div>
               <div>
-                <span className="text-red-600 font-medium">{outOfStockProducts}</span> out of stock
+                <span className="text-red-600 font-medium">{outOfStockProducts}</span> rupture de stock
               </div>
             </div>
           </CardContent>
@@ -64,16 +64,16 @@ const AdminDashboard: React.FC = () => {
                 <CreditCard size={24} />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Revenue</p>
+                <p className="text-sm font-medium text-gray-600">Revenus</p>
                 <p className="text-2xl font-bold text-gray-900">€{totalRevenue.toFixed(2)}</p>
               </div>
             </div>
             <div className="mt-4 flex justify-between text-sm">
               <div>
-                <span className="text-gray-600 font-medium">{orders.length}</span> total orders
+                <span className="text-gray-600 font-medium">{orders.length}</span> commandes
               </div>
               <Link to="/admin/orders" className="text-blue-600 hover:text-blue-800">
-                View all
+                Voir tout
               </Link>
             </div>
           </CardContent>
@@ -86,16 +86,16 @@ const AdminDashboard: React.FC = () => {
                 <Clock size={24} />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Pending Orders</p>
+                <p className="text-sm font-medium text-gray-600">Commandes en Attente</p>
                 <p className="text-2xl font-bold text-gray-900">{pendingOrders}</p>
               </div>
             </div>
             <div className="mt-4 flex justify-between text-sm">
               <div>
-                <span className="text-yellow-600 font-medium">{readyOrders}</span> ready for pickup
+                <span className="text-yellow-600 font-medium">{readyOrders}</span> prêtes au retrait
               </div>
               <Link to="/admin/orders" className="text-blue-600 hover:text-blue-800">
-                Manage
+                Gérer
               </Link>
             </div>
           </CardContent>
@@ -108,16 +108,16 @@ const AdminDashboard: React.FC = () => {
                 <Package size={24} />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Used Items</p>
+                <p className="text-sm font-medium text-gray-600">Articles d'Occasion</p>
                 <p className="text-2xl font-bold text-gray-900">{usedProducts}</p>
               </div>
             </div>
             <div className="mt-4 flex justify-between text-sm">
               <div>
-                <span className="text-purple-600 font-medium">{Math.round((usedProducts / totalProducts) * 100)}%</span> of inventory
+                <span className="text-purple-600 font-medium">{Math.round((usedProducts / totalProducts) * 100)}%</span> de l'inventaire
               </div>
               <Link to="/admin/products" className="text-blue-600 hover:text-blue-800">
-                View all
+                Voir tout
               </Link>
             </div>
           </CardContent>
@@ -128,9 +128,9 @@ const AdminDashboard: React.FC = () => {
       <Card className="mb-8">
         <CardHeader>
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-gray-900">Recent Orders</h2>
+            <h2 className="text-xl font-bold text-gray-900">Commandes Récentes</h2>
             <Link to="/admin/orders" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              View All
+              Voir Tout
             </Link>
           </div>
         </CardHeader>
@@ -139,19 +139,19 @@ const AdminDashboard: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order ID
+                  ID Commande
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
+                  Client
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Date
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
+                  Montant
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  Statut
                 </th>
               </tr>
             </thead>
@@ -159,7 +159,7 @@ const AdminDashboard: React.FC = () => {
               {orders.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
-                    No orders yet
+                    Pas encore de commandes
                   </td>
                 </tr>
               ) : (
@@ -189,7 +189,11 @@ const AdminDashboard: React.FC = () => {
                             : 'bg-gray-100 text-gray-800'
                         }`}
                       >
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        {order.status === 'paid' ? 'Payée' : 
+                         order.status === 'pending' ? 'En Attente' : 
+                         order.status === 'ready' ? 'Prête' : 
+                         order.status === 'collected' ? 'Récupérée' : 
+                         order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
                     </td>
                   </tr>
@@ -209,8 +213,8 @@ const AdminDashboard: React.FC = () => {
                 <ShoppingBag size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Manage Products</h3>
-                <p className="text-sm text-gray-600">Add, edit, or remove products</p>
+                <h3 className="text-lg font-medium text-gray-900">Gérer les Produits</h3>
+                <p className="text-sm text-gray-600">Ajouter, modifier ou supprimer des produits</p>
               </div>
             </Link>
           </CardContent>
@@ -223,8 +227,8 @@ const AdminDashboard: React.FC = () => {
                 <CreditCard size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Manage Orders</h3>
-                <p className="text-sm text-gray-600">View and update order status</p>
+                <h3 className="text-lg font-medium text-gray-900">Gérer les Commandes</h3>
+                <p className="text-sm text-gray-600">Voir et mettre à jour l'état des commandes</p>
               </div>
             </Link>
           </CardContent>
@@ -237,8 +241,8 @@ const AdminDashboard: React.FC = () => {
                 <BarChart3 size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Reports</h3>
-                <p className="text-sm text-gray-600">View sales and inventory reports</p>
+                <h3 className="text-lg font-medium text-gray-900">Rapports</h3>
+                <p className="text-sm text-gray-600">Consulter les rapports de ventes et d'inventaire</p>
               </div>
             </Link>
           </CardContent>

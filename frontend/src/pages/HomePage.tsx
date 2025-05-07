@@ -18,10 +18,10 @@ const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative z-10">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">
-              Quality School Uniforms at Affordable Prices
+              Uniformes Scolaires de Qualité à Prix Abordables
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-blue-100">
-              New and gently-used uniforms for your children. Save money while supporting our school community.
+              Uniformes neufs et d'occasion pour vos enfants. Économisez tout en soutenant notre communauté scolaire.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <Button
@@ -32,7 +32,7 @@ const HomePage: React.FC = () => {
                 className="bg-white text-blue-900 hover:bg-blue-50"
               >
                 <ShoppingBag className="mr-2" size={20} />
-                Shop Now
+                Acheter Maintenant
               </Button>
               <Button
                 as={Link}
@@ -42,7 +42,7 @@ const HomePage: React.FC = () => {
                 className="border-white text-white hover:bg-blue-800"
               >
                 <Info className="mr-2" size={20} />
-                Learn More
+                En Savoir Plus
               </Button>
             </div>
           </div>
@@ -53,9 +53,9 @@ const HomePage: React.FC = () => {
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Us?</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Pourquoi Nous Choisir ?</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Our school uniform shop provides quality clothing while supporting sustainability and affordability for all families.
+              Notre boutique d'uniformes scolaires fournit des vêtements de qualité tout en soutenant la durabilité et l'accessibilité pour toutes les familles.
             </p>
           </div>
           
@@ -64,9 +64,9 @@ const HomePage: React.FC = () => {
               <div className="inline-block p-3 bg-blue-100 rounded-full text-blue-800 mb-4">
                 <TShirt size={32} />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Quality Clothing</h3>
+              <h3 className="text-xl font-semibold mb-2">Vêtements de Qualité</h3>
               <p className="text-gray-600">
-                All our uniforms meet the highest quality standards, whether new or gently used.
+                Tous nos uniformes répondent aux normes de qualité les plus élevées, qu'ils soient neufs ou d'occasion.
               </p>
             </div>
             
@@ -74,9 +74,9 @@ const HomePage: React.FC = () => {
               <div className="inline-block p-3 bg-green-100 rounded-full text-green-800 mb-4">
                 <Shield size={32} />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Sustainability</h3>
+              <h3 className="text-xl font-semibold mb-2">Durabilité</h3>
               <p className="text-gray-600">
-                Our secondhand options reduce waste and promote sustainable practices.
+                Nos options d'occasion réduisent les déchets et favorisent des pratiques durables.
               </p>
             </div>
             
@@ -84,9 +84,9 @@ const HomePage: React.FC = () => {
               <div className="inline-block p-3 bg-yellow-100 rounded-full text-yellow-800 mb-4">
                 <ShoppingBag size={32} />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Affordability</h3>
+              <h3 className="text-xl font-semibold mb-2">Accessibilité</h3>
               <p className="text-gray-600">
-                Competitive prices and secondhand options make uniforms accessible to all families.
+                Des prix compétitifs et des options d'occasion rendent les uniformes accessibles à toutes les familles.
               </p>
             </div>
           </div>
@@ -97,9 +97,9 @@ const HomePage: React.FC = () => {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Featured Items</h2>
+            <h2 className="text-3xl font-bold text-gray-900">Articles en Vedette</h2>
             <Link to="/shop" className="text-blue-600 hover:text-blue-800 font-medium">
-              View All →
+              Voir Tout →
             </Link>
           </div>
           

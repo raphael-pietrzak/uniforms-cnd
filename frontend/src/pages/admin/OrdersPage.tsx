@@ -31,7 +31,7 @@ const OrdersPage: React.FC = () => {
   
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Orders</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Commandes</h1>
       
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
         <div className="p-6 border-b border-gray-200">
@@ -43,7 +43,7 @@ const OrdersPage: React.FC = () => {
                 </div>
                 <Input
                   type="text"
-                  placeholder="Search orders..."
+                  placeholder="Rechercher des commandes..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -57,11 +57,11 @@ const OrdersPage: React.FC = () => {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 options={[
-                  { value: 'all', label: 'All Statuses' },
-                  { value: 'pending', label: 'Pending' },
-                  { value: 'paid', label: 'Paid' },
-                  { value: 'ready', label: 'Ready for Pickup' },
-                  { value: 'collected', label: 'Collected' },
+                  { value: 'all', label: 'Tous les Statuts' },
+                  { value: 'pending', label: 'En Attente' },
+                  { value: 'paid', label: 'Payée' },
+                  { value: 'ready', label: 'Prête pour Retrait' },
+                  { value: 'collected', label: 'Récupérée' },
                 ]}
                 fullWidth
               />

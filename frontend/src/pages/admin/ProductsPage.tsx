@@ -27,7 +27,7 @@ const ProductsPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Products</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Produits</h1>
         <Button
           as={Link}
           to="/admin/products/new"
@@ -35,7 +35,7 @@ const ProductsPage: React.FC = () => {
           className="flex items-center"
         >
           <Plus size={18} className="mr-2" />
-          Add New Product
+          Ajouter un Nouveau Produit
         </Button>
       </div>
       
@@ -49,7 +49,7 @@ const ProductsPage: React.FC = () => {
                 </div>
                 <Input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder="Rechercher des produits..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -61,7 +61,7 @@ const ProductsPage: React.FC = () => {
             <div className="flex items-center">
               <label className="flex items-center cursor-pointer">
                 <div className="mr-3 text-sm font-medium text-gray-700">
-                  Show out of stock only
+                  Afficher uniquement les ruptures de stock
                 </div>
                 <div 
                   className={`relative w-12 h-6 transition-colors duration-200 ease-in-out rounded-full ${
@@ -85,22 +85,22 @@ const ProductsPage: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product
+                  Produit
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  Statut
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
+                  Prix
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sizes
+                  Tailles
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Condition
+                  État
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
+                  Catégorie
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -111,7 +111,7 @@ const ProductsPage: React.FC = () => {
               {filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                    No products found
+                    Aucun produit trouvé
                   </td>
                 </tr>
               ) : (
@@ -140,12 +140,12 @@ const ProductsPage: React.FC = () => {
                         {product.inStock ? (
                           <>
                             <span className="h-2.5 w-2.5 rounded-full bg-green-500 mr-2"></span>
-                            <span className="text-green-800">In Stock</span>
+                            <span className="text-green-800">En Stock</span>
                           </>
                         ) : (
                           <>
                             <span className="h-2.5 w-2.5 rounded-full bg-red-500 mr-2"></span>
-                            <span className="text-red-800">Out of Stock</span>
+                            <span className="text-red-800">Rupture de Stock</span>
                           </>
                         )}
                       </button>
@@ -164,7 +164,7 @@ const ProductsPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge variant={product.condition === 'new' ? 'primary' : 'warning'}>
-                        {product.condition === 'new' ? 'New' : 'Used'}
+                        {product.condition === 'new' ? 'Neuf' : 'Occasion'}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

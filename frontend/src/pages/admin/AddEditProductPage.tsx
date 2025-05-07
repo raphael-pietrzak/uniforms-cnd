@@ -18,13 +18,13 @@ const AddEditProductPage: React.FC = () => {
   if (isEditMode && !product) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <p className="text-xl text-gray-600">Product not found</p>
+        <p className="text-xl text-gray-600">Produit non trouvé</p>
         <button 
           onClick={() => navigate('/admin/products')} 
           className="mt-4 inline-flex items-center text-blue-600 hover:text-blue-800"
         >
           <ArrowLeft size={18} className="mr-1" />
-          Back to Products
+          Retour aux Produits
         </button>
       </div>
     );
@@ -46,11 +46,11 @@ const AddEditProductPage: React.FC = () => {
         className="flex items-center text-gray-600 hover:text-blue-800 mb-6"
       >
         <ArrowLeft size={18} className="mr-1" />
-        Back to Products
+        Retour aux Produits
       </button>
       
       <h1 className="text-3xl font-bold text-gray-900 mb-8">
-        {isEditMode ? 'Edit Product' : 'Add New Product'}
+        {isEditMode ? 'Modifier le Produit' : 'Ajouter un Nouveau Produit'}
       </h1>
       
       <div className="bg-white rounded-lg shadow-md overflow-hidden">

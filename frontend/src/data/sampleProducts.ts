@@ -3,8 +3,8 @@ import { Product } from '../types';
 export const sampleProducts: Product[] = [
   {
     id: 'product-1',
-    name: 'School Logo Polo Shirt',
-    description: 'Classic polo shirt with embroidered school logo. Made from durable cotton blend fabric.',
+    name: 'Polo avec Logo de l\'École',
+    description: 'Polo classique avec logo de l\'école brodé. Fabriqué à partir de tissu durable en mélange de coton.',
     price: 15.99,
     sizes: ['S', 'M', 'L', 'XL'],
     condition: 'new',
@@ -19,8 +19,8 @@ export const sampleProducts: Product[] = [
   },
   {
     id: 'product-2',
-    name: 'Pleated Skirt',
-    description: 'Navy blue pleated skirt with adjustable waist. Perfect for everyday school wear.',
+    name: 'Jupe Plissée',
+    description: 'Jupe plissée bleu marine avec taille ajustable. Parfaite pour l\'usage quotidien à l\'école.',
     price: 24.99,
     sizes: ['S', 'M', 'L'],
     condition: 'new',
@@ -35,8 +35,8 @@ export const sampleProducts: Product[] = [
   },
   {
     id: 'product-3',
-    name: 'Chino Trousers',
-    description: 'Comfortable chino trousers in navy blue. Perfect for school uniform.',
+    name: 'Pantalon Chino',
+    description: 'Pantalon chino confortable en bleu marine. Parfait pour l\'uniforme scolaire.',
     price: 29.99,
     sizes: ['S', 'M', 'L', 'XL'],
     condition: 'new',
@@ -51,8 +51,8 @@ export const sampleProducts: Product[] = [
   },
   {
     id: 'product-4',
-    name: 'School Cardigan',
-    description: 'Warm navy blue cardigan with school logo. Perfect for cooler days.',
+    name: 'Cardigan Scolaire',
+    description: 'Cardigan chaud bleu marine avec logo de l\'école. Parfait pour les journées fraîches.',
     price: 34.99,
     sizes: ['S', 'M', 'L'],
     condition: 'used',
@@ -67,8 +67,8 @@ export const sampleProducts: Product[] = [
   },
   {
     id: 'product-5',
-    name: 'School Blazer',
-    description: 'Formal navy blue blazer with school crest. Required for formal school events.',
+    name: 'Blazer Scolaire',
+    description: 'Blazer formel bleu marine avec écusson de l\'école. Obligatoire pour les événements scolaires formels.',
     price: 59.99,
     sizes: ['S', 'M', 'L', 'XL'],
     condition: 'new',
@@ -83,8 +83,8 @@ export const sampleProducts: Product[] = [
   },
   {
     id: 'product-6',
-    name: 'PE T-Shirt',
-    description: 'Breathable sports t-shirt with school logo. Perfect for physical education classes.',
+    name: 'T-shirt d\'EPS',
+    description: 'T-shirt respirant de sport avec logo de l\'école. Parfait pour les cours d\'éducation physique.',
     price: 12.99,
     sizes: ['S', 'M', 'L', 'XL'],
     condition: 'new',

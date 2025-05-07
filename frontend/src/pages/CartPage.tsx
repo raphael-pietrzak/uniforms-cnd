@@ -42,14 +42,14 @@ const CartPage: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Order Confirmed!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Commande Confirmée !</h2>
           <p className="text-gray-600 mb-6">
             {paymentMethod === 'online' 
-              ? 'Your payment was successful and your order has been placed.' 
-              : 'Your order has been placed and will be ready for pickup. Payment will be collected on-site.'}
+              ? 'Votre paiement a été effectué avec succès et votre commande a été passée.' 
+              : 'Votre commande a été passée et sera prête à être retirée. Le paiement sera effectué sur place.'}
           </p>
           <p className="text-gray-600 mb-6">
-            A confirmation email has been sent to <span className="font-medium">{customerInfo.email}</span>
+            Un email de confirmation a été envoyé à <span className="font-medium">{customerInfo.email}</span>
           </p>
           <Button
             as={Link}
@@ -58,7 +58,7 @@ const CartPage: React.FC = () => {
             className="inline-flex items-center"
           >
             <ShoppingBag size={18} className="mr-2" />
-            Continue Shopping
+            Continuer vos Achats
           </Button>
         </div>
       </div>
@@ -71,14 +71,14 @@ const CartPage: React.FC = () => {
         <div className="inline-block p-6 bg-gray-100 rounded-full mb-6">
           <ShoppingBag size={40} className="text-gray-400" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
-        <p className="text-gray-600 mb-8">Looks like you haven't added any items to your cart yet.</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Votre panier est vide</h2>
+        <p className="text-gray-600 mb-8">Il semble que vous n'ayez pas encore ajouté d'articles à votre panier.</p>
         <Button
           as={Link}
           to="/shop"
           variant="primary"
         >
-          Browse Products
+          Parcourir les Produits
         </Button>
       </div>
     );
@@ -87,7 +87,7 @@ const CartPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">
-        {checkoutStep === 'cart' ? 'Your Shopping Cart' : 'Checkout'}
+        {checkoutStep === 'cart' ? 'Votre Panier' : 'Paiement'}
       </h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -96,7 +96,7 @@ const CartPage: React.FC = () => {
           {checkoutStep === 'cart' ? (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">Cart Items ({cart.length})</h2>
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">Articles du Panier ({cart.length})</h2>
                 <div className="divide-y divide-gray-200">
                   {cart.map((item, index) => (
                     <CartItem key={`${item.product.id}-${item.selectedSize}-${index}`} item={item} />
@@ -107,11 +107,11 @@ const CartPage: React.FC = () => {
           ) : (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="p-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">Contact Information</h2>
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">Informations de Contact</h2>
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-4">
                     <Input
-                      label="Full Name"
+                      label="Nom Complet"
                       name="name"
                       value={customerInfo.name}
                       onChange={handleInputChange}
@@ -129,7 +129,7 @@ const CartPage: React.FC = () => {
                     />
                     
                     <div className="mt-6">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4">Payment Method</h3>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-4">Méthode de Paiement</h3>
                       <div className="space-y-2">
                         <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
                           <input
@@ -142,10 +142,10 @@ const CartPage: React.FC = () => {
                           />
                           <div className="ml-3">
                             <span className="block text-sm font-medium text-gray-700">
-                              Pay Online (Credit Card)
+                              Payer en Ligne (Carte de Crédit)
                             </span>
                             <span className="block text-xs text-gray-500">
-                              Secure payment processing
+                              Traitement sécurisé des paiements
                             </span>
                           </div>
                           <CreditCard size={20} className="ml-auto text-gray-400" />
@@ -162,10 +162,10 @@ const CartPage: React.FC = () => {
                           />
                           <div className="ml-3">
                             <span className="block text-sm font-medium text-gray-700">
-                              Pay at Pickup
+                              Payer au Retrait
                             </span>
                             <span className="block text-xs text-gray-500">
-                              Cash or card payment when collecting your order
+                              Paiement en espèces ou par carte lors du retrait de votre commande
                             </span>
                           </div>
                         </label>
@@ -175,8 +175,8 @@ const CartPage: React.FC = () => {
                     <div className="pt-6">
                       <Button type="submit" variant="primary" fullWidth>
                         {paymentMethod === 'online' 
-                          ? 'Pay Now' 
-                          : 'Complete Order'
+                          ? 'Payer Maintenant' 
+                          : 'Finaliser la Commande'
                         }
                       </Button>
                     </div>
@@ -191,15 +191,15 @@ const CartPage: React.FC = () => {
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow-md overflow-hidden sticky top-20">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Order Summary</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">Récapitulatif de la Commande</h2>
               <div className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal</span>
+                  <span className="text-gray-600">Sous-total</span>
                   <span className="text-gray-800">€{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Shipping</span>
-                  <span className="text-green-600">Free</span>
+                  <span className="text-gray-600">Livraison</span>
+                  <span className="text-green-600">Gratuite</span>
                 </div>
                 <div className="border-t pt-4 flex justify-between font-bold">
                   <span>Total</span>
@@ -215,7 +215,7 @@ const CartPage: React.FC = () => {
                   fullWidth
                   className="flex items-center justify-center"
                 >
-                  Proceed to Checkout <ArrowRight size={18} className="ml-2" />
+                  Procéder au Paiement <ArrowRight size={18} className="ml-2" />
                 </Button>
               ) : (
                 <Button
@@ -223,7 +223,7 @@ const CartPage: React.FC = () => {
                   variant="outline"
                   fullWidth
                 >
-                  Back to Cart
+                  Retour au Panier
                 </Button>
               )}
             </div>

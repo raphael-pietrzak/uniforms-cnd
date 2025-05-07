@@ -60,9 +60,9 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
           className="flex items-center justify-between w-full bg-gray-100 p-2 rounded"
         >
           <span className="font-medium flex items-center">
-            <Filter size={16} className="mr-2" /> Filters
+            <Filter size={16} className="mr-2" /> Filtres
           </span>
-          {isOpen ? <X size={16} /> : <span className="text-xs">Show</span>}
+          {isOpen ? <X size={16} /> : <span className="text-xs">Afficher</span>}
         </button>
       </div>
 
@@ -71,42 +71,42 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <Select
             name="gender"
-            label="Gender"
+            label="Genre"
             value={filters.gender}
             onChange={handleChange}
             options={[
-              { value: '', label: 'All Genders' },
-              { value: 'boys', label: 'Boys' },
-              { value: 'girls', label: 'Girls' },
-              { value: 'unisex', label: 'Unisex' },
+              { value: '', label: 'Tous les genres' },
+              { value: 'boys', label: 'Garçons' },
+              { value: 'girls', label: 'Filles' },
+              { value: 'unisex', label: 'Unisexe' },
             ]}
             fullWidth
           />
 
           <Select
             name="condition"
-            label="Condition"
+            label="État"
             value={filters.condition}
             onChange={handleChange}
             options={[
-              { value: '', label: 'All Conditions' },
-              { value: 'new', label: 'New' },
-              { value: 'used', label: 'Used' },
+              { value: '', label: 'Tous les états' },
+              { value: 'new', label: 'Neuf' },
+              { value: 'used', label: 'Occasion' },
             ]}
             fullWidth
           />
 
           <Select
             name="category"
-            label="Category"
+            label="Catégorie"
             value={filters.category}
             onChange={handleChange}
             options={[
-              { value: '', label: 'All Categories' },
-              { value: 'tops', label: 'Tops' },
-              { value: 'bottoms', label: 'Bottoms' },
-              { value: 'outerwear', label: 'Outerwear' },
-              { value: 'sportswear', label: 'Sportswear' },
+              { value: '', label: 'Toutes les catégories' },
+              { value: 'tops', label: 'Hauts' },
+              { value: 'bottoms', label: 'Bas' },
+              { value: 'outerwear', label: 'Vêtements d\'extérieur' },
+              { value: 'sportswear', label: 'Vêtements de sport' },
             ]}
             fullWidth
           />
@@ -114,7 +114,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
           <div className="flex space-x-2">
             <Input
               name="minPrice"
-              label="Min Price"
+              label="Prix min"
               type="number"
               min="0"
               value={filters.minPrice}
@@ -124,7 +124,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
             />
             <Input
               name="maxPrice"
-              label="Max Price"
+              label="Prix max"
               type="number"
               min="0"
               value={filters.maxPrice}
@@ -136,25 +136,25 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
 
           <Select
             name="size"
-            label="Size"
+            label="Taille"
             value={filters.size}
             onChange={handleChange}
             options={[
-              { value: '', label: 'All Sizes' },
-              { value: 'S', label: 'Small (S)' },
-              { value: 'M', label: 'Medium (M)' },
-              { value: 'L', label: 'Large (L)' },
-              { value: 'XL', label: 'X-Large (XL)' },
+              { value: '', label: 'Toutes les tailles' },
+              { value: 'S', label: 'Petit (S)' },
+              { value: 'M', label: 'Moyen (M)' },
+              { value: 'L', label: 'Grand (L)' },
+              { value: 'XL', label: 'Très grand (XL)' },
             ]}
             fullWidth
           />
 
           <Input
             name="brand"
-            label="Brand"
+            label="Marque"
             value={filters.brand}
             onChange={handleChange}
-            placeholder="All Brands"
+            placeholder="Toutes les marques"
             fullWidth
           />
         </div>
@@ -165,7 +165,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
             variant="outline"
             className="mr-2"
           >
-            Reset Filters
+            Réinitialiser les filtres
           </Button>
         </div>
       </div>

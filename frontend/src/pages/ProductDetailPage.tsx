@@ -18,13 +18,13 @@ const ProductDetailPage: React.FC = () => {
   if (!product) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <p className="text-xl text-gray-600">Product not found</p>
+        <p className="text-xl text-gray-600">Produit non trouvé</p>
         <Button 
           onClick={() => navigate('/shop')} 
           variant="primary"
           className="mt-4"
         >
-          Back to Shop
+          Retour à la Boutique
         </Button>
       </div>
     );
@@ -45,7 +45,7 @@ const ProductDetailPage: React.FC = () => {
         className="flex items-center text-gray-600 hover:text-blue-800 mb-6"
       >
         <ArrowLeft size={18} className="mr-1" />
-        Back
+        Retour
       </button>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -86,20 +86,20 @@ const ProductDetailPage: React.FC = () => {
             <div className="flex items-center mb-4">
               <span className="text-blue-900 text-2xl font-bold mr-4">€{product.price.toFixed(2)}</span>
               <Badge variant={product.condition === 'new' ? 'primary' : 'warning'}>
-                {product.condition === 'new' ? 'New' : 'Used'}
+                {product.condition === 'new' ? 'Neuf' : 'Occasion'}
               </Badge>
-              {!product.inStock && <Badge variant="danger" className="ml-2">Out of Stock</Badge>}
+              {!product.inStock && <Badge variant="danger" className="ml-2">Rupture de Stock</Badge>}
             </div>
             <p className="text-gray-700 mb-6">{product.description}</p>
           </div>
           
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Brand</h3>
+            <h3 className="text-sm font-medium text-gray-900 mb-2">Marque</h3>
             <p className="text-gray-700">{product.brand}</p>
           </div>
           
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-900 mb-4">Select Size</h3>
+            <h3 className="text-sm font-medium text-gray-900 mb-4">Sélectionner une Taille</h3>
             <div className="grid grid-cols-4 gap-2">
               {product.sizes.map((size) => (
                 <button
@@ -127,7 +127,7 @@ const ProductDetailPage: React.FC = () => {
               className="flex items-center justify-center"
             >
               <ShoppingCart size={20} className="mr-2" />
-              {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+              {product.inStock ? 'Ajouter au Panier' : 'Rupture de Stock'}
             </Button>
             <Button
               variant="outline"
@@ -135,16 +135,16 @@ const ProductDetailPage: React.FC = () => {
               className="flex items-center justify-center"
             >
               <Heart size={20} className="mr-2" />
-              Save
+              Sauvegarder
             </Button>
           </div>
           
           <div className="mt-8 pt-8 border-t border-gray-200">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Details</h3>
+            <h3 className="text-sm font-medium text-gray-900 mb-2">Détails</h3>
             <ul className="text-sm text-gray-700 space-y-2">
-              <li><span className="font-medium">Category:</span> {product.category}</li>
-              <li><span className="font-medium">Gender:</span> {product.gender}</li>
-              <li><span className="font-medium">Condition:</span> {product.condition === 'new' ? 'New' : 'Used'}</li>
+              <li><span className="font-medium">Catégorie:</span> {product.category}</li>
+              <li><span className="font-medium">Genre:</span> {product.gender}</li>
+              <li><span className="font-medium">État:</span> {product.condition === 'new' ? 'Neuf' : 'Occasion'}</li>
             </ul>
           </div>
         </div>
