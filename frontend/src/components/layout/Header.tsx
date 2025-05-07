@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ShoppingCart, Menu, X, User } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
 import Button from '../ui/Button';
@@ -8,12 +8,28 @@ import Logo from '../../assets/cnd_logo.svg';
 const Header: React.FC = () => {
   const { cart, isAdmin, setIsAdmin } = useShop();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  
+  // Fonction pour déterminer si un lien est actif
+  const isActive = (path: string) => {
+    if (path === '/' && location.pathname === '/') return true;
+    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    return false;
+  };
+  
+  // Classes pour les liens actifs et inactifs
+  const activeLinkClass = "inline-flex items-center px-1 pt-1 text-sm font-medium text-blue-900 border-b-2 border-blue-900";
+  const inactiveLinkClass = "inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-blue-900 hover:border-b-2 hover:border-gray-300";
+  
+  // Classes pour les liens mobiles actifs et inactifs
+  const activeMobileLinkClass = "block pl-3 pr-4 py-2 text-base font-medium text-blue-900 bg-gray-50 border-l-4 border-blue-900";
+  const inactiveMobileLinkClass = "block pl-3 pr-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-l-4 hover:border-gray-300";
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -21,9 +37,6 @@ const Header: React.FC = () => {
         <div className="flex justify-between h-16">
           <div className="flex-1 flex items-center justify-between">
             <div className="flex-shrink-0 flex items-center">
-              {/* <Link to="/" className="text-2xl font-bold text-blue-900">
-                UniformeScolaire
-              </Link> */}
               {/* Logo */}
               <Link to="/" className="flex items-center space-x-2">
                 <img src={Logo} alt="Logo Cours Notre Dame" className="h-10 w-auto" />
@@ -33,17 +46,17 @@ const Header: React.FC = () => {
             
             {/* Navigation Bureau */}
             <nav className="hidden md:ml-6 md:flex md:space-x-8">
-              <Link to="/" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-800 hover:text-blue-900">
+              <Link to="/" className={isActive('/') ? activeLinkClass : inactiveLinkClass}>
                 Accueil
               </Link>
-              <Link to="/shop" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-blue-900">
+              <Link to="/shop" className={isActive('/shop') ? activeLinkClass : inactiveLinkClass}>
                 Boutique
               </Link>
-              <Link to="/info" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-blue-900">
+              <Link to="/info" className={isActive('/info') ? activeLinkClass : inactiveLinkClass}>
                 Informations
               </Link>
               {isAdmin && (
-                <Link to="/admin" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-blue-900">
+                <Link to="/admin" className={isActive('/admin') ? activeLinkClass : inactiveLinkClass}>
                   Administration
                 </Link>
               )}
@@ -59,7 +72,7 @@ const Header: React.FC = () => {
               </button>
               
               {/* Panier */}
-              <Link to="/cart" className="mr-2 md:mr-0 p-2 rounded-full text-gray-500 hover:text-blue-900 focus:outline-none relative">
+              <Link to="/cart" className={`mr-2 md:mr-0 p-2 rounded-full focus:outline-none relative ${isActive('/cart') ? 'text-blue-900' : 'text-gray-500 hover:text-blue-900'}`}>
                 <ShoppingCart size={20} />
                 {totalItems > 0 && (
                   <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-blue-800 rounded-full">
@@ -87,21 +100,21 @@ const Header: React.FC = () => {
           <div className="pt-2 pb-3 space-y-1">
             <Link
               to="/"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-800 hover:bg-gray-50"
+              className={isActive('/') ? activeMobileLinkClass : inactiveMobileLinkClass}
               onClick={() => setIsMenuOpen(false)}
             >
               Accueil
             </Link>
             <Link
               to="/shop"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-50"
+              className={isActive('/shop') ? activeMobileLinkClass : inactiveMobileLinkClass}
               onClick={() => setIsMenuOpen(false)}
             >
               Boutique
             </Link>
             <Link
               to="/info"
-              className="block pl-3 pr-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-50"
+              className={isActive('/info') ? activeMobileLinkClass : inactiveMobileLinkClass}
               onClick={() => setIsMenuOpen(false)}
             >
               Informations
@@ -109,7 +122,7 @@ const Header: React.FC = () => {
             {isAdmin && (
               <Link
                 to="/admin"
-                className="block pl-3 pr-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-50"
+                className={isActive('/admin') ? activeMobileLinkClass : inactiveMobileLinkClass}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Administration
