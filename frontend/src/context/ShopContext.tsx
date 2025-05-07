@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Product, CartItem, Order } from '../types';
-import { sampleProducts } from '../data/sampleProducts';
+
+// API base URL
+const API_URL = 'http://localhost:3000/api';
 
 interface ShopContextType {
   products: Product[];
@@ -10,22 +12,76 @@ interface ShopContextType {
   removeFromCart: (productId: string, size: string) => void;
   updateQuantity: (productId: string, size: string, quantity: number) => void;
   clearCart: () => void;
-  checkout: (paymentMethod: 'online' | 'inperson', customerInfo: { name: string; email: string }) => void;
+  checkout: (paymentMethod: 'online' | 'inperson', customerInfo: { name: string; email: string }) => Promise<void>;
   isAdmin: boolean;
   setIsAdmin: (value: boolean) => void;
-  addProduct: (product: Product) => void;
-  updateProduct: (product: Product) => void;
-  toggleProductStatus: (productId: string) => void;
+  addProduct: (product: Product) => Promise<void>;
+  updateProduct: (product: Product) => Promise<void>;
+  toggleProductStatus: (productId: string) => Promise<void>;
+  loading: boolean;
+  error: string | null;
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
 
 export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [products, setProducts] = useState<Product[]>(sampleProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Charger les produits au montage du composant
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  // Fonctions d'API
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_URL}/products`);
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement des produits');
+      }
+      const data = await response.json();
+      // Transformer les chaînes JSON en objets JS
+      const formattedProducts = data.map((product: any) => ({
+        ...product,
+        sizes: typeof product.sizes === 'string' ? JSON.parse(product.sizes) : product.sizes,
+        images: typeof product.images === 'string' ? JSON.parse(product.images) : product.images,
+        id: product.id.toString() // Assure que l'ID est une chaîne
+      }));
+      setProducts(formattedProducts);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
+      console.error('Erreur:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_URL}/orders`);
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement des commandes');
+      }
+      const data = await response.json();
+      setOrders(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
+      console.error('Erreur:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fonctions de manipulation du panier (inchangées)
   const addToCart = (product: Product, selectedSize: string) => {
     const existingItem = cart.find(
       (item) => item.product.id === product.id && item.selectedSize === selectedSize
@@ -56,41 +112,153 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCart([]);
   };
 
-  const checkout = (
+  // Mise à jour de checkout pour utiliser l'API
+  const checkout = async (
     paymentMethod: 'online' | 'inperson',
     customerInfo: { name: string; email: string }
   ) => {
-    const newOrder: Order = {
-      id: `order-${Date.now()}`,
-      items: [...cart],
-      total: cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
-      status: paymentMethod === 'online' ? 'paid' : 'pending',
-      paymentMethod,
-      customerName: customerInfo.name,
-      customerEmail: customerInfo.email,
-      createdAt: new Date().toISOString(),
-    };
+    setLoading(true);
+    setError(null);
+    try {
+      const orderData = {
+        items: cart,
+        customerName: customerInfo.name,
+        customerEmail: customerInfo.email,
+        paymentMethod,
+        total: cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+        status: paymentMethod === 'online' ? 'paid' : 'pending',
+      };
 
-    setOrders([newOrder, ...orders]);
-    clearCart();
+      const response = await fetch(`${API_URL}/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la création de la commande');
+      }
+
+      const newOrder = await response.json();
+      setOrders([newOrder, ...orders]);
+      clearCart();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
+      console.error('Erreur:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addProduct = (product: Product) => {
-    setProducts([...products, { ...product, id: `product-${Date.now()}` }]);
+  // Mise à jour des fonctions de gestion des produits
+  const addProduct = async (product: Product) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_URL}/products`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...product,
+          sizes: JSON.stringify(product.sizes),
+          images: JSON.stringify(product.images)
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'ajout du produit');
+      }
+
+      const newProduct = await response.json();
+      // Formater le produit pour le frontend
+      const formattedProduct = {
+        ...newProduct,
+        sizes: typeof newProduct.sizes === 'string' ? JSON.parse(newProduct.sizes) : newProduct.sizes,
+        images: typeof newProduct.images === 'string' ? JSON.parse(newProduct.images) : newProduct.images,
+        id: newProduct.id.toString()
+      };
+      
+      setProducts([...products, formattedProduct]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
+      console.error('Erreur:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateProduct = (updatedProduct: Product) => {
-    setProducts(
-      products.map((product) => (product.id === updatedProduct.id ? updatedProduct : product))
-    );
+  const updateProduct = async (updatedProduct: Product) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_URL}/products/${updatedProduct.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...updatedProduct,
+          sizes: JSON.stringify(updatedProduct.sizes),
+          images: JSON.stringify(updatedProduct.images)
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la mise à jour du produit');
+      }
+
+      const product = await response.json();
+      // Formater le produit pour le frontend
+      const formattedProduct = {
+        ...product,
+        sizes: typeof product.sizes === 'string' ? JSON.parse(product.sizes) : product.sizes,
+        images: typeof product.images === 'string' ? JSON.parse(product.images) : product.images,
+        id: product.id.toString()
+      };
+
+      setProducts(
+        products.map((p) => (p.id === formattedProduct.id ? formattedProduct : p))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
+      console.error('Erreur:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleProductStatus = (productId: string) => {
-    setProducts(
-      products.map((product) =>
-        product.id === productId ? { ...product, inStock: !product.inStock } : product
-      )
-    );
+  const toggleProductStatus = async (productId: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // D'abord, trouver le produit actuel
+      const product = products.find(p => p.id === productId);
+      if (!product) {
+        throw new Error('Produit non trouvé');
+      }
+
+      // Mettre à jour le statut
+      const updatedProduct = {
+        ...product,
+        inStock: !product.inStock
+      };
+
+      // Appeler l'API pour mettre à jour
+      await updateProduct(updatedProduct);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
+      console.error('Erreur:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -109,6 +277,8 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         addProduct,
         updateProduct,
         toggleProductStatus,
+        loading,
+        error
       }}
     >
       {children}
