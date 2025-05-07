@@ -5,6 +5,28 @@ import { useShop } from '../context/ShopContext';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 
+// Fonctions auxiliaires pour traduire les catégories et genres
+const translateCategory = (category: string): string => {
+  const categoryMap: Record<string, string> = {
+    'tops': 'Hauts',
+    'bottoms': 'Bas',
+    'outerwear': 'Vêtements d\'extérieur',
+    'sportswear': 'Vêtements de sport',
+  };
+  return categoryMap[category] || category;
+};
+
+const translateGender = (gender: string): string => {
+  const genderMap: Record<string, string> = {
+    'unisex': 'Unisexe',
+    'boys': 'Garçons',
+    'girls': 'Filles',
+    'men': 'Hommes',
+    'women': 'Femmes',
+  };
+  return genderMap[gender] || gender;
+};
+
 const ProductDetailPage: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
@@ -142,8 +164,8 @@ const ProductDetailPage: React.FC = () => {
           <div className="mt-8 pt-8 border-t border-gray-200">
             <h3 className="text-sm font-medium text-gray-900 mb-2">Détails</h3>
             <ul className="text-sm text-gray-700 space-y-2">
-              <li><span className="font-medium">Catégorie:</span> {product.category}</li>
-              <li><span className="font-medium">Genre:</span> {product.gender}</li>
+              <li><span className="font-medium">Catégorie:</span> {translateCategory(product.category)}</li>
+              <li><span className="font-medium">Genre:</span> {translateGender(product.gender)}</li>
               <li><span className="font-medium">État:</span> {product.condition === 'new' ? 'Neuf' : 'Occasion'}</li>
             </ul>
           </div>
