@@ -10,6 +10,7 @@ import ShopPage from './pages/ShopPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import CartPage from './pages/CartPage';
 import InfoPage from './pages/InfoPage';
+import CheckoutSuccessPage from './pages/CheckoutSuccessPage';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -42,6 +43,8 @@ function App() {
               <Route path="/product/:productId" element={<ProductDetailPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/info" element={<InfoPage />} />
+              <Route path="/checkout-success" element={<CheckoutSuccessPage />} />
+
               
               {/* Admin Routes */}
               <Route 

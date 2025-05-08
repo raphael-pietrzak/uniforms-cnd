@@ -86,6 +86,23 @@ export const ordersApi = {
   },
 };
 
+// Stripe API
+export const stripeApi = {
+  createCheckoutSession: async (items: any[], customerEmail: string) => {
+    const response = await fetch(`${API_URL}/create-checkout-session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items, customerEmail }),
+    });
+    return handleResponse(response);
+  },
+  
+  getCheckoutSession: async (sessionId: string) => {
+    const response = await fetch(`${API_URL}/checkout-session/${sessionId}`);
+    return handleResponse(response);
+  }
+};
+
 // Auth API (pour plus tard)
 export const authApi = {
   login: async (credentials: { username: string; password: string }) => {

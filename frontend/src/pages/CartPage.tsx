@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { CreditCard, ArrowRight, ShoppingBag } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import CartItem from '../components/shop/CartItem';
@@ -14,6 +14,7 @@ const CartPage: React.FC = () => {
     email: '',
   });
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'confirmation'>('cart');
+  const navigate = useNavigate();
   
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const shipping = 0; // Free shipping
@@ -27,10 +28,22 @@ const CartPage: React.FC = () => {
     });
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    checkout(paymentMethod, customerInfo);
-    setCheckoutStep('confirmation');
+    try {
+      const result = await checkout(paymentMethod, customerInfo);
+      
+      if (result.redirect) {
+        // Rediriger vers la page de paiement Stripe
+        window.location.href = result.redirect;
+        return;
+      }
+      
+      // Sinon, c'est un paiement en personne, montrer la confirmation
+      setCheckoutStep('confirmation');
+    } catch (error) {
+      console.error('Erreur lors du paiement:', error);
+    }
   };
   
   if (checkoutStep === 'confirmation') {
@@ -145,7 +158,7 @@ const CartPage: React.FC = () => {
                               Payer en Ligne (Carte de Crédit)
                             </span>
                             <span className="block text-xs text-gray-500">
-                              Traitement sécurisé des paiements
+                              Traitement sécurisé des paiements via Stripe
                             </span>
                           </div>
                           <CreditCard size={20} className="ml-auto text-gray-400" />
@@ -175,7 +188,7 @@ const CartPage: React.FC = () => {
                     <div className="pt-6">
                       <Button type="submit" variant="primary" fullWidth>
                         {paymentMethod === 'online' 
-                          ? 'Payer Maintenant' 
+                          ? 'Payer avec Stripe' 
                           : 'Finaliser la Commande'
                         }
                       </Button>
