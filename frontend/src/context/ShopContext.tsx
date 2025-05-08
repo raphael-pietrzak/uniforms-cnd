@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Product, CartItem, Order } from '../types';
+import { productsApi, ordersApi, stripeApi } from '../services/api';
 
 // API base URL
 const API_URL = 'http://localhost:3000/api';
@@ -12,7 +13,7 @@ interface ShopContextType {
   removeFromCart: (productId: string, size: string) => void;
   updateQuantity: (productId: string, size: string, quantity: number) => void;
   clearCart: () => void;
-  checkout: (paymentMethod: 'online' | 'inperson', customerInfo: { name: string; email: string }) => Promise<void>;
+  checkout: (paymentMethod: 'online' | 'inperson', customerInfo: { name: string; email: string }) => Promise<{ redirect?: string }>;
   isAdmin: boolean;
   setIsAdmin: (value: boolean) => void;
   addProduct: (product: Product) => Promise<void>;
@@ -42,19 +43,8 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/products`);
-      if (!response.ok) {
-        throw new Error('Erreur lors du chargement des produits');
-      }
-      const data = await response.json();
-      // Transformer les chaînes JSON en objets JS
-      const formattedProducts = data.map((product: any) => ({
-        ...product,
-        sizes: typeof product.sizes === 'string' ? JSON.parse(product.sizes) : product.sizes,
-        images: typeof product.images === 'string' ? JSON.parse(product.images) : product.images,
-        id: product.id.toString() // Assure que l'ID est une chaîne
-      }));
-      setProducts(formattedProducts);
+      const data = await productsApi.getAll();
+      setProducts(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
       console.error('Erreur:', err);
@@ -67,11 +57,7 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/orders`);
-      if (!response.ok) {
-        throw new Error('Erreur lors du chargement des commandes');
-      }
-      const data = await response.json();
+      const data = await ordersApi.getAll();
       setOrders(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
@@ -81,7 +67,7 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Fonctions de manipulation du panier (inchangées)
+  // Fonctions de manipulation du panier
   const addToCart = (product: Product, selectedSize: string) => {
     const existingItem = cart.find(
       (item) => item.product.id === product.id && item.selectedSize === selectedSize
@@ -112,7 +98,7 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCart([]);
   };
 
-  // Mise à jour de checkout pour utiliser l'API
+  // Mise à jour de checkout pour utiliser Stripe
   const checkout = async (
     paymentMethod: 'online' | 'inperson',
     customerInfo: { name: string; email: string }
@@ -120,30 +106,28 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     setError(null);
     try {
-      const orderData = {
-        items: cart,
-        customerName: customerInfo.name,
-        customerEmail: customerInfo.email,
-        paymentMethod,
-        total: cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
-        status: paymentMethod === 'online' ? 'paid' : 'pending',
-      };
+      if (paymentMethod === 'online') {
+        // Utiliser Stripe pour le paiement en ligne
+        const session = await stripeApi.createCheckoutSession(cart, customerInfo.email);
+        
+        // Retourner l'URL de redirection Stripe
+        return { redirect: session.url };
+      } else {
+        // Utiliser l'API de commande existante pour le paiement en personne
+        const orderData = {
+          items: cart,
+          customerName: customerInfo.name,
+          customerEmail: customerInfo.email,
+          paymentMethod,
+          total: cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+          status: 'pending',
+        };
 
-      const response = await fetch(`${API_URL}/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Erreur lors de la création de la commande');
+        const newOrder = await ordersApi.create(orderData);
+        setOrders([newOrder, ...orders]);
+        clearCart();
+        return {};
       }
-
-      const newOrder = await response.json();
-      setOrders([newOrder, ...orders]);
-      clearCart();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
       console.error('Erreur:', err);
@@ -158,32 +142,8 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/products`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...product,
-          sizes: JSON.stringify(product.sizes),
-          images: JSON.stringify(product.images)
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Erreur lors de l\'ajout du produit');
-      }
-
-      const newProduct = await response.json();
-      // Formater le produit pour le frontend
-      const formattedProduct = {
-        ...newProduct,
-        sizes: typeof newProduct.sizes === 'string' ? JSON.parse(newProduct.sizes) : newProduct.sizes,
-        images: typeof newProduct.images === 'string' ? JSON.parse(newProduct.images) : newProduct.images,
-        id: newProduct.id.toString()
-      };
-      
-      setProducts([...products, formattedProduct]);
+      const newProduct = await productsApi.create(product);
+      setProducts([...products, newProduct]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
       console.error('Erreur:', err);
@@ -197,33 +157,9 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/products/${updatedProduct.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...updatedProduct,
-          sizes: JSON.stringify(updatedProduct.sizes),
-          images: JSON.stringify(updatedProduct.images)
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Erreur lors de la mise à jour du produit');
-      }
-
-      const product = await response.json();
-      // Formater le produit pour le frontend
-      const formattedProduct = {
-        ...product,
-        sizes: typeof product.sizes === 'string' ? JSON.parse(product.sizes) : product.sizes,
-        images: typeof product.images === 'string' ? JSON.parse(product.images) : product.images,
-        id: product.id.toString()
-      };
-
+      const product = await productsApi.update(updatedProduct);
       setProducts(
-        products.map((p) => (p.id === formattedProduct.id ? formattedProduct : p))
+        products.map((p) => (p.id === product.id ? product : p))
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
