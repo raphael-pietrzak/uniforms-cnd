@@ -1,5 +1,5 @@
 # TODO
 
-- [ ] Add a modal for adding products
-- [ ] Implement Stripe payment
-- [ ] Write tests
+- [ ] Pouvoir ajouter des photos au lieu de l'url
+- [ ] Requetes orders
+- [ ] Actions sur status

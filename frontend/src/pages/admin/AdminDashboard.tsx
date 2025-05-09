@@ -5,6 +5,12 @@ import { useShop } from '../../context/ShopContext';
 import Card, { CardContent, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 
+// Helper function to format order IDs safely
+const formatOrderId = (id: any): string => {
+  const stringId = String(id || '');
+  return stringId.length > 8 ? `${stringId.substring(0, 8)}...` : stringId;
+};
+
 const AdminDashboard: React.FC = () => {
   const { products, orders } = useShop();
   
@@ -166,13 +172,13 @@ const AdminDashboard: React.FC = () => {
                 orders.slice(0, 5).map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {order.id.substring(0, 8)}...
+                      {formatOrderId(order.id)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {order.customerName}
+                      {order.customer_name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      {new Date(order.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       €{order.total.toFixed(2)}
