@@ -17,11 +17,11 @@ const AddProductModal = ({ isOpen, onClose, onAdd }: { isOpen: boolean; onClose:
     brand: '',
     category: '',
     sizes: [] as string[],
-    condition: 'new',
-    gender: 'unisex',
+    condition: 'new' as 'new' | 'used',
+    gender: 'unisex' as 'unisex',
     images: ['https://placehold.co/600x400?text=Ajouter+une+image'],
     inStock: true
-  });
+  })
   const [sizesInput, setSizesInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
