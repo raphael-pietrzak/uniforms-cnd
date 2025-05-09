@@ -33,9 +33,11 @@ const AdminDashboard: React.FC = () => {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Tableau de Bord Admin</h1>
         <div className="flex space-x-3">
-          <Button as={Link} to="/admin/products/new" variant="primary">
-            Ajouter un Nouveau Produit
-          </Button>
+          <Link to="/admin/products/new">
+            <Button variant="primary">
+              Ajouter un Nouveau Produit
+            </Button>
+          </Link>
         </div>
       </div>
       
