@@ -1,76 +1,77 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useShop } from '../../context/ShopContext';
 import OrdersTable from '../../components/admin/OrdersTable';
 import { Order } from '../../types';
-import { Search, Filter } from 'lucide-react';
-import Input from '../../components/ui/Input';
-import Select from '../../components/ui/Select';
+import { ordersApi } from '../../services/api';
 
 const OrdersPage: React.FC = () => {
-  const { orders } = useShop();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  
-  const filteredOrders = orders.filter((order) => {
-    // Filter by search term
-    const matchesSearch = 
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Filter by status
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
-  
-  const handleUpdateStatus = (orderId: string, newStatus: Order['status']) => {
-    // This would be handled by the context in a real app
-    console.log(`Update order ${orderId} to status: ${newStatus}`);
+  const { orders, loading, error } = useShop();
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  useEffect(() => {
+    // Appliquer les filtres
+    if (statusFilter === 'all') {
+      setFilteredOrders(orders);
+    } else {
+      setFilteredOrders(orders.filter(order => order.status === statusFilter));
+    }
+  }, [orders, statusFilter]);
+
+  const handleUpdateStatus = async (orderId: string, newStatus: Order['status']) => {
+    try {
+      await ordersApi.updateStatus(orderId, newStatus);
+      // Mettre à jour l'interface utilisateur
+      // Dans une vraie application, vous devriez recharger les commandes depuis le serveur
+      // ou gérer la mise à jour de l'état local de façon plus robuste
+      window.location.reload();
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut:', error);
+      alert('Erreur lors de la mise à jour du statut de la commande.');
+    }
   };
-  
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Commandes</h1>
-      
-      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-            <div className="w-full md:w-80">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search size={18} className="text-gray-400" />
-                </div>
-                <Input
-                  type="text"
-                  placeholder="Rechercher des commandes..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                  fullWidth
-                />
-              </div>
-            </div>
-            
-            <div className="w-full md:w-48">
-              <Select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                options={[
-                  { value: 'all', label: 'Tous les Statuts' },
-                  { value: 'pending', label: 'En Attente' },
-                  { value: 'paid', label: 'Payée' },
-                  { value: 'ready', label: 'Prête pour Retrait' },
-                  { value: 'collected', label: 'Récupérée' },
-                ]}
-                fullWidth
-              />
-            </div>
-          </div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Gestion des Commandes</h1>
+        <div className="flex space-x-2">
+          <select
+            className="form-select rounded-md border-gray-300"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">Toutes les commandes</option>
+            <option value="pending">En attente</option>
+            <option value="paid">Payées</option>
+            <option value="ready">Prêtes</option>
+            <option value="collected">Récupérées</option>
+          </select>
+          <button 
+            className="px-4 py-2 bg-blue-600 text-white rounded-md"
+            onClick={() => window.location.reload()}
+          >
+            Actualiser
+          </button>
         </div>
-        
-        <OrdersTable orders={filteredOrders} onUpdateStatus={handleUpdateStatus} />
       </div>
+
+      {loading && <p className="text-center py-4">Chargement des commandes...</p>}
+      
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <p>{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+          <OrdersTable 
+            orders={filteredOrders} 
+            onUpdateStatus={handleUpdateStatus} 
+          />
+        </div>
+      )}
     </div>
   );
 };

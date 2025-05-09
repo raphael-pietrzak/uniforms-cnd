@@ -73,7 +73,8 @@ export const productsApi = {
 export const ordersApi = {
   getAll: async (): Promise<Order[]> => {
     const response = await fetch(`${API_URL}/orders`);
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return data;
   },
 
   create: async (orderData: any): Promise<Order> => {
@@ -82,7 +83,18 @@ export const ordersApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData),
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return data;
+  },
+
+  updateStatus: async (orderId: string, status: string): Promise<Order> => {
+    const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    const data = await handleResponse(response);
+    return data;
   },
 };
 
@@ -94,12 +106,14 @@ export const stripeApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items, customerEmail }),
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return data;
   },
   
   getCheckoutSession: async (sessionId: string) => {
     const response = await fetch(`${API_URL}/checkout-session/${sessionId}`);
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return data;
   }
 };
 
@@ -111,6 +125,7 @@ export const authApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return data;
   },
 };

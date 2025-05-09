@@ -33,10 +33,15 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Charger les produits au montage du composant
+  // Charger les produits et les commandes au montage du composant
   useEffect(() => {
     fetchProducts();
-  }, []);
+    
+    // Charger les commandes si l'utilisateur est admin
+    if (isAdmin) {
+      fetchOrders();
+    }
+  }, [isAdmin]);
 
   // Fonctions d'API
   const fetchProducts = async () => {
@@ -61,7 +66,7 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setOrders(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
-      console.error('Erreur:', err);
+      console.error('Erreur lors du chargement des commandes:', err);
     } finally {
       setLoading(false);
     }
