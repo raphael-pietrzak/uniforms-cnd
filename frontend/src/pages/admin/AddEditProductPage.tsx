@@ -34,7 +34,7 @@ const AddEditProductPage: React.FC = () => {
     if (isEditMode && product) {
       updateProduct({ ...productData, id: product.id });
     } else {
-      addProduct(productData);
+      addProduct({ ...productData, id: Date.now().toString() });
     }
     navigate('/admin/products');
   };

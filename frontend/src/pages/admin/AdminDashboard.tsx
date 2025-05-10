@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Users, CreditCard, BarChart3, Package, Clock } from 'lucide-react';
-import { useShop } from '../../context/ShopContext';
 import Card, { CardContent, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import { productsApi, ordersApi } from '../../services/api';
+import { Product, Order } from '../../types';
 
 // Helper function to format order IDs safely
 const formatOrderId = (id: any): string => {
@@ -12,7 +13,35 @@ const formatOrderId = (id: any): string => {
 };
 
 const AdminDashboard: React.FC = () => {
-  const { products, orders } = useShop();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Charger les données au montage du composant
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Charger les produits et les commandes en parallèle
+        const [productsData, ordersData] = await Promise.all([
+          productsApi.getAll(),
+          ordersApi.getAll()
+        ]);
+        
+        setProducts(productsData);
+        setOrders(ordersData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
+        console.error('Erreur lors du chargement des données:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []); // Exécuter une seule fois au montage
   
   // Calculate stats
   const totalProducts = products.length;
@@ -27,6 +56,32 @@ const AdminDashboard: React.FC = () => {
   const totalRevenue = orders
     .filter(o => o.status === 'paid' || o.status === 'ready' || o.status === 'collected')
     .reduce((sum, order) => sum + order.total, 0);
+  
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center">
+          <p className="text-lg text-gray-600">Chargement des données...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <p className="text-red-800">Erreur: {error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
