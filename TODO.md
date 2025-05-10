@@ -1,7 +1,6 @@
 # TODO
 
-- [ ] Pouvoir ajouter des photos au lieu de l'url
-- [ ] Requetes orders
+- [ ] Télécharger Photos
 - [ ] Actions sur status
 
 

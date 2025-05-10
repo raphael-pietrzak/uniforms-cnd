@@ -1,14 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { useShop } from '../../context/ShopContext';
 import OrdersTable from '../../components/admin/OrdersTable';
 import { Order } from '../../types';
 import { ordersApi } from '../../services/api';
 
 const OrdersPage: React.FC = () => {
-  const { orders, loading, error } = useShop();
+  const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Charger les commandes au montage du composant
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+  
   useEffect(() => {
     // Appliquer les filtres
     if (statusFilter === 'all') {
@@ -18,16 +24,35 @@ const OrdersPage: React.FC = () => {
     }
   }, [orders, statusFilter]);
 
+  const fetchOrders = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await ordersApi.getAll();
+      setOrders(data);
+      // Au premier chargement, initialiser également les commandes filtrées
+      if (statusFilter === 'all') {
+        setFilteredOrders(data);
+      } else {
+        setFilteredOrders(data.filter(order => order.status === statusFilter));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
+      console.error('Erreur lors du chargement des commandes:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleUpdateStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
       await ordersApi.updateStatus(orderId, newStatus);
-      // Mettre à jour l'interface utilisateur
-      // Dans une vraie application, vous devriez recharger les commandes depuis le serveur
-      // ou gérer la mise à jour de l'état local de façon plus robuste
-      window.location.reload();
+      // Mettre à jour l'interface utilisateur sans recharger la page
+      const updatedOrder = await ordersApi.getAll(); // On recharge toutes les commandes pour être sûr
+      setOrders(updatedOrder);
     } catch (error) {
       console.error('Erreur lors de la mise à jour du statut:', error);
-      alert('Erreur lors de la mise à jour du statut de la commande.');
+      setError('Erreur lors de la mise à jour du statut de la commande.');
     }
   };
 
@@ -49,7 +74,7 @@ const OrdersPage: React.FC = () => {
           </select>
           <button 
             className="px-4 py-2 bg-blue-600 text-white rounded-md"
-            onClick={() => window.location.reload()}
+            onClick={fetchOrders}
           >
             Actualiser
           </button>
