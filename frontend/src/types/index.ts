@@ -22,7 +22,7 @@ export interface Order {
   id: string;
   items: CartItem[];
   total: number;
-  status: 'pending' | 'paid' | 'ready' | 'collected';
+  status: 'pending' | 'paid' | 'ready' | 'collected' | string
   payment_method: 'online' | 'inperson';
   customer_name: string;
   customer_email: string;
