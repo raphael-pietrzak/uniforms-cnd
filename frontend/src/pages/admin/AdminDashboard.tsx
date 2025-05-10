@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Users, CreditCard, BarChart3, Package, Clock } from 'lucide-react';
+import { ShoppingBag, CreditCard, BarChart3, Package, Clock } from 'lucide-react';
 import Card, { CardContent, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { productsApi, ordersApi } from '../../services/api';
@@ -49,7 +49,6 @@ const AdminDashboard: React.FC = () => {
   const outOfStockProducts = totalProducts - inStockProducts;
   const usedProducts = products.filter(p => p.condition === 'used').length;
   
-  const totalOrders = orders.length;
   const pendingOrders = orders.filter(o => o.status === 'pending').length;
   const readyOrders = orders.filter(o => o.status === 'ready').length;
   
