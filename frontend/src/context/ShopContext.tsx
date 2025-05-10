@@ -2,8 +2,6 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Product, CartItem, Order } from '../types';
 import { productsApi, ordersApi, stripeApi } from '../services/api';
 
-// API base URL
-const API_URL = 'http://localhost:3000/api';
 
 interface ShopContextType {
   products: Product[];
