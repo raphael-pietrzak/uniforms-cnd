@@ -46,7 +46,8 @@ class WhatsAppService {
 
   /**
    * Envoie un message utilisant un template WhatsApp
-   * @param {Array} components - Composants et paramètres du template@param {string} templateName - Nom du template
+   * @param {string} templateName - Nom du template
+   * @param {Array} components - Composants et paramètres du template
    * @returns {Promise} - La réponse de l'API WhatsApp
    */
   async sendTemplateMessage(templateName, components = []) {
@@ -84,15 +85,21 @@ class WhatsAppService {
    * @param {object} order - Les détails de la commande
    */
   async notifyNewOrder(order) {
-    const message = `📦 Nouvelle commande reçue !\n\n` +
-      `ID: ${order.id}\n` +
-      `Client: ${order.customer_name}\n` +
-      `Email: ${order.customer_email}\n` +
-      `Total: ${order.total}€\n` +
-      `Date: ${new Date(order.created_at).toLocaleDateString('fr-FR')}\n\n` +
-      `Connectez-vous au tableau de bord pour voir les détails.`;
+    // Utilisation du template "order_management_1"
+    const components = [
+      {
+        type: "body",
+        parameters: [
+          { type: "text", text: order.id },
+          { type: "text", text: order.customer_name },
+          { type: "text", text: order.customer_email },
+          { type: "text", text: order.total },
+          { type: "text", text: new Date(order.created_at).toLocaleDateString('fr-FR') }
+        ]
+      }
+    ];
     
-    return this.sendMessageToSecretary(message);
+    return this.sendTemplateMessage("order_management_1", components);
   }
 }
 
