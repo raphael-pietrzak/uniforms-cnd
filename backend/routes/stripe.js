@@ -1,6 +1,7 @@
 const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const db = require('../config/database');
+const whatsappService = require('../services/whatsappService');
 
 const router = express.Router();
 
@@ -106,7 +107,8 @@ router.post('/webhook', async (req, res) => {
           customer_name: session.customer_details?.name || 'Client Stripe',
           customer_email: session.customer_email,
           payment_method: 'online',
-          total: session.amount_total / 100,,
+          total: session.amount_total / 100,
+          status: 'paid',
           created_at: new Date().toISOString()
         });
         
@@ -119,6 +121,24 @@ router.post('/webhook', async (req, res) => {
         }));
         
         await trx('order_items').insert(orderItems);
+        
+        // Récupérer les détails de la commande complète pour la notification
+        const orderNotification = {
+          id: orderId,
+          customer_name: session.customer_details?.name || 'Client Stripe',
+          customer_email: session.customer_email,
+          total: session.amount_total / 100,
+          created_at: new Date().toISOString()
+        };
+        
+        // Envoyer une notification WhatsApp à la secrétaire
+        try {
+          await whatsappService.notifyNewOrder(orderNotification);
+          console.log('Notification WhatsApp envoyée avec succès');
+        } catch (whatsappError) {
+          console.error('Erreur lors de l\'envoi de la notification WhatsApp:', whatsappError);
+          // On continue malgré l'erreur WhatsApp
+        }
       });
       
       console.log('Commande créée avec succès depuis Stripe webhook');
