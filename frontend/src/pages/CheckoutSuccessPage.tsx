@@ -64,15 +64,15 @@ const CheckoutSuccessPage: React.FC = () => {
           <p className="text-gray-600 mb-6">
             Aucune information de paiement n'a été trouvée. Si vous venez de finaliser un achat, vérifiez votre email pour la confirmation.
           </p>
-          <Button
-            as={Link}
-            to="/shop"
-            variant="primary"
-            className="inline-flex items-center"
-          >
-            <ShoppingBag size={18} className="mr-2" />
-            Continuer vos Achats
-          </Button>
+          <Link to="/shop">
+            <Button
+              variant="primary"
+              className="inline-flex items-center"
+            >
+              <ShoppingBag size={18} className="mr-2" />
+              Continuer vos Achats
+            </Button>
+          </Link>
         </div>
       </div>
     );
@@ -91,13 +91,13 @@ const CheckoutSuccessPage: React.FC = () => {
           <p className="text-gray-600 mb-6">
             Impossible de vérifier votre paiement. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter notre service client.
           </p>
-          <Button
-            as={Link}
-            to="/cart"
-            variant="primary"
-          >
-            Retourner au panier
-          </Button>
+          <Link to="/cart">
+            <Button
+              variant="primary"
+            >
+              Retourner au panier
+            </Button>
+          </Link>
         </div>
       </div>
     );
@@ -120,15 +120,15 @@ const CheckoutSuccessPage: React.FC = () => {
             Un email de confirmation a été envoyé à <span className="font-medium">{sessionDetails.customer_email}</span>
           </p>
         )}
-        <Button
-          as={Link}
-          to="/shop"
-          variant="primary"
-          className="inline-flex items-center"
-        >
-          <ShoppingBag size={18} className="mr-2" />
-          Continuer vos Achats
-        </Button>
+        <Link to="/shop">
+          <Button
+            variant="primary"
+            className="inline-flex items-center"
+          >
+            <ShoppingBag size={18} className="mr-2" />
+            Continuer vos Achats
+          </Button>
+        </Link>
       </div>
     </div>
   );
