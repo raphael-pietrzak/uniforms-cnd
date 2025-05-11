@@ -9,21 +9,21 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Info Entreprise */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">UniformeScolaire</h3>
+            <h3 className="text-lg font-semibold mb-4">Cours Notre Dame</h3>
             <p className="text-gray-300 mb-4">
               Des uniformes scolaires de qualité à des prix abordables.
             </p>
             <div className="flex items-center mb-2">
               <Phone size={16} className="mr-2" />
-              <span className="text-gray-300">+33 123 456 789</span>
+              <span className="text-gray-300">+33 9 51 34 26 76</span>
             </div>
             <div className="flex items-center mb-2">
               <Mail size={16} className="mr-2" />
-              <span className="text-gray-300">contact@uniformescolaire.com</span>
+              <span className="text-gray-300">cours.notre.dame@icrsp.org</span>
             </div>
             <div className="flex items-start">
               <MapPin size={16} className="mr-2 mt-1 flex-shrink-0" />
-              <span className="text-gray-300">123 Rue de l'École, 75001 Paris, France</span>
+              <span className="text-gray-300">334 Rue du Pioch de Boutonnet, 34090 Montpellier, France</span>
             </div>
           </div>
           
@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
         </div>
         
         <div className="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400 text-sm">
-          <p>© {new Date().getFullYear()} UniformeScolaire. Tous droits réservés.</p>
+          <p>© {new Date().getFullYear()} Cours Notre Dame - ICRSP - Tous droits réservés.</p>
         </div>
       </div>
     </footer>
