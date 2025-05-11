@@ -6,7 +6,7 @@ import Input from '../../components/ui/Input';
 import Badge from '../../components/ui/Badge';
 import { Product } from '../../types';
 import AddProductModal from '../../components/admin/AddProductModal';
-import { productsApi } from '../../services/api';
+import { productsApi, getFullImageUrl } from '../../services/api';
 
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -191,7 +191,7 @@ const ProductsPage: React.FC = () => {
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0">
                             <img
-                              src={product.images[0]}
+                              src={product.images && product.images.length > 0 ? product.images[0] : 'https://placehold.co/600x400?text=Image+placeholder'}
                               alt={product.name}
                               className="h-10 w-10 rounded-md object-cover"
                             />

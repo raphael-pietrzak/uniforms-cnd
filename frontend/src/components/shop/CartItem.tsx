@@ -2,6 +2,7 @@ import React from 'react';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { CartItem as CartItemType } from '../../types';
 import { useShop } from '../../context/ShopContext';
+import { getFullImageUrl } from '../../services/api';
 
 interface CartItemProps {
   item: CartItemType;
@@ -10,26 +11,31 @@ interface CartItemProps {
 const CartItem: React.FC<CartItemProps> = ({ item }) => {
   const { updateQuantity, removeFromCart } = useShop();
   const { product, quantity, selectedSize } = item;
-  
+
+  // S'assurer que l'image existe, sinon utiliser un placeholder
+  const imageUrl = product.images && product.images.length > 0 
+    ? product.images[0] 
+    : 'https://placehold.co/600x400?text=Image+placeholder';
+
   const handleIncrease = () => {
     updateQuantity(product.id, selectedSize, quantity + 1);
   };
-  
+
   const handleDecrease = () => {
     if (quantity > 1) {
       updateQuantity(product.id, selectedSize, quantity - 1);
     }
   };
-  
+
   const handleRemove = () => {
     removeFromCart(product.id, selectedSize);
   };
-  
+
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center py-4 border-b border-gray-200">
       <div className="w-full sm:w-24 h-24 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden mr-0 sm:mr-4 mb-4 sm:mb-0">
         <img 
-          src={product.images[0]}
+          src={imageUrl}
           alt={product.name}
           className="w-full h-full object-cover"
         />
