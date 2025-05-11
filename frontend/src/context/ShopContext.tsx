@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Product, CartItem, Order } from '../types';
 import { productsApi, ordersApi, stripeApi } from '../services/api';
 
+// Clé pour le localStorage
+const CART_STORAGE_KEY = 'cnd-uniformes-cart';
 
 interface ShopContextType {
   products: Product[];
@@ -35,11 +37,27 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     fetchProducts();
     
+    // Charger le panier depuis localStorage
+    const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (err) {
+        console.error('Erreur lors du chargement du panier:', err);
+        localStorage.removeItem(CART_STORAGE_KEY);
+      }
+    }
+    
     // Charger les commandes si l'utilisateur est admin
     if (isAdmin) {
       fetchOrders();
     }
   }, [isAdmin]);
+  
+  // Mettre à jour localStorage quand le panier change
+  useEffect(() => {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  }, [cart]);
 
   // Fonctions d'API
   const fetchProducts = async () => {
