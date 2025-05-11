@@ -127,7 +127,7 @@ const AdminDashboard: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Revenus</p>
-                <p className="text-2xl font-bold text-gray-900">€{totalRevenue.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-gray-900">{totalRevenue.toFixed(2)}&nbsp;€</p>
               </div>
             </div>
             <div className="mt-4 flex justify-between text-sm">
@@ -237,7 +237,7 @@ const AdminDashboard: React.FC = () => {
                       {new Date(order.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      €{order.total.toFixed(2)}
+                      {order.total.toFixed(2)}&nbsp;€
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span

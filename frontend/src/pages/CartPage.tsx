@@ -64,15 +64,15 @@ const CartPage: React.FC = () => {
           <p className="text-gray-600 mb-6">
             Un email de confirmation a été envoyé à <span className="font-medium">{customerInfo.email}</span>
           </p>
-          <Button
-            as={Link}
-            to="/shop"
-            variant="primary"
-            className="inline-flex items-center"
-          >
-            <ShoppingBag size={18} className="mr-2" />
-            Continuer vos Achats
-          </Button>
+          <Link to="/shop">
+            <Button
+              variant="primary"
+              className="inline-flex items-center"
+            >
+              <ShoppingBag size={18} className="mr-2" />
+              Continuer vos Achats
+            </Button>
+          </Link>
         </div>
       </div>
     );
@@ -86,13 +86,12 @@ const CartPage: React.FC = () => {
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Votre panier est vide</h2>
         <p className="text-gray-600 mb-8">Il semble que vous n'ayez pas encore ajouté d'articles à votre panier.</p>
-        <Button
-          as={Link}
-          to="/shop"
-          variant="primary"
-        >
-          Parcourir les Produits
-        </Button>
+        <Link to="/shop">
+          <Button variant="outline" className="inline-flex items-center">
+            <ShoppingBag size={18} className="mr-2" />
+            Parcourir les Produits
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -208,7 +207,7 @@ const CartPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Sous-total</span>
-                  <span className="text-gray-800">€{subtotal.toFixed(2)}</span>
+                  <span className="text-gray-800">{subtotal.toFixed(2)}&nbsp;€</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Livraison</span>
@@ -216,7 +215,7 @@ const CartPage: React.FC = () => {
                 </div>
                 <div className="border-t pt-4 flex justify-between font-bold">
                   <span>Total</span>
-                  <span className="text-blue-900">€{total.toFixed(2)}</span>
+                  <span className="text-blue-900">{total.toFixed(2)}&nbsp;€</span>
                 </div>
               </div>
             </div>

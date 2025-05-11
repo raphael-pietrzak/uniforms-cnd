@@ -93,7 +93,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onUpdateStatus }) => 
                 {order.items.length} articles
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {order.total.toFixed(2)} €
+                {order.total.toFixed(2)}&nbsp;€
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {order.payment_method === 'online' ? 'En ligne (Carte)' : 'En personne'}
