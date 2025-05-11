@@ -88,12 +88,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    // Appeler l'API de déconnexion si nécessaire
-    // authApi.logout();
-    
-    localStorage.removeItem('user');
-    localStorage.removeItem('tokens');
-    setUser(null);
+    try {
+      const tokensStr = localStorage.getItem('tokens');
+      if (tokensStr) {
+        const tokens = JSON.parse(tokensStr);
+        if (tokens.refreshToken) {
+          // Appel de l'API de déconnexion
+          authApi.logout(tokens.refreshToken);
+        }
+      }
+    } catch (err) {
+      console.error('Erreur lors de la déconnexion:', err);
+    } finally {
+      localStorage.removeItem('user');
+      localStorage.removeItem('tokens');
+      setUser(null);
+    }
   };
 
   const isAuthenticated = !!user;

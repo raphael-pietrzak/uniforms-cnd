@@ -3,6 +3,30 @@ import { Product, Order } from '../types';
 const API_URL = 'http://localhost:3000/api';
 const BASE_URL = 'http://localhost:3000';
 
+// Fonction utilitaire pour récupérer le token d'accès
+const getAccessToken = (): string | null => {
+  const tokensStr = localStorage.getItem('tokens');
+  if (!tokensStr) return null;
+  
+  try {
+    const tokens = JSON.parse(tokensStr);
+    return tokens.accessToken || null;
+  } catch (e) {
+    console.error('Erreur lors de la récupération du token:', e);
+    return null;
+  }
+};
+
+// Fonction pour obtenir les en-têtes d'authentification
+const getAuthHeaders = (): Record<string, string> => {
+  const token = getAccessToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
+
 // Fonction utilitaire pour gérer les erreurs des requêtes
 const handleResponse = async (response: Response) => {
   if (!response.ok) {
@@ -107,8 +131,15 @@ export const uploadApi = {
       formData.append('images', file);
     });
 
+    const token = getAccessToken();
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_URL}/upload`, {
       method: 'POST',
+      headers,
       body: formData,
     });
 
@@ -120,7 +151,9 @@ export const uploadApi = {
 // Commandes API
 export const ordersApi = {
   getAll: async (): Promise<Order[]> => {
-    const response = await fetch(`${API_URL}/orders`);
+    const response = await fetch(`${API_URL}/orders`, {
+      headers: getAuthHeaders()
+    });
     const data = await handleResponse(response);
     return data;
   },
@@ -128,7 +161,7 @@ export const ordersApi = {
   create: async (orderData: any): Promise<Order> => {
     const response = await fetch(`${API_URL}/orders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(orderData),
     });
     const data = await handleResponse(response);
@@ -138,7 +171,7 @@ export const ordersApi = {
   updateStatus: async (orderId: string, status: string): Promise<Order> => {
     const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ status }),
     });
     const data = await handleResponse(response);
