@@ -1,0 +1,36 @@
+FROM node:18-alpine AS builder
+
+# Création du répertoire de travail
+WORKDIR /app
+
+# Copie des fichiers de dépendances
+COPY package*.json ./
+
+# Installation uniquement des dépendances de production
+RUN npm ci --only=production
+
+# Copie des autres fichiers du projet
+COPY . .
+
+# Si vous avez une étape de build
+# RUN npm run build
+
+# Production image
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copie depuis l'étape de build
+COPY --from=builder /app .
+
+# Utilisateur non-root pour plus de sécurité
+USER node
+
+# Exposition du port
+EXPOSE 3000
+
+# Configuration des variables d'environnement
+ENV NODE_ENV=production
+
+# Commande pour démarrer l'application
+CMD ["npm", "start"]
