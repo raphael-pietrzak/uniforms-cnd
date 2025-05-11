@@ -1,6 +1,6 @@
 const express = require('express');
 const db = require('../config/database');
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, verifyAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -30,7 +30,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Créer un produit (protégé par authentification)
-router.post('/', verifyToken, async (req, res) => {
+router.post('/', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const [id] = await db('products').insert({
       name: req.body.name,
@@ -54,7 +54,7 @@ router.post('/', verifyToken, async (req, res) => {
 });
 
 // Mettre à jour un produit (protégé par authentification)
-router.put('/:id', verifyToken, async (req, res) => {
+router.put('/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const updateData = {
       ...req.body,
@@ -75,7 +75,7 @@ router.put('/:id', verifyToken, async (req, res) => {
 });
 
 // Supprimer un produit (protégé par authentification)
-router.delete('/:id', verifyToken, async (req, res) => {
+router.delete('/:id', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const deletedCount = await db('products').where({ id: req.params.id }).del();
     

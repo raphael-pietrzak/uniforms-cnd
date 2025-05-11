@@ -6,6 +6,7 @@ import Input from '../../components/ui/Input';
 import Badge from '../../components/ui/Badge';
 import { Product } from '../../types';
 import AddProductModal from '../../components/admin/AddProductModal';
+import DeleteConfirmationModal from '../../components/admin/DeleteConfirmationModal';
 import { productsApi, getFullImageUrl } from '../../services/api';
 
 const ProductsPage: React.FC = () => {
@@ -15,12 +16,17 @@ const ProductsPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
+  // États pour la suppression
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Charger les produits au montage du composant
   useEffect(() => {
     fetchProducts();
   }, []);
-  
+
   const fetchProducts = async () => {
     setLoading(true);
     setError(null);
@@ -34,7 +40,7 @@ const ProductsPage: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   const handleToggleProductStatus = async (productId: string) => {
     try {
       // Trouver le produit actuel
@@ -51,7 +57,7 @@ const ProductsPage: React.FC = () => {
 
       // Appeler l'API pour mettre à jour
       await productsApi.update(updatedProduct);
-      
+
       // Mettre à jour l'état local
       setProducts(products.map(p => p.id === productId ? updatedProduct : p));
     } catch (err) {
@@ -59,7 +65,7 @@ const ProductsPage: React.FC = () => {
       console.error('Erreur lors de la mise à jour du statut:', err);
     }
   };
-  
+
   const handleAddProduct = async (newProduct: Product) => {
     try {
       const createdProduct = await productsApi.create(newProduct);
@@ -71,19 +77,43 @@ const ProductsPage: React.FC = () => {
     }
   };
 
+  // Fonction pour ouvrir la modale de confirmation
+  const openDeleteModal = (product: Product) => {
+    setProductToDelete(product);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Fonction pour gérer la suppression du produit
+  const handleDeleteProduct = async () => {
+    if (!productToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await productsApi.delete(productToDelete.id);
+      setProducts(products.filter(p => p.id !== productToDelete.id));
+      setIsDeleteModalOpen(false);
+      setProductToDelete(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur s\'est produite lors de la suppression');
+      console.error('Erreur lors de la suppression du produit:', err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const filteredProducts = products.filter((product) => {
     // Filter by search term
-    const matchesSearch = 
+    const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     // Filter by stock status if enabled
     const matchesStock = showOnlyOutOfStock ? !product.inStock : true;
-    
+
     return matchesSearch && matchesStock;
   });
-  
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -97,13 +127,13 @@ const ProductsPage: React.FC = () => {
           Ajouter un Nouveau Produit
         </Button>
       </div>
-      
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           <p>{error}</p>
         </div>
       )}
-      
+
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
         <div className="p-6 border-b border-gray-200">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
@@ -122,19 +152,19 @@ const ProductsPage: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="flex items-center">
               <label className="flex items-center cursor-pointer">
                 <div className="mr-3 text-sm font-medium text-gray-700">
                   Afficher uniquement les ruptures de stock
                 </div>
-                <div 
+                <div
                   className={`relative w-12 h-6 transition-colors duration-200 ease-in-out rounded-full ${
                     showOnlyOutOfStock ? 'bg-blue-600' : 'bg-gray-200'
                   }`}
                   onClick={() => setShowOnlyOutOfStock(!showOnlyOutOfStock)}
                 >
-                  <div 
+                  <div
                     className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ease-in-out ${
                       showOnlyOutOfStock ? 'transform translate-x-6' : ''
                     }`}
@@ -144,7 +174,7 @@ const ProductsPage: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         {loading ? (
           <div className="text-center p-8">
             <p className="text-gray-600">Chargement des produits...</p>
@@ -248,7 +278,10 @@ const ProductsPage: React.FC = () => {
                           >
                             <Edit size={18} />
                           </Link>
-                          <button className="text-red-600 hover:text-red-900">
+                          <button 
+                            className="text-red-600 hover:text-red-900"
+                            onClick={() => openDeleteModal(product)}
+                          >
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -261,12 +294,21 @@ const ProductsPage: React.FC = () => {
           </div>
         )}
       </div>
-      
+
       {/* Modal pour ajouter un produit */}
       <AddProductModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAdd={handleAddProduct}
+      />
+
+      {/* Modal de confirmation de suppression */}
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteProduct}
+        itemName={productToDelete?.name || ''}
+        isDeleting={isDeleting}
       />
     </div>
   );

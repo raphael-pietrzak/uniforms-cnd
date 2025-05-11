@@ -90,7 +90,9 @@ export const productsApi = {
   create: async (product: Omit<Product, 'id'>): Promise<Product> => {
     const response = await fetch(`${API_URL}/products`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        ...getAuthHeaders()
+      },
       body: JSON.stringify({
         ...product,
         sizes: JSON.stringify(product.sizes),
@@ -104,7 +106,9 @@ export const productsApi = {
   update: async (product: Product): Promise<Product> => {
     const response = await fetch(`${API_URL}/products/${product.id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        ...getAuthHeaders()
+      },
       body: JSON.stringify({
         ...product,
         sizes: JSON.stringify(product.sizes),
@@ -118,6 +122,7 @@ export const productsApi = {
   delete: async (id: string): Promise<void> => {
     const response = await fetch(`${API_URL}/products/${id}`, {
       method: 'DELETE',
+      headers: getAuthHeaders()
     });
     await handleResponse(response);
   },

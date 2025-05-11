@@ -12,9 +12,8 @@ const HomePage: React.FC = () => {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative bg-blue-900 text-white">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-blue-700 opacity-90"></div>
-        <div className="absolute inset-0 bg-[url('https://images.pexels.com/photos/5905555/pexels-photo-5905555.jpeg?auto=compress&cs=tinysrgb&w=1600')] bg-cover bg-center mix-blend-overlay"></div>
+      <section className="relative text-white">
+        <div className="absolute inset-0 bg-[url('../../public/arles_group.jpg')] bg-cover bg-center "></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative z-10">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">
@@ -24,26 +23,27 @@ const HomePage: React.FC = () => {
               Uniformes neufs et d'occasion pour vos enfants. Économisez tout en soutenant notre communauté scolaire.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <Button
-                as={Link}
-                to="/shop"
-                variant="primary"
-                size="lg"
-                className="bg-white text-blue-900 hover:bg-blue-50"
-              >
-                <ShoppingBag className="mr-2" size={20} />
-                Acheter Maintenant
-              </Button>
-              <Button
-                as={Link}
-                to="/info"
-                variant="outline"
-                size="lg"
-                className="border-white text-white hover:bg-blue-800"
-              >
-                <Info className="mr-2" size={20} />
-                En Savoir Plus
-              </Button>
+              <Link to="/shop">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="bg-white text-blue-900 hover:bg-blue-50"
+                >
+                  <ShoppingBag className="mr-2" size={20} />
+                  Acheter Maintenant
+                </Button>
+              </Link>
+              
+              <Link to="/info">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-white text-white hover:bg-blue-800"
+                >
+                  <Info className="mr-2" size={20} />
+                  En Savoir Plus
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
