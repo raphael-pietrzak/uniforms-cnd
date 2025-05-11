@@ -1,6 +1,7 @@
 import { Product, Order } from '../types';
 
 const API_URL = 'http://localhost:3000/api';
+const BASE_URL = 'http://localhost:3000';
 
 // Fonction utilitaire pour gérer les erreurs des requêtes
 const handleResponse = async (response: Response) => {
@@ -11,13 +12,42 @@ const handleResponse = async (response: Response) => {
   return response.json();
 };
 
+// Fonction pour construire l'URL complète des images
+export const getFullImageUrl = (imagePath: string): string => {
+  if (!imagePath) return 'https://placehold.co/600x400?text=Image+placeholder';
+  
+  // Si l'image est déjà une URL complète (http:// ou https://)
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  
+  // Si c'est un chemin relatif vers uploads
+  if (imagePath.startsWith('/uploads/')) {
+    return `${BASE_URL}${imagePath}`;
+  }
+  
+  // Fallback au placeholder
+  return 'https://placehold.co/600x400?text=Image+placeholder';
+};
+
 // Formatter les produits pour la consommation par le frontend
-const formatProduct = (product: any): Product => ({
-  ...product,
-  sizes: typeof product.sizes === 'string' ? JSON.parse(product.sizes) : product.sizes,
-  images: typeof product.images === 'string' ? JSON.parse(product.images) : product.images,
-  id: product.id.toString()
-});
+const formatProduct = (product: any): Product => {
+  let parsedImages: string[];
+  try {
+    // Tenter de parser les images JSON
+    parsedImages = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
+  } catch (e) {
+    console.error('Erreur de parsing des images:', e);
+    parsedImages = ['https://placehold.co/600x400?text=Image+placeholder'];
+  }
+
+  return {
+    ...product,
+    sizes: typeof product.sizes === 'string' ? JSON.parse(product.sizes) : product.sizes,
+    images: parsedImages.map(getFullImageUrl),
+    id: product.id.toString()
+  };
+};
 
 // Produits API
 export const productsApi = {
@@ -67,6 +97,24 @@ export const productsApi = {
     });
     await handleResponse(response);
   },
+};
+
+// Service d'upload des images
+export const uploadApi = {
+  uploadImages: async (imageFiles: File[]): Promise<string[]> => {
+    const formData = new FormData();
+    imageFiles.forEach(file => {
+      formData.append('images', file);
+    });
+
+    const response = await fetch(`${API_URL}/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await handleResponse(response);
+    return result.files;
+  }
 };
 
 // Commandes API

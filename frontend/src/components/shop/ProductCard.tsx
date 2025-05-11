@@ -3,18 +3,24 @@ import { Link } from 'react-router-dom';
 import { Product } from '../../types';
 import Card from '../ui/Card';
 import Badge from '../ui/Badge';
+import { getFullImageUrl } from '../../services/api';
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  // S'assurer que l'image existe, sinon utiliser un placeholder
+  const imageUrl = product.images && product.images.length > 0 
+    ? product.images[0] 
+    : 'https://placehold.co/600x400?text=Image+placeholder';
+    
   return (
     <Card className="h-full transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
       <Link to={`/product/${product.id}`}>
         <div className="relative h-64 overflow-hidden">
           <img
-            src={product.images[0]}
+            src={imageUrl}
             alt={product.name}
             className="w-full h-full object-cover"
           />

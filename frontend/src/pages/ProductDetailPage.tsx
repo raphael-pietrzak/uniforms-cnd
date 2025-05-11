@@ -4,6 +4,7 @@ import { ShoppingCart, ArrowLeft, Heart } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
+import { getFullImageUrl } from '../services/api';
 
 // Fonctions auxiliaires pour traduire les catégories et genres
 const translateCategory = (category: string): string => {
@@ -75,12 +76,12 @@ const ProductDetailPage: React.FC = () => {
         <div>
           <div className="bg-gray-100 rounded-lg overflow-hidden mb-4 h-96">
             <img
-              src={product.images[selectedImage]}
+              src={product.images && product.images[selectedImage] ? product.images[selectedImage] : 'https://placehold.co/600x400?text=Image+placeholder'}
               alt={product.name}
               className="w-full h-full object-contain"
             />
           </div>
-          {product.images.length > 1 && (
+          {product.images && product.images.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
               {product.images.map((image, index) => (
                 <button

@@ -3,6 +3,7 @@ import { X, Camera, Upload } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import { Product } from '../../types';
+import { uploadApi } from '../../services/api';
 
 interface ProductFormProps {
   initialValues?: Product;
@@ -31,6 +32,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   const [imagePreviews, setImagePreviews] = useState<string[]>(
     initialValues?.images || []
   );
+  const [uploadedImages, setUploadedImages] = useState<string[]>(
+    initialValues?.images?.filter(url => url.startsWith('/uploads/')) || []
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -38,17 +42,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
     e.preventDefault();
     setIsLoading(true);
     try {
-      const uploadedImageUrls = await Promise.all(
-        imageFiles.map(async (file) => {
-          return URL.createObjectURL(file);
-        })
-      );
-
-      const allImages = [...imagePreviews.filter(url => !url.startsWith('blob:')), ...uploadedImageUrls];
+      let serverImagePaths: string[] = [...uploadedImages];
+      
+      if (imageFiles.length > 0) {
+        const uploadedImageUrls = await uploadApi.uploadImages(imageFiles);
+        serverImagePaths = [...serverImagePaths, ...uploadedImageUrls];
+      }
       
       const productData = {
         ...formData,
-        images: allImages.length > 0 ? allImages : ['https://placehold.co/600x400?text=Image+placeholder']
+        images: serverImagePaths.length > 0 ? serverImagePaths : ['https://placehold.co/600x400?text=Image+placeholder']
       };
 
       onSubmit(productData);
@@ -99,7 +102,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   };
 
   const removeImage = (index: number) => {
-    setImageFiles(files => files.filter((_, i) => i !== index));
+    const isServerImage = index < uploadedImages.length;
+    
+    if (isServerImage) {
+      setUploadedImages(images => images.filter((_, i) => i !== index));
+    } else {
+      const localIndex = index - uploadedImages.length;
+      setImageFiles(files => files.filter((_, i) => i !== localIndex));
+    }
+    
     setImagePreviews(previews => previews.filter((_, i) => i !== index));
   };
 
