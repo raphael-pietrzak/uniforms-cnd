@@ -27,18 +27,19 @@ const HomePage: React.FC = () => {
                 <Button
                   variant="primary"
                   size="lg"
-                  className="bg-white text-blue-900 hover:bg-blue-50"
+                  className="bg-blue-900 text-white hover:bg-blue-800"
                 >
                   <ShoppingBag className="mr-2" size={20} />
                   Acheter Maintenant
                 </Button>
               </Link>
+
               
               <Link to="/info">
                 <Button
                   variant="outline"
                   size="lg"
-                  className="border-white text-white hover:bg-blue-800"
+                  className="border-white text-white hover:bg-white hover:text-blue-900 hover:border-white"
                 >
                   <Info className="mr-2" size={20} />
                   En Savoir Plus

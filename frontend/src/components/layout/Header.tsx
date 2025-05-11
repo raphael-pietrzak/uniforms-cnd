@@ -76,7 +76,7 @@ const Header: React.FC = () => {
               )}
               
               {/* Bouton de connexion ou déconnexion */}
-              {isAuthenticated ? (
+              {/* {isAuthenticated ? (
                 <button 
                   onClick={handleLogout}
                   className="mr-2 md:mr-4 p-2 rounded-full text-gray-500 hover:text-blue-900 focus:outline-none flex items-center"
@@ -92,7 +92,7 @@ const Header: React.FC = () => {
                 >
                   <LogIn size={20} />
                 </Link>
-              )}
+              )} */}
               
               {/* Panier */}
               <Link to="/cart" className={`mr-2 md:mr-0 p-2 rounded-full focus:outline-none relative ${isActive('/cart') ? 'text-blue-900' : 'text-gray-500 hover:text-blue-900'}`}>

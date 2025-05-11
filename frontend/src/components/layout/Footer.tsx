@@ -51,6 +51,11 @@ const Footer: React.FC = () => {
                   Panier
                 </Link>
               </li>
+              <li>
+                <Link to="/login" className="text-gray-300 hover:text-white transition-colors">
+                  Connexion
+                </Link>
+              </li>
             </ul>
           </div>
           
