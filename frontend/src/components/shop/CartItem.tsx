@@ -37,10 +37,10 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
       
       <div className="flex-1">
         <h3 className="text-lg font-medium text-gray-800">{product.name}</h3>
-        <p className="text-sm text-gray-500">Size: {selectedSize}</p>
+        <p className="text-sm text-gray-500">Taille: {selectedSize}</p>
         <p className="text-sm text-gray-500">
           Condition: <span className={product.condition === 'new' ? 'text-green-600' : 'text-yellow-600'}>
-            {product.condition === 'new' ? 'New' : 'Used'}
+            {product.condition === 'new' ? 'Neuf' : 'Occasion'}
           </span>
         </p>
       </div>
@@ -64,7 +64,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
         </div>
         
         <div className="text-lg font-bold text-gray-800 mr-4">
-          €{(product.price * quantity).toFixed(2)}
+          {(product.price * quantity).toFixed(2)}&nbsp;€
         </div>
         
         <button 

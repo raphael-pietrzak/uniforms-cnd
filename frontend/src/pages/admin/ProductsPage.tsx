@@ -221,7 +221,7 @@ const ProductsPage: React.FC = () => {
                         </button>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        €{product.price.toFixed(2)}
+                        {product.price.toFixed(2)}&nbsp;€
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex flex-wrap gap-1">
