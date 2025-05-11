@@ -165,15 +165,41 @@ export const stripeApi = {
   }
 };
 
-// Auth API (pour plus tard)
+// Auth API
 export const authApi = {
-  login: async (credentials: { username: string; password: string }) => {
+  login: async (credentials: { email: string; password: string }) => {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
     });
-    const data = await handleResponse(response);
-    return data;
+    return handleResponse(response);
+  },
+
+  register: async (userData: { username: string; email: string; password: string }) => {
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+    });
+    return handleResponse(response);
+  },
+
+  refreshToken: async (refreshToken: string) => {
+    const response = await fetch(`${API_URL}/auth/refresh-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    return handleResponse(response);
+  },
+
+  logout: async (refreshToken: string) => {
+    const response = await fetch(`${API_URL}/auth/logout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    return handleResponse(response);
   },
 };
