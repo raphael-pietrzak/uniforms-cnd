@@ -106,8 +106,7 @@ router.post('/webhook', async (req, res) => {
           customer_name: session.customer_details?.name || 'Client Stripe',
           customer_email: session.customer_email,
           payment_method: 'online',
-          total: session.amount_total / 100, // Convertir les centimes en euros
-          status: 'paid',
+          total: session.amount_total / 100,,
           created_at: new Date().toISOString()
         });
         
