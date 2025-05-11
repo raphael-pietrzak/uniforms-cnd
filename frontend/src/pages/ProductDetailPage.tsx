@@ -152,14 +152,14 @@ const ProductDetailPage: React.FC = () => {
               <ShoppingCart size={20} className="mr-2" />
               {product.inStock ? 'Ajouter au Panier' : 'Rupture de Stock'}
             </Button>
-            <Button
+            {/* <Button
               variant="outline"
               size="lg"
               className="flex items-center justify-center"
             >
               <Heart size={20} className="mr-2" />
               Sauvegarder
-            </Button>
+            </Button> */}
           </div>
           
           <div className="mt-8 pt-8 border-t border-gray-200">
