@@ -15,14 +15,41 @@ const verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET);
-    req.user = decoded;
-    next();
+    
+    // Récupérer les informations de l'utilisateur, y compris son rôle
+    db('users').where({ id: decoded.id }).first()
+      .then(user => {
+        if (!user) {
+          return res.status(403).json({ error: 'Utilisateur non trouvé' });
+        }
+        req.user = {
+          ...decoded,
+          role: user.role
+        };
+        next();
+      })
+      .catch(err => {
+        return res.status(500).json({ error: 'Erreur serveur' });
+      });
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({ error: 'Token expiré', expired: true });
     }
     return res.status(403).json({ error: 'Token invalide' });
   }
+};
+
+// Middleware pour vérifier si l'utilisateur est admin
+const verifyAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Non authentifié' });
+  }
+  
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Accès refusé. Privilèges administrateur requis.' });
+  }
+  
+  next();
 };
 
 // Génération des tokens
@@ -55,6 +82,7 @@ const verifyRefreshToken = async (token) => {
 
 module.exports = {
   verifyToken,
+  verifyAdmin,
   generateTokens,
   verifyRefreshToken
 };
