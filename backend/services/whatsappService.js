@@ -29,10 +29,10 @@ class WhatsAppService {
           messaging_product: 'whatsapp',
           recipient_type: 'individual',
           to: this.secretaryPhoneNumber,
-          type: "template",
-          template: {
-              name: "order_management_1",
-          },
+          type: 'text',
+          text: {
+            body: message
+          }
         }
       });
 
@@ -41,6 +41,41 @@ class WhatsAppService {
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message WhatsApp:', error.response?.data || error.message);
       throw new Error('Échec de l\'envoi du message WhatsApp');
+    }
+  }
+
+  /**
+   * Envoie un message utilisant un template WhatsApp
+   * @param {Array} components - Composants et paramètres du template@param {string} templateName - Nom du template
+   * @returns {Promise} - La réponse de l'API WhatsApp
+   */
+  async sendTemplateMessage(templateName, components = []) {
+    try {
+      const response = await axios({
+        method: 'POST',
+        url: `${this.apiUrl}${this.phoneNumberId}/messages`,
+        headers: {
+          'Authorization': `Bearer ${this.token}`,
+          'Content-Type': 'application/json'
+        },
+        data: {
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: this.secretaryPhoneNumber,
+          type: "template",
+          template: {
+            name: templateName,
+            language: { code: "fr" },
+            components: components
+          }
+        }
+      });
+
+      console.log('Message WhatsApp avec template envoyé avec succès:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi du message WhatsApp avec template:', error.response?.data || error.message);
+      throw new Error('Échec de l\'envoi du message WhatsApp avec template');
     }
   }
 
