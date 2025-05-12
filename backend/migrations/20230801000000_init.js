@@ -21,7 +21,9 @@ exports.up = function(knex) {
       table.string('payment_method').notNullable();
       table.string('customer_name').notNullable();
       table.string('customer_email').notNullable();
-      table.timestamp('created_at').defaultTo(knex.fn.now());
+      table.string('whatsapp_message_id');
+      table.timestamp('notification_sent_at');
+      table.timestamp(true, true);
     })
     .createTable('order_items', function(table) {
       table.increments('id').primary();

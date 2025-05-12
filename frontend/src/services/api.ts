@@ -187,7 +187,7 @@ export const ordersApi = {
 // Stripe API
 export const stripeApi = {
   createCheckoutSession: async (items: any[], customerEmail: string) => {
-    const response = await fetch(`${API_URL}/create-checkout-session`, {
+    const response = await fetch(`${API_URL}/stripe/create-checkout-session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items, customerEmail }),
@@ -197,7 +197,7 @@ export const stripeApi = {
   },
   
   getCheckoutSession: async (sessionId: string) => {
-    const response = await fetch(`${API_URL}/checkout-session/${sessionId}`);
+    const response = await fetch(`${API_URL}/stripe/checkout-session/${sessionId}`);
     const data = await handleResponse(response);
     return data;
   }

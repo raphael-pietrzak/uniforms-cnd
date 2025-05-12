@@ -1,7 +1,7 @@
 const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const db = require('../config/database');
-const whatsappService = require('../services/whatsappService');
+const whatsappRoutes = require('./whatsapp');
 
 const router = express.Router();
 
@@ -101,7 +101,38 @@ router.post('/webhook', async (req, res) => {
       // Extraire les métadonnées
       const orderDetails = JSON.parse(session.metadata.order_details);
       
-      // Créer la commande dans la base de données
+      // Récupérer les détails complets des produits pour la notification
+      const items = await Promise.all(orderDetails.items.map(async (item) => {
+        const product = await db('products').where('id', item.product_id).first();
+        return {
+          product: {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            images: product.images
+          },
+          quantity: item.quantity,
+          selectedSize: item.selectedSize
+        };
+      }));
+      
+      // Préparer l'objet de notification
+      const orderNotification = {
+        // On n'a pas encore d'ID réel mais on utilisera un placeholder
+        id: 'En cours de création',
+        customer_name: session.customer_details?.name || 'Client Stripe',
+        customer_email: session.customer_email,
+        payment_method: 'online',
+        total: session.amount_total / 100,
+        status: 'paid',
+        created_at: new Date().toISOString(),
+        items: items
+      };
+      
+      // Envoyer la notification WhatsApp et récupérer l'ID du message
+      const whatsappMessageId = await whatsappRoutes.sendOrderNotification(orderNotification);
+      
+      // Créer la commande dans la base de données avec l'ID du message WhatsApp
       await db.transaction(async trx => {
         const [orderId] = await trx('orders').insert({
           customer_name: session.customer_details?.name || 'Client Stripe',
@@ -109,7 +140,8 @@ router.post('/webhook', async (req, res) => {
           payment_method: 'online',
           total: session.amount_total / 100,
           status: 'paid',
-          created_at: new Date().toISOString()
+          whatsapp_message_id: whatsappMessageId, // Ajouter l'ID du message WhatsApp ici
+          notification_sent_at: whatsappMessageId ? new Date().toISOString() : null,
         });
         
         // Insérer les items de commande
@@ -122,22 +154,16 @@ router.post('/webhook', async (req, res) => {
         
         await trx('order_items').insert(orderItems);
         
-        // Récupérer les détails de la commande complète pour la notification
-        const orderNotification = {
-          id: orderId,
-          customer_name: session.customer_details?.name || 'Client Stripe',
-          customer_email: session.customer_email,
-          total: session.amount_total / 100,
-          created_at: new Date().toISOString()
-        };
-        
-        // Envoyer une notification WhatsApp à la secrétaire
-        try {
-          await whatsappService.notifyNewOrder(orderNotification);
-          console.log('Notification WhatsApp envoyée avec succès');
-        } catch (whatsappError) {
-          console.error('Erreur lors de l\'envoi de la notification WhatsApp:', whatsappError);
-          // On continue malgré l'erreur WhatsApp
+        // Si on a envoyé la notification mais qu'on n'a pas reçu l'ID,
+        // envoyez une nouvelle notification avec l'ID réel de la commande
+        if (!whatsappMessageId) {
+          orderNotification.id = orderId;
+          try {
+            await whatsappRoutes.sendOrderNotification(orderNotification);
+            console.log('Notification WhatsApp envoyée avec succès (second essai)');
+          } catch (whatsappError) {
+            console.error('Erreur lors de l\'envoi de la seconde notification WhatsApp:', whatsappError);
+          }
         }
       });
       

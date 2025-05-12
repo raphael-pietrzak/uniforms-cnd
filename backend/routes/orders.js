@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../config/database');
+const whatsappRoutes = require('./whatsapp'); // Importer les routes WhatsApp
 
 const router = express.Router();
 
@@ -91,7 +92,8 @@ router.post('/', async (req, res) => {
         payment_method: paymentMethod,
         total,
         status,
-        created_at: new Date().toISOString()
+        created_at: new Date(),
+        updated_at: new Date()
       });
       
       // Insérer les items de commande
@@ -130,6 +132,14 @@ router.post('/', async (req, res) => {
       
       return newOrder;
     });
+    
+    // Envoyer une notification WhatsApp pour la nouvelle commande
+    try {
+      await whatsappRoutes.sendOrderNotification(result);
+    } catch (notifError) {
+      console.error('Erreur lors de l\'envoi de la notification WhatsApp:', notifError);
+      // On continue même si la notification échoue
+    }
     
     res.status(201).json(result);
   } catch (error) {

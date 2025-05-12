@@ -1,3 +1,5 @@
+const { up } = require("../migrations/20230801000000_init");
+
 exports.seed = async function(knex) {
   // Vider les tables existantes
   await knex('order_items').del();
@@ -13,32 +15,28 @@ exports.seed = async function(knex) {
       status: 'collected',
       payment_method: 'credit_card',
       customer_name: 'Jean Dupont',
-      customer_email: 'jean.dupont@example.com',
-      created_at: new Date('2023-09-15T10:30:00')
+      customer_email: 'jean.dupont@example.com'
     },
     {
       total: 24.99,
       status: 'pending',
       payment_method: 'paypal',
       customer_name: 'Marie Martin',
-      customer_email: 'marie.martin@example.com',
-      created_at: new Date('2023-09-18T14:45:00')
+      customer_email: 'marie.martin@example.com'
     },
     {
       total: 104.97,
       status: 'ready',
       payment_method: 'credit_card',
       customer_name: 'Pierre Lefebvre',
-      customer_email: 'pierre.lefebvre@example.com',
-      created_at: new Date('2023-09-20T09:15:00')
+      customer_email: 'pierre.lefebvre@example.com'
     },
     {
       total: 12.99,
       status: 'paid',
       payment_method: 'paypal',
       customer_name: 'Sophie Bertrand',
-      customer_email: 'sophie.bertrand@example.com',
-      created_at: new Date('2023-09-22T16:20:00')
+      customer_email: 'sophie.bertrand@example.com'
     }
   ];
   
