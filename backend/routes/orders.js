@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../config/database');
+const { createOrderAndNotify } = require('../utils/orderUtils');
 const whatsappRoutes = require('./whatsapp'); // Importer les routes WhatsApp
 
 const router = express.Router();
@@ -82,61 +83,15 @@ router.post('/', async (req, res) => {
   try {
     const { items, customerName, customerEmail, paymentMethod, total, status } = req.body;
     
-    // Démarrer une transaction pour garantir l'intégrité
-    const result = await db.transaction(async trx => {
-      // Insérer la commande
-      const [orderId] = await trx('orders').insert({
-        customer_name: customerName,
-        customer_email: customerEmail,
-        payment_method: paymentMethod,
-        total,
-        status
-      });
-      
-      // Insérer les items de commande
-      const orderItemsToInsert = items.map(item => ({
-        order_id: orderId,
-        product_id: item.product.id,
-        quantity: item.quantity,
-        selected_size: item.selectedSize
-      }));
-      
-      await trx('order_items').insert(orderItemsToInsert);
-      
-      // Retourner la commande complète
-      const newOrder = await trx('orders').where({ id: orderId }).first();
-      const orderItems = await trx('order_items')
-        .where({ order_id: orderId })
-        .join('products', 'order_items.product_id', 'products.id')
-        .select(
-          'products.*',
-          'order_items.quantity',
-          'order_items.selected_size'
-        );
-      
-      newOrder.items = orderItems.map(item => ({
-        product: {
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          images: item.images,
-          brand: item.brand,
-          condition: item.condition
-        },
-        quantity: item.quantity,
-        selectedSize: item.selected_size
-      }));
-      
-      return newOrder;
+    // Utilisation de la nouvelle fonction réutilisable
+    const result = await createOrderAndNotify({
+      items,
+      customerName,
+      customerEmail,
+      paymentMethod,
+      total,
+      status
     });
-    
-    // Envoyer une notification WhatsApp pour la nouvelle commande
-    try {
-      await whatsappRoutes.sendOrderNotification(result);
-    } catch (notifError) {
-      console.error('Erreur lors de l\'envoi de la notification WhatsApp:', notifError);
-      // On continue même si la notification échoue
-    }
     
     res.status(201).json(result);
   } catch (error) {

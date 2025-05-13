@@ -1,11 +1,11 @@
 # TODO
 
-[] envoyer mail
-[] refaire le login
-[] enregistrer l'id du message whatsapp
+## !! URGENT
+
 [] gestion des quantitées
-[] verifier sur telephone
 [] arreter d'envoyer milles requetes stripe après le paiement
 
+[] refaire le login
+[] verifier sur telephone
 
-Questions
+## Questions
