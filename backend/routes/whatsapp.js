@@ -36,10 +36,11 @@ async function sendWhatsAppMessage(to, messageText) {
 
 // Fonction pour formater le résumé d'une commande
 function formatOrderSummary(order) {
+    const paymentMethod = order.payment_method === 'online' ? 'En ligne' : 'À la livraison';
   let summary = `📦 *NOUVELLE COMMANDE #${order.id}*\n\n`;
   summary += `👤 *Client:* ${order.customer_name}\n`;
   summary += `📧 *Email:* ${order.customer_email}\n`;
-  summary += `💳 *Méthode de paiement:* ${order.payment_method}\n`;
+  summary += `💳 *Méthode de paiement:* ${paymentMethod}\n`;
   summary += `🏷️ *Total:* ${order.total.toFixed(2)}€\n\n`;
   
   summary += `*Articles commandés:*\n`;

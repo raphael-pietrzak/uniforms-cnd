@@ -30,8 +30,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Configuration des routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
-app.use('/api/orders', verifyToken, verifyAdmin, ordersRoutes);
-app.use('/api/upload', verifyToken, verifyAdmin, uploadRoutes);
+app.use('/api/orders', ordersRoutes);
+app.use('/api/upload', uploadRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 

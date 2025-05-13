@@ -76,7 +76,7 @@ const Header: React.FC = () => {
               )}
               
               {/* Bouton de connexion ou déconnexion */}
-              {/* {isAuthenticated ? (
+              {isAuthenticated && (
                 <button 
                   onClick={handleLogout}
                   className="mr-2 md:mr-4 p-2 rounded-full text-gray-500 hover:text-blue-900 focus:outline-none flex items-center"
@@ -84,7 +84,9 @@ const Header: React.FC = () => {
                 >
                   <LogOut size={20} />
                 </button>
-              ) : (
+              )}
+
+              {/* : (
                 <Link 
                   to="/login"
                   className="mr-2 md:mr-4 p-2 rounded-full text-gray-500 hover:text-blue-900 focus:outline-none flex items-center"

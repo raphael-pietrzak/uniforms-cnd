@@ -19,7 +19,6 @@ router.get('/', async (req, res) => {
           'order_items.quantity',
           'order_items.selected_size'
         );
-      
       order.items = items.map(item => ({
         product: {
           id: item.id,
@@ -91,9 +90,7 @@ router.post('/', async (req, res) => {
         customer_email: customerEmail,
         payment_method: paymentMethod,
         total,
-        status,
-        created_at: new Date(),
-        updated_at: new Date()
+        status
       });
       
       // Insérer les items de commande

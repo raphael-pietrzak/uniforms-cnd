@@ -17,16 +17,16 @@ exports.seed = async function(knex) {
       password: adminPassword,
       email: 'admin@cnduniformes.com',
       role: 'admin',
-      created_at: new Date(),
-      updated_at: new Date()
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     },
     {
       username: 'utilisateur',
       password: userPassword,
       email: 'user@cnduniformes.com',
       role: 'user',
-      created_at: new Date(),
-      updated_at: new Date()
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
   ]);
 };

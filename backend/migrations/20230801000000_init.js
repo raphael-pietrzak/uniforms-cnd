@@ -23,7 +23,7 @@ exports.up = function(knex) {
       table.string('customer_email').notNullable();
       table.string('whatsapp_message_id');
       table.timestamp('notification_sent_at');
-      table.timestamp(true, true);
+      table.timestamps(true, true);
     })
     .createTable('order_items', function(table) {
       table.increments('id').primary();
