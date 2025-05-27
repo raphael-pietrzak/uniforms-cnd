@@ -3,6 +3,12 @@ import { Order } from '../../types';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 
+// Helper function to format order IDs safely
+const formatOrderId = (id: any): string => {
+  const stringId = String(id || '');
+  return stringId.length > 8 ? `${stringId.substring(0, 8)}...` : stringId;
+};
+
 interface OrdersTableProps {
   orders: Order[];
   onUpdateStatus: (orderId: string, status: Order['status']) => void;
@@ -12,13 +18,13 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onUpdateStatus }) => 
   const getStatusBadge = (status: Order['status']) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="warning">Pending</Badge>;
+        return <Badge variant="warning">En attente</Badge>;
       case 'paid':
-        return <Badge variant="primary">Paid</Badge>;
+        return <Badge variant="primary">Payé</Badge>;
       case 'ready':
-        return <Badge variant="success">Ready for Pickup</Badge>;
+        return <Badge variant="success">Prêt à récupérer</Badge>;
       case 'collected':
-        return <Badge variant="default">Collected</Badge>;
+        return <Badge variant="default">Récupéré</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -26,7 +32,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onUpdateStatus }) => 
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('fr-FR', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -36,7 +42,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onUpdateStatus }) => 
   };
 
   if (orders.length === 0) {
-    return <p className="text-gray-500 py-4">No orders found.</p>;
+    return <p className="text-gray-500 py-4 ml-4">Aucune commande trouvée.</p>;
   }
 
   return (
@@ -45,25 +51,25 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onUpdateStatus }) => 
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Order ID
+              N° Commande
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Date
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Customer
+              Client
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Items
+              Articles
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Total
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Payment
+              Paiement
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
+              Statut
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
@@ -74,23 +80,23 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onUpdateStatus }) => 
           {orders.map((order) => (
             <tr key={order.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {order.id.substring(0, 8)}...
+                {formatOrderId(order.id)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {formatDate(order.createdAt)}
+                {formatDate(order.created_at)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {order.customerName}
-                <div className="text-xs text-gray-400">{order.customerEmail}</div>
+                {order.customer_name}
+                <div className="text-xs text-gray-400">{order.customer_email}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {order.items.length} items
+                {order.items.length} articles
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                €{order.total.toFixed(2)}
+                {order.total.toFixed(2)}&nbsp;€
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {order.paymentMethod === 'online' ? 'Online (Card)' : 'In-person'}
+                {order.payment_method === 'online' ? 'En ligne (Carte)' : 'En personne'}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 {getStatusBadge(order.status)}
@@ -102,7 +108,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onUpdateStatus }) => 
                     variant="primary"
                     onClick={() => onUpdateStatus(order.id, 'paid')}
                   >
-                    Mark Paid
+                    Marquer payé
                   </Button>
                 )}
                 {order.status === 'paid' && (
@@ -111,7 +117,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onUpdateStatus }) => 
                     variant="success"
                     onClick={() => onUpdateStatus(order.id, 'ready')}
                   >
-                    Ready for Pickup
+                    Prêt à récupérer
                   </Button>
                 )}
                 {order.status === 'ready' && (
@@ -120,7 +126,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ orders, onUpdateStatus }) => 
                     variant="outline"
                     onClick={() => onUpdateStatus(order.id, 'collected')}
                   >
-                    Mark Collected
+                    Marquer récupéré
                   </Button>
                 )}
               </td>

@@ -1,33 +1,39 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart } from 'lucide-react';
 import { Product } from '../../types';
 import Card from '../ui/Card';
-import Button from '../ui/Button';
 import Badge from '../ui/Badge';
+import { getFullImageUrl } from '../../services/api';
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  // S'assurer que l'image existe, sinon utiliser un placeholder
+  const imageUrl = product.images && product.images.length > 0 
+    ? product.images[0] 
+    : 'https://placehold.co/600x400?text=Image+placeholder';
+    
   return (
     <Card className="h-full transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
       <Link to={`/product/${product.id}`}>
         <div className="relative h-64 overflow-hidden">
           <img
-            src={product.images[0]}
+            src={imageUrl}
             alt={product.name}
             className="w-full h-full object-cover"
           />
           {product.condition === 'used' && (
             <div className="absolute top-2 left-2">
-              <Badge variant="warning">Used</Badge>
+              <Badge variant="warning">Occasion</Badge>
             </div>
           )}
           {!product.inStock && (
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">Out of Stock</span>
+              <span className="text-white font-bold text-lg">
+                Indisponible
+              </span>
             </div>
           )}
         </div>
@@ -35,7 +41,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <h3 className="text-lg font-semibold text-gray-800 mb-1 truncate">{product.name}</h3>
           <p className="text-gray-500 text-sm mb-2">{product.brand}</p>
           <div className="flex justify-between items-center">
-            <span className="text-blue-900 font-bold">€{product.price.toFixed(2)}</span>
+            <span className="text-blue-900 font-bold">{product.price.toFixed(2)}&nbsp;€</span>
             <div className="flex space-x-1">
               {product.sizes.map((size) => (
                 <span key={size} className="text-xs bg-gray-100 px-2 py-1 rounded">

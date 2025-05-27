@@ -4,6 +4,7 @@ import { ShoppingCart, ArrowLeft, Heart } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
+import { getFullImageUrl } from '../services/api';
 
 // Fonctions auxiliaires pour traduire les catégories et genres
 const translateCategory = (category: string): string => {
@@ -75,12 +76,12 @@ const ProductDetailPage: React.FC = () => {
         <div>
           <div className="bg-gray-100 rounded-lg overflow-hidden mb-4 h-96">
             <img
-              src={product.images[selectedImage]}
+              src={product.images && product.images[selectedImage] ? product.images[selectedImage] : 'https://placehold.co/600x400?text=Image+placeholder'}
               alt={product.name}
               className="w-full h-full object-contain"
             />
           </div>
-          {product.images.length > 1 && (
+          {product.images && product.images.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
               {product.images.map((image, index) => (
                 <button
@@ -106,7 +107,7 @@ const ProductDetailPage: React.FC = () => {
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
             <div className="flex items-center mb-4">
-              <span className="text-blue-900 text-2xl font-bold mr-4">€{product.price.toFixed(2)}</span>
+              <span className="text-blue-900 text-2xl font-bold mr-4">{product.price.toFixed(2)}&nbsp;€</span>
               <Badge variant={product.condition === 'new' ? 'primary' : 'warning'}>
                 {product.condition === 'new' ? 'Neuf' : 'Occasion'}
               </Badge>
@@ -151,14 +152,14 @@ const ProductDetailPage: React.FC = () => {
               <ShoppingCart size={20} className="mr-2" />
               {product.inStock ? 'Ajouter au Panier' : 'Rupture de Stock'}
             </Button>
-            <Button
+            {/* <Button
               variant="outline"
               size="lg"
               className="flex items-center justify-center"
             >
               <Heart size={20} className="mr-2" />
               Sauvegarder
-            </Button>
+            </Button> */}
           </div>
           
           <div className="mt-8 pt-8 border-t border-gray-200">

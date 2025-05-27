@@ -71,21 +71,21 @@ const InfoPage: React.FC = () => {
                 <Phone size={18} className="text-blue-800 mr-3 mt-1" />
                 <div>
                   <p className="font-medium">Téléphone</p>
-                  <p className="text-gray-600">+33 123 456 789</p>
+                  <p className="text-gray-600">+33 9 51 34 26 76</p>
                 </div>
               </div>
               <div className="flex items-start">
                 <Mail size={18} className="text-blue-800 mr-3 mt-1" />
                 <div>
                   <p className="font-medium">Email</p>
-                  <p className="text-gray-600">contact@schoolwear.com</p>
+                  <p className="text-gray-600">cours.notre.dame@icrsp.org</p>
                 </div>
               </div>
               <div className="flex items-start">
                 <MapPin size={18} className="text-blue-800 mr-3 mt-1" />
                 <div>
                   <p className="font-medium">Adresse</p>
-                  <p className="text-gray-600">123 Rue de l'École, 75001 Paris, France</p>
+                  <p className="text-gray-600">334 Rue du Pioch de Boutonnet, 34090 Montpellier, France</p>
                 </div>
               </div>
             </div>
@@ -150,7 +150,7 @@ const InfoPage: React.FC = () => {
             <div className="text-center">
               <MapPin size={48} className="mx-auto mb-4 text-blue-900" />
               <p className="text-gray-600">Emplacement de la carte</p>
-              <p className="font-medium text-gray-800 mt-2">123 Rue de l'École, 75001 Paris, France</p>
+              <p className="font-medium text-gray-800 mt-2">334 Rue du Pioch de Boutonnet, 34090 Montpellier, France</p>
             </div>
           </div>
         </div>

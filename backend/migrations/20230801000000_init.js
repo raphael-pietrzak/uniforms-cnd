@@ -21,7 +21,9 @@ exports.up = function(knex) {
       table.string('payment_method').notNullable();
       table.string('customer_name').notNullable();
       table.string('customer_email').notNullable();
-      table.timestamp('created_at').defaultTo(knex.fn.now());
+      table.string('whatsapp_message_id');
+      table.timestamp('notification_sent_at');
+      table.timestamps(true, true);
     })
     .createTable('order_items', function(table) {
       table.increments('id').primary();
@@ -29,6 +31,20 @@ exports.up = function(knex) {
       table.integer('product_id').unsigned().references('id').inTable('products').onDelete('CASCADE');
       table.integer('quantity').notNullable();
       table.string('selected_size').notNullable();
+    })
+    .createTable('users', function(table) {
+      table.increments('id').primary();
+      table.string('username').notNullable().unique();
+      table.string('password').notNullable();
+      table.string('email').notNullable().unique();
+      table.string('role').defaultTo('user'); // user, admin
+      table.timestamps(true, true);
+    })
+    .createTable('refresh_tokens', function(table) {
+      table.increments('id').primary();
+      table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE');
+      table.string('token').notNullable().unique();
+      table.timestamp('created_at').defaultTo(knex.fn.now());
     });
 };
 
@@ -36,5 +52,6 @@ exports.down = function(knex) {
   return knex.schema
     .dropTable('order_items')
     .dropTable('orders')
+    .dropTable('users')
     .dropTable('products');
 };

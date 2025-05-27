@@ -22,11 +22,11 @@ export interface Order {
   id: string;
   items: CartItem[];
   total: number;
-  status: 'pending' | 'paid' | 'ready' | 'collected';
-  paymentMethod: 'online' | 'inperson';
-  customerName: string;
-  customerEmail: string;
-  createdAt: string;
+  status: 'pending' | 'paid' | 'ready' | 'collected' | string
+  payment_method: 'online' | 'inperson';
+  customer_name: string;
+  customer_email: string;
+  created_at: string;
 }
 
 export interface User {

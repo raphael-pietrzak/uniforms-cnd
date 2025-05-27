@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Menu, X, User } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, LogIn, LogOut } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
+import { useAuth } from '../../context/AuthContext';
 import Logo from '../../assets/cnd_logo.svg';
 
 const Header: React.FC = () => {
-  const { cart, isAdmin, setIsAdmin } = useShop();
+  const { cart } = useShop();
+  const { isAuthenticated, isAdmin, logout, user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
   };
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -45,16 +51,16 @@ const Header: React.FC = () => {
             
             {/* Navigation Bureau */}
             <nav className="hidden md:ml-6 md:flex md:space-x-8">
-              {/* <Link to="/" className={isActive('/') ? activeLinkClass : inactiveLinkClass}>
+              <Link to="/" className={isActive('/') ? activeLinkClass : inactiveLinkClass}>
                 Accueil
-              </Link> */}
+              </Link>
               <Link to="/shop" className={isActive('/shop') ? activeLinkClass : inactiveLinkClass}>
                 Boutique
               </Link>
-              {/* <Link to="/info" className={isActive('/info') ? activeLinkClass : inactiveLinkClass}>
+              <Link to="/info" className={isActive('/info') ? activeLinkClass : inactiveLinkClass}>
                 Informations
-              </Link> */}
-              {isAdmin && (
+              </Link>
+              {isAuthenticated && isAdmin && (
                 <Link to="/admin" className={isActive('/admin') ? activeLinkClass : inactiveLinkClass}>
                   Administration
                 </Link>
@@ -62,13 +68,33 @@ const Header: React.FC = () => {
             </nav>
             
             <div className="flex items-center">
-              {/* Basculer Admin (pour démonstration) */}
-              <button 
-                onClick={() => setIsAdmin(!isAdmin)} 
-                className="mr-2 md:mr-4 p-2 rounded-full text-gray-500 hover:text-blue-900 focus:outline-none"
-              >
-                <User size={20} />
-              </button>
+              {/* Afficher le nom d'utilisateur si connecté */}
+              {isAuthenticated && user && (
+                <span className="mr-2 hidden md:inline text-sm text-gray-700">
+                  {user.username}
+                </span>
+              )}
+              
+              {/* Bouton de connexion ou déconnexion */}
+              {isAuthenticated && (
+                <button 
+                  onClick={handleLogout}
+                  className="mr-2 md:mr-4 p-2 rounded-full text-gray-500 hover:text-blue-900 focus:outline-none flex items-center"
+                  title="Déconnexion"
+                >
+                  <LogOut size={20} />
+                </button>
+              )}
+
+              {/* : (
+                <Link 
+                  to="/login"
+                  className="mr-2 md:mr-4 p-2 rounded-full text-gray-500 hover:text-blue-900 focus:outline-none flex items-center"
+                  title="Connexion"
+                >
+                  <LogIn size={20} />
+                </Link>
+              )} */}
               
               {/* Panier */}
               <Link to="/cart" className={`mr-2 md:mr-0 p-2 rounded-full focus:outline-none relative ${isActive('/cart') ? 'text-blue-900' : 'text-gray-500 hover:text-blue-900'}`}>
@@ -118,13 +144,30 @@ const Header: React.FC = () => {
             >
               Informations
             </Link>
-            {isAdmin && (
+            {isAuthenticated && isAdmin && (
               <Link
                 to="/admin"
                 className={isActive('/admin') ? activeMobileLinkClass : inactiveMobileLinkClass}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Administration
+              </Link>
+            )}
+            {isAuthenticated && (
+              <button
+                onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                className="block w-full text-left pl-3 pr-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-l-4 hover:border-gray-300"
+              >
+                Déconnexion
+              </button>
+            )}
+            {!isAuthenticated && (
+              <Link
+                to="/login"
+                className={isActive('/login') ? activeMobileLinkClass : inactiveMobileLinkClass}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Connexion
               </Link>
             )}
           </div>

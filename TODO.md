@@ -1,5 +1,11 @@
 # TODO
 
-- [ ] Add a modal for adding products
-- [ ] Implement Stripe payment
-- [ ] Write tests
+## !! URGENT
+
+[] gestion des quantitées
+[] arreter d'envoyer milles requetes stripe après le paiement
+
+[] refaire le login
+[] verifier sur telephone
+
+## Questions

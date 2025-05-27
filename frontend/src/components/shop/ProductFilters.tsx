@@ -119,7 +119,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
               min="0"
               value={filters.minPrice}
               onChange={handleChange}
-              placeholder="Min €"
+              placeholder="Min&nbsp;€"
               fullWidth
             />
             <Input
@@ -129,7 +129,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
               min="0"
               value={filters.maxPrice}
               onChange={handleChange}
-              placeholder="Max €"
+              placeholder="Max&nbsp;€"
               fullWidth
             />
           </div>

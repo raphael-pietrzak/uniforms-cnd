@@ -2,8 +2,8 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Product, CartItem, Order } from '../types';
 import { productsApi, ordersApi, stripeApi } from '../services/api';
 
-// API base URL
-const API_URL = 'http://localhost:3000/api';
+// Clé pour le localStorage
+const CART_STORAGE_KEY = 'cnd-uniformes-cart';
 
 interface ShopContextType {
   products: Product[];
@@ -33,10 +33,31 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Charger les produits au montage du composant
+  // Charger les produits et les commandes au montage du composant
   useEffect(() => {
     fetchProducts();
-  }, []);
+    
+    // Charger le panier depuis localStorage
+    const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (err) {
+        console.error('Erreur lors du chargement du panier:', err);
+        localStorage.removeItem(CART_STORAGE_KEY);
+      }
+    }
+    
+    // Charger les commandes si l'utilisateur est admin
+    if (isAdmin) {
+      fetchOrders();
+    }
+  }, [isAdmin]);
+  
+  // Mettre à jour localStorage quand le panier change
+  useEffect(() => {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  }, [cart]);
 
   // Fonctions d'API
   const fetchProducts = async () => {
@@ -61,7 +82,7 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setOrders(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
-      console.error('Erreur:', err);
+      console.error('Erreur lors du chargement des commandes:', err);
     } finally {
       setLoading(false);
     }

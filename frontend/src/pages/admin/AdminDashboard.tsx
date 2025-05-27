@@ -1,12 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Users, CreditCard, BarChart3, Package, Clock } from 'lucide-react';
-import { useShop } from '../../context/ShopContext';
+import { ShoppingBag, CreditCard, BarChart3, Package, Clock } from 'lucide-react';
 import Card, { CardContent, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import { productsApi, ordersApi } from '../../services/api';
+import { Product, Order } from '../../types';
+
+// Helper function to format order IDs safely
+const formatOrderId = (id: any): string => {
+  const stringId = String(id || '');
+  return stringId.length > 8 ? `${stringId.substring(0, 8)}...` : stringId;
+};
 
 const AdminDashboard: React.FC = () => {
-  const { products, orders } = useShop();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Charger les données au montage du composant
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Charger les produits et les commandes en parallèle
+        const [productsData, ordersData] = await Promise.all([
+          productsApi.getAll(),
+          ordersApi.getAll()
+        ]);
+        
+        setProducts(productsData);
+        setOrders(ordersData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
+        console.error('Erreur lors du chargement des données:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []); // Exécuter une seule fois au montage
   
   // Calculate stats
   const totalProducts = products.length;
@@ -14,7 +49,6 @@ const AdminDashboard: React.FC = () => {
   const outOfStockProducts = totalProducts - inStockProducts;
   const usedProducts = products.filter(p => p.condition === 'used').length;
   
-  const totalOrders = orders.length;
   const pendingOrders = orders.filter(o => o.status === 'pending').length;
   const readyOrders = orders.filter(o => o.status === 'ready').length;
   
@@ -22,14 +56,42 @@ const AdminDashboard: React.FC = () => {
     .filter(o => o.status === 'paid' || o.status === 'ready' || o.status === 'collected')
     .reduce((sum, order) => sum + order.total, 0);
   
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center">
+          <p className="text-lg text-gray-600">Chargement des données...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <p className="text-red-800">Erreur: {error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Tableau de Bord Admin</h1>
         <div className="flex space-x-3">
-          <Button as={Link} to="/admin/products/new" variant="primary">
-            Ajouter un Nouveau Produit
-          </Button>
+          <Link to="/admin/products/new">
+            <Button variant="primary">
+              Ajouter un Nouveau Produit
+            </Button>
+          </Link>
         </div>
       </div>
       
@@ -65,7 +127,7 @@ const AdminDashboard: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Revenus</p>
-                <p className="text-2xl font-bold text-gray-900">€{totalRevenue.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-gray-900">{totalRevenue.toFixed(2)}&nbsp;€</p>
               </div>
             </div>
             <div className="mt-4 flex justify-between text-sm">
@@ -166,16 +228,16 @@ const AdminDashboard: React.FC = () => {
                 orders.slice(0, 5).map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {order.id.substring(0, 8)}...
+                      {formatOrderId(order.id)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {order.customerName}
+                      {order.customer_name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      {new Date(order.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      €{order.total.toFixed(2)}
+                      {order.total.toFixed(2)}&nbsp;€
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
