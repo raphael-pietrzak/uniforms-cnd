@@ -34,3 +34,5 @@ docker-compose up -d
 ```bash
 docker-compose down
 ```
+
+Go to `http://localhost:5173` to access the application.
