@@ -1,6 +1,10 @@
 
 # CND Uniforms
 
+## Preview
+
+![CND Uniforms Preview](frontend/public/preview-readme.png)
+
 ## Development
 
 ### Backend
