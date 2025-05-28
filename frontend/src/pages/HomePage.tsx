@@ -23,26 +23,26 @@ const HomePage: React.FC = () => {
               Uniformes neufs et d'occasion pour vos enfants. Économisez tout en soutenant notre communauté scolaire.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <Link to="/shop">
+                <Link to="/shop">
                 <Button
-                  variant="primary"
-                  size="lg"
-                  className="bg-blue-900 text-white hover:bg-blue-800"
+                variant="primary"
+                size="lg"
+                className="bg-blue-900 text-white hover:bg-blue-800 w-48 h-12 flex items-center justify-center"
                 >
-                  <ShoppingBag className="mr-2" size={20} />
-                  Acheter Maintenant
+                <ShoppingBag className="mr-2" size={16} />
+                <span className="text-sm">Acheter</span>
                 </Button>
-              </Link>
+                </Link>
 
-              
-              <Link to="/info">
+                
+                <Link to="/info">
                 <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-white text-white hover:bg-white hover:text-blue-900 hover:border-white"
+                variant="outline"
+                size="lg"
+                className="border-white text-white hover:bg-white hover:text-blue-900 hover:border-white w-48 h-12 flex items-center justify-center"
                 >
-                  <Info className="mr-2" size={20} />
-                  En Savoir Plus
+                <Info className="mr-2" size={16} />
+                <span className="text-sm">En Savoir Plus</span>
                 </Button>
               </Link>
             </div>

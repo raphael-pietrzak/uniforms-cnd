@@ -110,7 +110,10 @@ const ShopPage: React.FC = () => {
       </div>
 
       {/* Filters - Conditionally rendered */}
-      {showFilters && <ProductFilters onFilterChange={handleFilterChange} />}
+      <div className={`mb-6`}>
+      {showFilters && <ProductFilters onFilterChange={handleFilterChange} 
+      />}
+      </div>
 
       {/* Toolbar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
@@ -126,7 +129,7 @@ const ShopPage: React.FC = () => {
             <select
               value={sortOption}
               onChange={(e) => handleSortChange(e.target.value)}
-              className="border rounded-md p-1 text-sm"
+              className="border rounded-md p-1 text-sm outline-none"
             >
               <option value="default">Par défaut</option>
               <option value="price-asc">Prix : Croissant</option>
