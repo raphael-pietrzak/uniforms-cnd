@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
     
     try {
       await login(email, password);
-      navigate('/'); // Redirection vers la page d'accueil après connexion
+      navigate('/admin'); // Redirection vers la page d'accueil après connexion
     } catch (err) {
       // L'erreur est déjà gérée dans le contexte
     }

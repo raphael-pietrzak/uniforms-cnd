@@ -27,7 +27,7 @@ const HomePage: React.FC = () => {
                 <Button
                 variant="primary"
                 size="lg"
-                className="bg-blue-900 text-white hover:bg-blue-800 w-48 h-12 flex items-center justify-center"
+                className="bg-blue-900 text-white hover:bg-blue-700 w-48 h-12 flex items-center justify-center"
                 >
                 <ShoppingBag className="mr-2" size={16} />
                 <span className="text-sm">Acheter</span>
