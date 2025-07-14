@@ -4,6 +4,7 @@
   "description": "Backend pour CND Uniformes",
   "main": "index.js",
   "scripts": {
+    "build": "echo \"Building the backend...\"",
     "start": "node index.js",
     "dev": "nodemon index.js",
     "migrate": "knex migrate:latest",
