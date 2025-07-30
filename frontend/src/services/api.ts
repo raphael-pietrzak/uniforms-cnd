@@ -1,7 +1,7 @@
 import { Product, Order } from '../types';
 
-const API_URL = 'http://localhost:3000/api';
-const BASE_URL = 'http://localhost:3000';
+const API_URL = 'https://uniforms-cnd-production.up.railway.app/api';
+const BASE_URL = 'https://uniforms-cnd-production.up.railway.app/';
 
 // Fonction utilitaire pour récupérer le token d'accès
 const getAccessToken = (): string | null => {
