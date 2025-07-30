@@ -5,18 +5,16 @@ const { verifyToken, verifyAdmin } = require('../middleware/auth');
 const router = express.Router();
 
 // Récupérer tous les produits
-// router.get('/', async (req, res) => {
-//   try {
-//     const products = await db('products').select('*');
-//     res.json(products);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// });
-
 router.get('/', async (req, res) => {
-  res.json([{ id: 1, name: "Mock Product" }]);
+  try {
+    const products = await db('products').select('*');
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
+
+
 
 // Récupérer un produit par ID
 router.get('/:id', async (req, res) => {
