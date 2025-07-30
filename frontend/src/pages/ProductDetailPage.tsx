@@ -107,7 +107,7 @@ const ProductDetailPage: React.FC = () => {
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
             <div className="flex items-center mb-4">
-              <span className="text-blue-900 text-2xl font-bold mr-4">{product.price.toFixed(2)}&nbsp;€</span>
+              <span className="text-blue-900 text-2xl font-bold mr-4">{Number(product.price).toFixed(2)}&nbsp;€</span>
               <Badge variant={product.condition === 'new' ? 'primary' : 'warning'}>
                 {product.condition === 'new' ? 'Neuf' : 'Occasion'}
               </Badge>

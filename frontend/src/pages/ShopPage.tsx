@@ -189,7 +189,7 @@ const ShopPage: React.FC = () => {
                 <p className="text-gray-500 text-sm">{product.brand}</p>
                 <p className="mt-2 text-gray-600 line-clamp-2">{product.description}</p>
                 <div className="mt-2 flex justify-between items-center">
-                  <span className="text-blue-900 font-bold">{product.price.toFixed(2)}&nbsp;€</span>
+                  <span className="text-blue-900 font-bold">{Number(product.price).toFixed(2)}&nbsp;€</span>
                   <div className="flex space-x-1">
                     {product.sizes.slice(0, 3).map((size) => (
                       <span key={size} className="text-xs bg-gray-100 px-2 py-1 rounded">

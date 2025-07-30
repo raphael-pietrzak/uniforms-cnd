@@ -41,7 +41,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <h3 className="text-lg font-semibold text-gray-800 mb-1 truncate">{product.name}</h3>
           <p className="text-gray-500 text-sm mb-2">{product.brand}</p>
           <div className="flex justify-between items-center">
-            <span className="text-blue-900 font-bold">{product.price.toFixed(2)}&nbsp;€</span>
+            <span className="text-blue-900 font-bold">{Number(product.price).toFixed(2)}&nbsp;€</span>
             <div className="flex space-x-1">
               {product.sizes.map((size) => (
                 <span key={size} className="text-xs bg-gray-100 px-2 py-1 rounded">
