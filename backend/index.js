@@ -23,7 +23,7 @@ app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
 app.use(cors({
-  origin: "https://uniforms-cnd.vercel.app/",
+  origin: "https://uniforms-cnd.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));

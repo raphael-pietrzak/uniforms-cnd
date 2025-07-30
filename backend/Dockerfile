@@ -17,7 +17,7 @@ COPY start.sh .
 RUN chmod +x start.sh
 
 # Exposition du port (à adapter selon votre configuration)
-EXPOSE 3000
+EXPOSE $PORT
 
 # Commande pour démarrer l'application
 CMD ["./start.sh"]
