@@ -237,7 +237,7 @@ const AdminDashboard: React.FC = () => {
                       {new Date(order.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {order.total.toFixed(2)}&nbsp;€
+                      {Number(order.total).toFixed(2)}&nbsp;€
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span

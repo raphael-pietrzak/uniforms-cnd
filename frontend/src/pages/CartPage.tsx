@@ -207,7 +207,7 @@ const CartPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Sous-total</span>
-                  <span className="text-gray-800">{subtotal.toFixed(2)}&nbsp;€</span>
+                  <span className="text-gray-800">{Number(subtotal).toFixed(2)}&nbsp;€</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Livraison</span>
@@ -215,7 +215,7 @@ const CartPage: React.FC = () => {
                 </div>
                 <div className="border-t pt-4 flex justify-between font-bold">
                   <span>Total</span>
-                  <span className="text-blue-900">{total.toFixed(2)}&nbsp;€</span>
+                  <span className="text-blue-900">{Number(total).toFixed(2)}&nbsp;€</span>
                 </div>
               </div>
             </div>
