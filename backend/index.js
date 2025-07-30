@@ -18,6 +18,10 @@ const { verifyAdmin, verifyToken } = require('./middleware/auth');
 // Création de l'application Express
 const app = express();
 
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
+
 // Configuration du middleware pour les webhooks Stripe (doit être avant express.json())
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
