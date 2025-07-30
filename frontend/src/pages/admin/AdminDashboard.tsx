@@ -127,7 +127,7 @@ const AdminDashboard: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Revenus</p>
-                <p className="text-2xl font-bold text-gray-900">{totalRevenue.toFixed(2)}&nbsp;€</p>
+                <p className="text-2xl font-bold text-gray-900">{Number(totalRevenue).toFixed(2)}&nbsp;€</p>
               </div>
             </div>
             <div className="mt-4 flex justify-between text-sm">

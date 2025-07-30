@@ -70,7 +70,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
         </div>
         
         <div className="text-lg font-bold text-gray-800 mr-4">
-          {(product.price * quantity).toFixed(2)}&nbsp;€
+          {(Number(product.price) * Number(quantity)).toFixed(2)}&nbsp;€
         </div>
         
         <button 
