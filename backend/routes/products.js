@@ -34,22 +34,23 @@ router.get('/:id', async (req, res) => {
 // Créer un produit (protégé par authentification)
 router.post('/', verifyToken, verifyAdmin, async (req, res) => {
   try {
-    const [id] = await db('products').insert({
-      name: req.body.name,
-      description: req.body.description,
-      price: req.body.price,
-      sizes: req.body.sizes,
-      condition: req.body.condition,
-      brand: req.body.brand,
-      gender: req.body.gender,
-      images: req.body.images,
-      inStock: req.body.inStock,
-      category: req.body.category,
-      created_at: new Date().toISOString()
-    });
+    const [result] = await db('products')
+      .insert({
+        name: req.body.name,
+        description: req.body.description,
+        price: req.body.price,
+        sizes: req.body.sizes,
+        condition: req.body.condition,
+        brand: req.body.brand,
+        gender: req.body.gender,
+        images: req.body.images,
+        inStock: req.body.inStock,
+        category: req.body.category,
+        created_at: new Date().toISOString()
+      })
+      .returning('*');
     
-    const newProduct = await db('products').where({ id }).first();
-    res.status(201).json(newProduct);
+    res.status(201).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
