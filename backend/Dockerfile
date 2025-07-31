@@ -20,4 +20,4 @@ RUN chmod +x start.sh
 EXPOSE $PORT
 
 # Commande pour démarrer l'application
-CMD ["./start.sh"]
+CMD ["npm", "run", "start"]
