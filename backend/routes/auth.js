@@ -67,6 +67,12 @@ router.post('/register', registerValidation, async (req, res) => {
       return res.status(400).json({ error: 'Cet email est déjà utilisé' });
     }
     
+    // Vérifier si le nom d'utilisateur existe déjà
+    const existingUsername = await db('users').where({ username }).first();
+    if (existingUsername) {
+      return res.status(400).json({ error: 'Ce nom d\'utilisateur est déjà utilisé' });
+    }
+    
     // Hasher le mot de passe avec un coût plus élevé pour la sécurité
     const hashedPassword = await bcrypt.hash(password, 12);
     
@@ -76,21 +82,23 @@ router.post('/register', registerValidation, async (req, res) => {
       email,
       password: hashedPassword,
       created_at: new Date().toISOString(),
-      role: 'user' // Par défaut, un nouvel utilisateur a le rôle "user"
-    });
-    
+      role: 'user'
+    }).returning('id');
+
+    console.log('Nouvel utilisateur créé avec ID:', userId);
+        
     // Générer les tokens
     const { accessToken, refreshToken } = generateTokens(userId);
     
     // Stocker le refresh token dans la base de données
     await db('refresh_tokens').insert({
-      user_id: userId,
+      user_id: userId.id,
       token: refreshToken,
       created_at: new Date().toISOString()
     });
     
     res.status(201).json({
-      user: { id: userId, username, email, role: 'user' },
+      user: { id: userId.id, username, email, role: 'user' },
       tokens: { accessToken, refreshToken }
     });
   } catch (error) {
