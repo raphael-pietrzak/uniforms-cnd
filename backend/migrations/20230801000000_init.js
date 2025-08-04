@@ -40,12 +40,15 @@ exports.up = function(knex) {
       table.string('role').defaultTo('user'); // user, admin
       table.timestamps(true, true);
     })
-    .createTable('refresh_tokens', function(table) {
+    // Création de la table pour les refresh tokens
+    .createTable('refresh_tokens', table => {
       table.increments('id').primary();
-      table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE');
-      table.string('token').notNullable().unique();
-      table.timestamp('created_at').defaultTo(knex.fn.now());
-    });
+      table.integer('user_id').unsigned().notNullable();
+      table.foreign('user_id').references('users.id').onDelete('CASCADE');
+      table.string('token', 255).notNullable().unique();
+      table.timestamp('created_at').notNullable();
+      table.index(['user_id', 'token']);
+    })
 };
 
 exports.down = function(knex) {

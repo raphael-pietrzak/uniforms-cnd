@@ -22,8 +22,28 @@ const RegisterPage: React.FC = () => {
       return;
     }
     
+    if (username.length < 3 || username.length > 30) {
+      setFormError('Le nom d\'utilisateur doit contenir entre 3 et 30 caractères');
+      return;
+    }
+    
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      setFormError('Le nom d\'utilisateur ne peut contenir que des lettres, chiffres, tirets et underscores');
+      return;
+    }
+    
     if (password !== confirmPassword) {
       setFormError('Les mots de passe ne correspondent pas');
+      return;
+    }
+    
+    if (password.length < 8) {
+      setFormError('Le mot de passe doit contenir au moins 8 caractères');
+      return;
+    }
+    
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password)) {
+      setFormError('Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial');
       return;
     }
     
@@ -34,6 +54,34 @@ const RegisterPage: React.FC = () => {
       // L'erreur est déjà gérée dans le contexte
     }
   };
+  
+  const getPasswordStrength = () => {
+    if (!password) return { score: 0, text: '', color: 'gray' };
+    
+    let score = 0;
+    if (password.length >= 8) score += 1;
+    if (/[A-Z]/.test(password)) score += 1;
+    if (/[a-z]/.test(password)) score += 1;
+    if (/[0-9]/.test(password)) score += 1;
+    if (/[@$!%*?&]/.test(password)) score += 1;
+    
+    const strengthMap: Record<number, { text: string; color: string }> = {
+      0: { text: 'Très faible', color: 'red' },
+      1: { text: 'Faible', color: 'red' },
+      2: { text: 'Moyen', color: 'orange' },
+      3: { text: 'Bon', color: 'yellow' },
+      4: { text: 'Fort', color: 'green' },
+      5: { text: 'Excellent', color: 'green' }
+    };
+    
+    return { 
+      score,
+      text: strengthMap[score].text,
+      color: strengthMap[score].color
+    };
+  };
+  
+  const passwordStrength = getPasswordStrength();
   
   return (
     <div className="max-w-md mx-auto my-10 p-6 bg-white rounded-lg shadow-md">
@@ -58,6 +106,9 @@ const RegisterPage: React.FC = () => {
             className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
+          <p className="mt-1 text-xs text-gray-500">
+            Entre 3 et 30 caractères, lettres, chiffres, tirets et underscores uniquement.
+          </p>
         </div>
         
         <div className="mb-4">
@@ -86,6 +137,39 @@ const RegisterPage: React.FC = () => {
             className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
+          {password && (
+            <div className="mt-2">
+              <div className="flex items-center gap-2">
+                <div className="text-sm">Force du mot de passe:</div>
+                <div className={`text-sm font-medium text-${passwordStrength.color}-600`}>
+                  {passwordStrength.text}
+                </div>
+              </div>
+              <div className="w-full h-2 bg-gray-200 rounded-full mt-1">
+                <div 
+                  className={`h-full rounded-full bg-${passwordStrength.color}-500`}
+                  style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
+                ></div>
+              </div>
+              <ul className="mt-2 text-xs text-gray-500 list-disc pl-4">
+                <li className={password.length >= 8 ? "text-green-500" : ""}>
+                  Au moins 8 caractères
+                </li>
+                <li className={/[A-Z]/.test(password) ? "text-green-500" : ""}>
+                  Au moins une lettre majuscule
+                </li>
+                <li className={/[a-z]/.test(password) ? "text-green-500" : ""}>
+                  Au moins une lettre minuscule
+                </li>
+                <li className={/[0-9]/.test(password) ? "text-green-500" : ""}>
+                  Au moins un chiffre
+                </li>
+                <li className={/[@$!%*?&]/.test(password) ? "text-green-500" : ""}>
+                  Au moins un caractère spécial (@$!%*?&)
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
         
         <div className="mb-6">
@@ -100,6 +184,11 @@ const RegisterPage: React.FC = () => {
             className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
+          {confirmPassword && password !== confirmPassword && (
+            <p className="mt-1 text-xs text-red-500">
+              Les mots de passe ne correspondent pas
+            </p>
+          )}
         </div>
         
         <button

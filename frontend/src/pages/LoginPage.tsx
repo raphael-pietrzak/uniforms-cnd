@@ -1,14 +1,32 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
+// Interface pour le state de location
+interface LocationState {
+  from?: {
+    pathname: string;
+  };
+}
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
   
-  const { login, error, loading } = useAuth();
+  const { login, error, loading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Récupérer l'URL de redirection depuis le state
+  const from = (location.state as LocationState)?.from?.pathname || '/admin';
+  
+  // Rediriger l'utilisateur s'il est déjà connecté
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from);
+    }
+  }, [isAuthenticated, navigate, from]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +40,7 @@ const LoginPage: React.FC = () => {
     
     try {
       await login(email, password);
-      navigate('/admin'); // Redirection vers la page d'accueil après connexion
+      // La redirection se fera automatiquement via l'effet useEffect ci-dessus
     } catch (err) {
       // L'erreur est déjà gérée dans le contexte
     }
@@ -53,7 +71,7 @@ const LoginPage: React.FC = () => {
           />
         </div>
         
-        <div className="mb-6">
+        <div className="mb-4">
           <label htmlFor="password" className="block mb-2 text-sm font-medium">
             Mot de passe
           </label>
@@ -65,6 +83,11 @@ const LoginPage: React.FC = () => {
             className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
+          <div className="mt-1 text-right">
+            <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
+              Mot de passe oublié?
+            </Link>
+          </div>
         </div>
         
         <button
