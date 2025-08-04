@@ -1,6 +1,6 @@
 import { Product, Order } from '../types';
 
-const BASE_URL = 'https://uniforms-cnd-production.up.railway.app/';
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/';
 const API_URL = `${BASE_URL}api`;
 
 // Fonction utilitaire pour récupérer le token d'accès
