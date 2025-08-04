@@ -1,6 +1,8 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const db = require('../config/database');
+const jwt = require('jsonwebtoken');
+
 const { 
   generateTokens, 
   verifyRefreshToken, 
@@ -250,7 +252,7 @@ router.post('/forgot-password',
       // Générer un token de réinitialisation (valide 1 heure)
       const resetToken = jwt.sign(
         { id: user.id, action: 'reset_password' },
-        ACCESS_TOKEN_SECRET,
+        process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: '1h' }
       );
       
@@ -309,7 +311,7 @@ router.post('/reset-password', [
       }
       
       // Vérifier la validité du token
-      const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET);
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
       
       if (decoded.action !== 'reset_password' || decoded.id !== resetRecord.user_id) {
         return res.status(400).json({ error: 'Token invalide' });
