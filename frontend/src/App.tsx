@@ -1,9 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ShopProvider } from './context/ShopContext';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
+import ProtectedRoute from './components/layout/ProtectedRoute';
 
 // Public Pages
 import HomePage from './pages/HomePage';
@@ -14,23 +15,14 @@ import InfoPage from './pages/InfoPage';
 import CheckoutSuccessPage from './pages/CheckoutSuccessPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ProductsPage from './pages/admin/ProductsPage';
 import OrdersPage from './pages/admin/OrdersPage';
 import AddEditProductPage from './pages/admin/AddEditProductPage';
-
-// Route Guards
-const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isAdmin } = useAuth();
-  
-  if (!isAuthenticated || !isAdmin) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return <>{children}</>;
-};
 
 function App() {
   return (
@@ -50,48 +42,18 @@ function App() {
                 <Route path="/checkout-success" element={<CheckoutSuccessPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-                {/* Admin Routes */}
-                <Route 
-                  path="/admin" 
-                  element={
-                    <AdminRoute>
-                      <AdminDashboard />
-                    </AdminRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/products" 
-                  element={
-                    <AdminRoute>
-                      <ProductsPage />
-                    </AdminRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/products/new" 
-                  element={
-                    <AdminRoute>
-                      <AddEditProductPage />
-                    </AdminRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/products/edit/:productId" 
-                  element={
-                    <AdminRoute>
-                      <AddEditProductPage />
-                    </AdminRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/orders" 
-                  element={
-                    <AdminRoute>
-                      <OrdersPage />
-                    </AdminRoute>
-                  } 
-                />
+                {/* Routes protégées avec ProtectedRoute */}
+                <Route element={<ProtectedRoute requireAdmin={true} />}>
+                  {/* Routes Admin */}
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin/products" element={<ProductsPage />} />
+                  <Route path="/admin/products/new" element={<AddEditProductPage />} />
+                  <Route path="/admin/products/edit/:productId" element={<AddEditProductPage />} />
+                  <Route path="/admin/orders" element={<OrdersPage />} />
+                </Route>
                 
                 {/* Fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />
