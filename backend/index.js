@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const SECRETARY_PHONE_NUMBER = process.env.SECRETARY_PHONE_NUMBER;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 
 // Import des routes
@@ -26,8 +27,10 @@ app.get('/ping', (req, res) => {
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
+
+
 app.use(cors({
-  origin: "https://uniforms-cnd.vercel.app" || "http://localhost:5173",
+  origin: FRONTEND_URL,
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));

@@ -1,7 +1,8 @@
 import { Product, Order } from '../types';
 
-const BASE_URL = 'https://uniforms-cnd-production.up.railway.app/';
-const API_URL = `${BASE_URL}api`;
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+console.log(import.meta.env.VITE_BACKEND_URL)
+const API_URL = `${BASE_URL}/api`;
 
 // Fonction utilitaire pour récupérer le token d'accès
 const getAccessToken = (): string | null => {
@@ -30,8 +31,28 @@ const getAuthHeaders = (): Record<string, string> => {
 // Fonction utilitaire pour gérer les erreurs des requêtes
 const handleResponse = async (response: Response) => {
   if (!response.ok) {
+    // Pour les erreurs 401 avec code spécifique, on peut déclencher un événement personnalisé
+    if (response.status === 401) {
+      try {
+        const errorData = await response.json();
+        if (errorData.code === 'TOKEN_EXPIRED') {
+          // Déclencher un événement que le contexte d'authentification peut écouter
+          window.dispatchEvent(new CustomEvent('auth:tokenExpired'));
+        }
+      } catch (e) {
+        // Si on ne peut pas parser la réponse, on continue avec le traitement d'erreur normal
+      }
+    }
+    
     const errorText = await response.text();
-    throw new Error(errorText || response.statusText);
+    let errorMessage;
+    try {
+      const errorData = JSON.parse(errorText);
+      errorMessage = errorData.error || errorData.message || response.statusText;
+    } catch (e) {
+      errorMessage = errorText || response.statusText;
+    }
+    throw new Error(errorMessage);
   }
   return response.json();
 };
@@ -237,6 +258,25 @@ export const authApi = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
+    });
+    return handleResponse(response);
+  },
+  
+  // Nouvelles méthodes pour la récupération de mot de passe
+  forgotPassword: async (email: string) => {
+    const response = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    return handleResponse(response);
+  },
+  
+  resetPassword: async (token: string, password: string) => {
+    const response = await fetch(`${API_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, password }),
     });
     return handleResponse(response);
   },

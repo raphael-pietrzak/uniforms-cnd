@@ -52,9 +52,11 @@ const AdminDashboard: React.FC = () => {
   const pendingOrders = orders.filter(o => o.status === 'pending').length;
   const readyOrders = orders.filter(o => o.status === 'ready').length;
   
-  const totalRevenue = orders
-    .filter(o => o.status === 'paid' || o.status === 'ready' || o.status === 'collected')
-    .reduce((sum, order) => sum + order.total, 0);
+  const totalRevenue = orders.length > 0 
+    ? orders
+        .filter(o => o.status === 'paid' || o.status === 'ready' || o.status === 'collected')
+        .reduce((sum, order) => sum + (order.total ? parseFloat(order.total.toString()) : 0), 0) 
+    : 0;
   
   if (loading) {
     return (
