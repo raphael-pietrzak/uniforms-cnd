@@ -203,6 +203,14 @@ export const ordersApi = {
     const data = await handleResponse(response);
     return data;
   },
+  
+  delete: async (orderId: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/orders/${orderId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    await handleResponse(response);
+  },
 };
 
 // Stripe API

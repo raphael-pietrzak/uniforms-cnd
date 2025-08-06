@@ -41,13 +41,22 @@ const AddEditProductPage: React.FC = () => {
   
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <button 
-        onClick={() => navigate('/admin/products')} 
-        className="flex items-center text-gray-600 hover:text-blue-800 mb-6"
-      >
-        <ArrowLeft size={18} className="mr-1" />
-        Retour aux Produits
-      </button>
+      <div className="flex flex-col mb-6">
+        <button 
+          onClick={() => navigate('/admin/products')} 
+          className="flex items-center text-gray-600 hover:text-blue-800 mb-2"
+        >
+          <ArrowLeft size={18} className="mr-1" />
+          Retour aux Produits
+        </button>
+        <button 
+          onClick={() => navigate('/admin')} 
+          className="flex items-center text-gray-600 hover:text-blue-800"
+        >
+          <ArrowLeft size={18} className="mr-1" />
+          Retour au Tableau de Bord
+        </button>
+      </div>
       
       <h1 className="text-3xl font-bold text-gray-900 mb-8">
         {isEditMode ? 'Modifier le Produit' : 'Ajouter un Nouveau Produit'}

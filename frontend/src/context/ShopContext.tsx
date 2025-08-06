@@ -21,6 +21,7 @@ interface ShopContextType {
   toggleProductStatus: (productId: string) => Promise<void>;
   loading: boolean;
   error: string | null;
+  lastOrder?: Order;
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);

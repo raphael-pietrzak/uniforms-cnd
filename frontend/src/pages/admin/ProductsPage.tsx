@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Edit, Trash2, Plus, Search } from 'lucide-react';
+import { Edit, Trash2, Plus, Search, ArrowLeft } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Badge from '../../components/ui/Badge';
@@ -117,7 +117,13 @@ const ProductsPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Produits</h1>
+        <div>
+          <Link to="/admin" className="flex items-center text-gray-600 hover:text-blue-800 mb-2">
+            <ArrowLeft size={18} className="mr-1" />
+            Retour au Tableau de Bord
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900">Produits</h1>
+        </div>
         <Button
           variant="primary"
           className="flex items-center"

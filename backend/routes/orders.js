@@ -157,4 +157,22 @@ router.put('/:id/status', async (req, res) => {
   }
 });
 
+// Supprimer une commande
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await db('orders').where({ id }).first();
+    if (!order) {
+      return res.status(404).json({ error: 'Commande non trouvée' });
+    }
+    // Supprimer les items de la commande
+    await db('order_items').where({ order_id: id }).delete();
+    // Supprimer la commande
+    await db('orders').where({ id }).delete();
+    res.json({ message: 'Commande supprimée avec succès' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
