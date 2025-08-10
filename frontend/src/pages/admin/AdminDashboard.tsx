@@ -46,7 +46,7 @@ const AdminDashboard: React.FC = () => {
   
   // Calculate stats
   const totalProducts = products.length;
-  const inStockProducts = products.filter(p => p.inStock).length;
+  const inStockProducts = products.filter(p => p.inventory && p.inventory.length > 0 && p.inventory[0].quantity > 0).length;
   const outOfStockProducts = totalProducts - inStockProducts;
   const usedProducts = products.filter(p => p.condition === 'used').length;
   

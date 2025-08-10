@@ -46,7 +46,7 @@ const CheckoutSuccessPage: React.FC = () => {
                     <div className="flex">
                       <div className="ml-4">
                         <p className="text-sm font-medium text-gray-900">{item.product.name}</p>
-                        <p className="text-sm text-gray-600">Taille: {item.size}</p>
+                        <p className="text-sm text-gray-600">Taille: {item.selectedSize}</p>
                       </div>
                     </div>
                     <div className="flex items-end flex-col">

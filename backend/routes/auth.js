@@ -7,7 +7,9 @@ const {
   generateTokens, 
   verifyRefreshToken, 
   invalidateToken, 
-  cleanupExpiredTokens 
+  cleanupExpiredTokens,
+  setAuthCookies,
+  clearAuthCookies
 } = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
 const rateLimit = require('express-rate-limit');
@@ -99,9 +101,11 @@ router.post('/register', registerValidation, async (req, res) => {
       created_at: new Date().toISOString()
     });
     
+    // Définir les cookies d'authentification
+    setAuthCookies(res, accessToken, refreshToken);
+    
     res.status(201).json({
-      user: { id: userId.id, username, email, role: 'user' },
-      tokens: { accessToken, refreshToken }
+      user: { id: userId.id, username, email, role: 'user' }
     });
   } catch (error) {
     console.error('Erreur lors de l\'inscription:', error);
@@ -144,14 +148,16 @@ router.post('/login', loginValidation, loginLimiter, async (req, res) => {
       created_at: new Date().toISOString()
     });
     
+    // Définir les cookies d'authentification
+    setAuthCookies(res, accessToken, refreshToken);
+    
     res.json({
       user: {
         id: user.id,
         username: user.username,
         email: user.email,
         role: user.role
-      },
-      tokens: { accessToken, refreshToken }
+      }
     });
   } catch (error) {
     console.error('Erreur lors de la connexion:', error);
@@ -160,71 +166,65 @@ router.post('/login', loginValidation, loginLimiter, async (req, res) => {
 });
 
 // Route pour rafraîchir le token
-router.post('/refresh-token', 
-  body('refreshToken').notEmpty().withMessage('Refresh token requis'),
-  async (req, res) => {
-    try {
-      // Vérifier les erreurs de validation
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-      
-      const { refreshToken } = req.body;
-      
-      try {
-        // Vérifier le refresh token
-        const decoded = await verifyRefreshToken(refreshToken);
-        
-        // Invalider l'ancien token
-        await invalidateToken(decoded.id, refreshToken);
-        
-        // Générer de nouveaux tokens
-        const newTokens = generateTokens(decoded.id);
-        
-        // Stocker le nouveau refresh token
-        await db('refresh_tokens').insert({
-          user_id: decoded.id,
-          token: newTokens.refreshToken,
-          created_at: new Date().toISOString()
-        });
-        
-        res.json({ tokens: newTokens });
-      } catch (error) {
-        console.error('Erreur token:', error.message);
-        return res.status(401).json({ error: 'Refresh token invalide' });
-      }
-    } catch (error) {
-      console.error('Erreur lors du rafraîchissement du token:', error);
-      res.status(500).json({ error: 'Erreur serveur' });
+router.post('/refresh-token', async (req, res) => {
+  try {
+    // Récupérer le refresh token du cookie
+    const refreshToken = req.cookies.refreshToken;
+    
+    if (!refreshToken) {
+      return res.status(401).json({ error: 'Refresh token manquant' });
     }
+    
+    try {
+      // Vérifier le refresh token
+      const decoded = await verifyRefreshToken(refreshToken);
+      
+      // Invalider l'ancien token
+      await invalidateToken(decoded.id, refreshToken);
+      
+      // Générer de nouveaux tokens
+      const newTokens = generateTokens(decoded.id);
+      
+      // Stocker le nouveau refresh token
+      await db('refresh_tokens').insert({
+        user_id: decoded.id,
+        token: newTokens.refreshToken,
+        created_at: new Date().toISOString()
+      });
+      
+      // Définir les nouveaux cookies
+      setAuthCookies(res, newTokens.accessToken, newTokens.refreshToken);
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Erreur token:', error.message);
+      return res.status(401).json({ error: 'Refresh token invalide' });
+    }
+  } catch (error) {
+    console.error('Erreur lors du rafraîchissement du token:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 });
 
 // Route de déconnexion
-router.post('/logout', 
-  body('refreshToken').notEmpty().withMessage('Refresh token requis'),
-  async (req, res) => {
-    try {
-      // Vérifier les erreurs de validation
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-      
-      const { refreshToken } = req.body;
-      
+router.post('/logout', async (req, res) => {
+  try {
+    // Récupérer le refresh token du cookie
+    const refreshToken = req.cookies.refreshToken;
+    
+    if (refreshToken) {
       // Supprimer le refresh token de la base de données
-      const deleted = await invalidateToken(null, refreshToken);
-      
-      if (!deleted) {
-        return res.status(400).json({ error: 'Erreur lors de la déconnexion' });
-      }
-      
-      res.json({ success: true, message: 'Déconnexion réussie' });
-    } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error);
-      res.status(500).json({ error: 'Erreur serveur lors de la déconnexion' });
+      await invalidateToken(null, refreshToken);
     }
+    
+    // Supprimer les cookies d'authentification
+    clearAuthCookies(res);
+    
+    res.json({ success: true, message: 'Déconnexion réussie' });
+  } catch (error) {
+    console.error('Erreur lors de la déconnexion:', error);
+    res.status(500).json({ error: 'Erreur serveur lors de la déconnexion' });
+  }
 });
 
 // Route pour demander la réinitialisation du mot de passe

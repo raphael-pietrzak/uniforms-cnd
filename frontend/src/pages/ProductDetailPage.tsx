@@ -53,8 +53,12 @@ const ProductDetailPage: React.FC = () => {
     );
   }
   
+  // Vérifier la disponibilité du stock pour la taille sélectionnée
+  const selectedInventoryItem = product.inventory?.find(item => item.size === selectedSize);
+  const sizeInStock = selectedInventoryItem && selectedInventoryItem.quantity > 0;
+  
   const handleAddToCart = () => {
-    if (selectedSize) {
+    if (selectedSize && sizeInStock) {
       addToCart(product, selectedSize);
       // Show a toast or notification here
       navigate('/cart');
@@ -111,7 +115,11 @@ const ProductDetailPage: React.FC = () => {
               <Badge variant={product.condition === 'new' ? 'primary' : 'warning'}>
                 {product.condition === 'new' ? 'Neuf' : 'Occasion'}
               </Badge>
-              {!product.inStock && <Badge variant="danger" className="ml-2">Rupture de Stock</Badge>}
+              {!product.inventory || product.inventory.length === 0 || !product.inventory.some(item => item.quantity > 0) ?
+                <Badge variant="danger" className="ml-2">Rupture de Stock</Badge> :
+                product.inventory.some(item => item.quantity > 0) &&
+                <Badge variant="success" className="ml-2">En Stock</Badge>
+              }
             </div>
             <p className="text-gray-700 mb-6">{product.description}</p>
           </div>
@@ -124,19 +132,35 @@ const ProductDetailPage: React.FC = () => {
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-900 mb-4">Sélectionner une Taille</h3>
             <div className="grid grid-cols-4 gap-2">
-              {product.sizes.map((size) => (
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={`py-2 px-4 border rounded-md text-center ${
-                    selectedSize === size
-                      ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
+              {product.sizes.map((size) => {
+                // Vérifier le stock pour cette taille
+                const inventoryItem = product.inventory?.find(item => item.size === size);
+                const isInStock = inventoryItem && inventoryItem.quantity > 0;
+                
+                return (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`py-2 px-4 border rounded-md text-center ${
+                      selectedSize === size
+                        ? 'border-blue-600 bg-blue-50 text-blue-700'
+                        : isInStock
+                          ? 'border-gray-300 text-gray-700 hover:border-gray-400'
+                          : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                    disabled={!isInStock}
+                  >
+                    <div className="flex flex-col">
+                      <span>{size}</span>
+                      {inventoryItem && (
+                        <span className={`text-xs ${isInStock ? 'text-green-600' : 'text-red-500'}`}>
+                          {isInStock ? `En stock (${inventoryItem.quantity})` : 'Épuisé'}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
           
@@ -146,11 +170,11 @@ const ProductDetailPage: React.FC = () => {
               variant="primary"
               size="lg"
               fullWidth
-              disabled={!product.inStock}
+              disabled={!sizeInStock}
               className="flex items-center justify-center"
             >
               <ShoppingCart size={20} className="mr-2" />
-              {product.inStock ? 'Ajouter au Panier' : 'Rupture de Stock'}
+              {sizeInStock ? 'Ajouter au Panier' : 'Taille non disponible'}
             </Button>
             {/* <Button
               variant="outline"

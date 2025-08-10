@@ -9,6 +9,15 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'refresh-token-
 const ACCESS_TOKEN_EXPIRY = '15m'; // 15 minutes
 const REFRESH_TOKEN_EXPIRY = '7d'; // 7 jours
 
+// Configuration des cookies
+const COOKIE_OPTIONS = {
+  httpOnly: true,           // Empêche l'accès au cookie via JavaScript
+  secure: process.env.NODE_ENV === 'production', // HTTPS uniquement en production
+  sameSite: 'strict',       // Protection contre les attaques CSRF
+  path: '/',                // Accessible sur tout le domaine
+  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 jours en millisecondes
+};
+
 // Génération des tokens d'accès et de rafraîchissement
 const generateTokens = (userId) => {
   const accessToken = jwt.sign({ id: userId }, ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
@@ -17,16 +26,34 @@ const generateTokens = (userId) => {
   return { accessToken, refreshToken };
 };
 
+// Définir les cookies d'authentification
+const setAuthCookies = (res, accessToken, refreshToken) => {
+  res.cookie('accessToken', accessToken, {
+    ...COOKIE_OPTIONS,
+    maxAge: 15 * 60 * 1000 // 15 minutes
+  });
+  
+  res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
+};
+
+// Supprimer les cookies d'authentification
+const clearAuthCookies = (res) => {
+  res.clearCookie('accessToken', { path: '/' });
+  res.clearCookie('refreshToken', { path: '/' });
+};
+
 // Vérification du token d'accès
 const verifyToken = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    // Essayer d'abord de récupérer le token du cookie
+    const token = req.cookies.accessToken || 
+                  // Fallback pour supporter les en-têtes d'autorisation pendant la transition
+                  (req.headers.authorization && req.headers.authorization.startsWith('Bearer ') 
+                   ? req.headers.authorization.split(' ')[1] : null);
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
       return res.status(401).json({ error: 'Accès non autorisé: token manquant' });
     }
-    
-    const token = authHeader.split(' ')[1];
     
     try {
       const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET);
@@ -162,5 +189,7 @@ module.exports = {
   verifyAdmin,
   verifyResourceOwnership,
   invalidateToken,
-  cleanupExpiredTokens
+  cleanupExpiredTokens,
+  setAuthCookies,
+  clearAuthCookies
 };

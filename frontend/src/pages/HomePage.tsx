@@ -7,7 +7,7 @@ import ProductCard from '../components/shop/ProductCard';
 
 const HomePage: React.FC = () => {
   const { products } = useShop();
-  const featuredProducts = products.filter(product => product.inStock).slice(0, 4);
+  const featuredProducts = products.filter(product => product.inventory && product.inventory.length > 0 && product.inventory[0].quantity > 0).slice(0, 8);
   
   return (
     <div>

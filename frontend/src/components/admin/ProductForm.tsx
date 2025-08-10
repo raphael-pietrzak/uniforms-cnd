@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Camera, Upload } from 'lucide-react';
+import { X, Camera, Upload, PlusCircle, MinusCircle } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import { Product } from '../../types';
@@ -7,25 +7,35 @@ import { uploadApi } from '../../services/api';
 
 interface ProductFormProps {
   initialValues?: Product;
-  onSubmit: (productData: Omit<Product, 'id'>) => void;
+  onSubmit: (productData: Product) => void;
   onCancel: () => void;
 }
 
+interface InventoryItem {
+  size: string;
+  quantity: number;
+}
+
 const defaultValues = {
-  name: '',
-  description: '',
+  id: '',
+  name: 'test',
+  description: 'description',
   price: 0,
-  brand: '',
+  brand: 'M&S',
   category: '',
   sizes: [] as string[],
   condition: 'new' as 'new' | 'used',
   gender: 'unisex' as 'unisex' | 'boys' | 'girls',
   images: [] as string[],
-  inStock: true
+  inventory: [] as InventoryItem[]
 };
 
 const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState(initialValues || defaultValues);
+  const [formData, setFormData] = useState({
+    ...defaultValues,
+    ...initialValues,
+    inventory: initialValues?.inventory || []
+  });
   const [sizesInput, setSizesInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -76,14 +86,34 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       e.preventDefault();
       const newSize = sizesInput.trim();
       if (newSize && !formData.sizes.includes(newSize)) {
-        setFormData({ ...formData, sizes: [...formData.sizes, newSize] });
+        // Ajouter la taille à la liste des tailles
+        setFormData({ 
+          ...formData, 
+          sizes: [...formData.sizes, newSize],
+          // Ajouter également dans l'inventaire avec quantité 0 par défaut
+          inventory: [...formData.inventory, { size: newSize, quantity: 0 }]
+        });
         setSizesInput('');
       }
     }
   };
 
   const removeSize = (size: string) => {
-    setFormData({ ...formData, sizes: formData.sizes.filter(s => s !== size) });
+    setFormData({ 
+      ...formData, 
+      sizes: formData.sizes.filter(s => s !== size),
+      // Supprimer également de l'inventaire
+      inventory: formData.inventory.filter(item => item.size !== size)
+    });
+  };
+
+  const updateInventoryQuantity = (size: string, quantity: number) => {
+    // Mettre à jour la quantité pour une taille spécifique
+    const updatedInventory = formData.inventory.map(item => 
+      item.size === size ? { ...item, quantity } : item
+    );
+    
+    setFormData({ ...formData, inventory: updatedInventory });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -229,45 +259,95 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           </select>
         </div>
         
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-          <div className="flex items-center mt-2">
-            <input
-              type="checkbox"
-              id="inStock"
-              checked={formData.inStock}
-              onChange={() => setFormData({ ...formData, inStock: !formData.inStock })}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="inStock" className="ml-2 block text-sm text-gray-900">
-              Produit en stock
-            </label>
-          </div>
-        </div>
-        
         <div className="col-span-1 md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tailles (appuyez sur Entrée ou virgule pour ajouter)</label>
-          <Input
-            value={sizesInput}
-            onChange={(e) => setSizesInput(e.target.value)}
-            onKeyDown={handleSizesChange}
-            placeholder="ex: S, M, L, XL..."
-            fullWidth
-          />
-          <div className="flex flex-wrap gap-2 mt-2">
-            {formData.sizes.map((size) => (
-              <div key={size} className="bg-gray-100 rounded px-2 py-1 flex items-center">
-                {size}
-                <button
-                  type="button"
-                  onClick={() => removeSize(size)}
-                  className="ml-1 text-gray-500 hover:text-gray-700"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ))}
+          <label className="block text-sm font-medium text-gray-700 mb-1">Tailles et inventaire</label>
+          <div className="flex mb-4">
+            <Input
+              value={sizesInput}
+              onChange={(e) => setSizesInput(e.target.value)}
+              onKeyDown={handleSizesChange}
+              placeholder="Ajouter une taille (ex: S, M, L, XL...)"
+              fullWidth
+            />
+            <Button 
+              type="button" 
+              variant="secondary"
+              className="ml-2"
+              onClick={() => {
+                if (sizesInput.trim() && !formData.sizes.includes(sizesInput.trim())) {
+                  setFormData({ 
+                    ...formData, 
+                    sizes: [...formData.sizes, sizesInput.trim()],
+                    inventory: [...formData.inventory, { size: sizesInput.trim(), quantity: 0 }]
+                  });
+                  setSizesInput('');
+                }
+              }}
+            >
+              <PlusCircle size={18} className="mr-1" /> Ajouter
+            </Button>
           </div>
+          
+          {formData.sizes.length > 0 && (
+            <div className="border rounded-md overflow-hidden mt-2">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Taille</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantité en stock</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {formData.sizes.map((size) => {
+                    // Trouver l'entrée d'inventaire correspondante
+                    const inventoryItem = formData.inventory.find(item => item.size === size) || { size, quantity: 0 };
+                    
+                    return (
+                      <tr key={size}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{size}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <div className="flex items-center">
+                            <button
+                              type="button"
+                              className="text-gray-500 hover:text-gray-700"
+                              onClick={() => updateInventoryQuantity(size, Math.max(0, inventoryItem.quantity - 1))}
+                              disabled={inventoryItem.quantity <= 0}
+                            >
+                              <MinusCircle size={18} />
+                            </button>
+                            <Input
+                              type="number"
+                              min="0"
+                              value={inventoryItem.quantity}
+                              onChange={(e) => updateInventoryQuantity(size, parseInt(e.target.value) || 0)}
+                              className="mx-2 w-16 text-center"
+                            />
+                            <button
+                              type="button"
+                              className="text-gray-500 hover:text-gray-700"
+                              onClick={() => updateInventoryQuantity(size, inventoryItem.quantity + 1)}
+                            >
+                              <PlusCircle size={18} />
+                            </button>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <button
+                            type="button"
+                            onClick={() => removeSize(size)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <X size={18} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
         
         <div className="col-span-1 md:col-span-2">

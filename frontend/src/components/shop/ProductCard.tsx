@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Product } from '../../types';
 import Card from '../ui/Card';
 import Badge from '../ui/Badge';
-import { getFullImageUrl } from '../../services/api';
 
 interface ProductCardProps {
   product: Product;
@@ -29,11 +28,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <Badge variant="warning">Occasion</Badge>
             </div>
           )}
-          {!product.inStock && (
+          {!product.inventory || product.inventory.length === 0 || !product.inventory.some(item => item.quantity > 0) ? (
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
               <span className="text-white font-bold text-lg">
                 Indisponible
               </span>
+            </div>
+          ) : (
+            <div className="absolute top-2 right-2">
+              <Badge variant="success">En Stock</Badge>
             </div>
           )}
         </div>

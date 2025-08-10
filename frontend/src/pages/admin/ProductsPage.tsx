@@ -52,7 +52,7 @@ const ProductsPage: React.FC = () => {
       // Mettre à jour le statut
       const updatedProduct = {
         ...product,
-        inStock: !product.inStock
+        // inStock: !product.inStock
       };
 
       // Appeler l'API pour mettre à jour
@@ -109,7 +109,7 @@ const ProductsPage: React.FC = () => {
       product.description.toLowerCase().includes(searchTerm.toLowerCase());
 
     // Filter by stock status if enabled
-    const matchesStock = showOnlyOutOfStock ? !product.inStock : true;
+    const matchesStock = showOnlyOutOfStock ? false : true;
 
     return matchesSearch && matchesStock;
   });
@@ -200,7 +200,7 @@ const ProductsPage: React.FC = () => {
                     Prix
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tailles
+                    Tailles & Stock
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     État
@@ -243,7 +243,7 @@ const ProductsPage: React.FC = () => {
                           onClick={() => handleToggleProductStatus(product.id)}
                           className="flex items-center text-sm"
                         >
-                          {product.inStock ? (
+                          {product.inventory && product.inventory.length > 0 && product.inventory[0].quantity > 0 ? (
                             <>
                               <span className="h-2.5 w-2.5 rounded-full bg-green-500 mr-2"></span>
                               <span className="text-green-800">En Stock</span>
@@ -261,11 +261,26 @@ const ProductsPage: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex flex-wrap gap-1">
-                          {product.sizes.map((size) => (
-                            <span key={size} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                              {size}
-                            </span>
-                          ))}
+                          {product.sizes.map((size) => {
+                            // Trouver l'inventaire pour cette taille
+                            const inventoryItem = product.inventory?.find(item => item.size === size);
+                            const quantity = inventoryItem?.quantity || 0;
+                            const isInStock = quantity > 0;
+                            
+                            return (
+                              <span 
+                                key={size} 
+                                className={`text-xs px-2 py-1 rounded flex items-center ${
+                                  isInStock 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-red-100 text-red-800'
+                                }`}
+                                title={`${size}: ${quantity} en stock`}
+                              >
+                                {size} <span className="ml-1 font-medium">({quantity})</span>
+                              </span>
+                            );
+                          })}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

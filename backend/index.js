@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 const SECRETARY_PHONE_NUMBER = process.env.SECRETARY_PHONE_NUMBER;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -27,12 +28,12 @@ app.get('/ping', (req, res) => {
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
-
+app.use(cookieParser()); // Middleware pour analyser les cookies
 
 app.use(cors({
   origin: FRONTEND_URL,
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
+  credentials: true // Important pour permettre l'envoi de cookies avec CORS
 }));
 
 // Servir les fichiers statiques
