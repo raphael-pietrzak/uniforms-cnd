@@ -53,7 +53,7 @@ const CartPage: React.FC = () => {
       setCheckoutStep('confirmation');
     } catch (error) {
       console.error('Erreur lors du paiement:', error);
-      setError(error.message || 'Une erreur est survenue lors du traitement de votre commande');
+      setError(error instanceof Error ? error.message : 'Une erreur est survenue lors du traitement de votre commande');
     } finally {
       setIsProcessing(false);
     }
@@ -202,7 +202,6 @@ const CartPage: React.FC = () => {
                         type="submit" 
                         variant="primary" 
                         fullWidth
-                        isLoading={isProcessing}
                         disabled={isProcessing}
                       >
                         {paymentMethod === 'online' 
