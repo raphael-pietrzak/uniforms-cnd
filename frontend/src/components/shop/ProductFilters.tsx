@@ -78,7 +78,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
               { value: '', label: 'Tous les genres' },
               { value: 'boys', label: 'Garçons' },
               { value: 'girls', label: 'Filles' },
-              { value: 'unisex', label: 'Unisexe' },
+              { value: 'unisex', label: 'Mixte' },
             ]}
             className="border-gray-200 focus:border-gray-300 focus:ring-0 text-sm rounded-md"
             fullWidth

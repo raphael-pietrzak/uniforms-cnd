@@ -14,6 +14,8 @@ const CartPage: React.FC = () => {
     email: 'jean.dupont@example.com',
   });
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'confirmation'>('cart');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
@@ -28,13 +30,21 @@ const CartPage: React.FC = () => {
     });
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCheckout = async (method: 'online' | 'inperson') => {
+    setIsProcessing(true);
+    setError(null);
+    
     try {
-      const result = await checkout(paymentMethod, customerInfo);
+      if (!customerInfo.name || !customerInfo.email) {
+        setError('Veuillez fournir vos informations de contact');
+        setIsProcessing(false);
+        return;
+      }
       
-      if (result.redirect) {
-        // Rediriger vers la page de paiement Stripe
+      const result = await checkout(method, customerInfo);
+      
+      // Si nous avons une URL de redirection, rediriger l'utilisateur
+      if (result && result.redirect) {
         window.location.href = result.redirect;
         return;
       }
@@ -43,6 +53,9 @@ const CartPage: React.FC = () => {
       setCheckoutStep('confirmation');
     } catch (error) {
       console.error('Erreur lors du paiement:', error);
+      setError(error.message || 'Une erreur est survenue lors du traitement de votre commande');
+    } finally {
+      setIsProcessing(false);
     }
   };
   
@@ -120,7 +133,7 @@ const CartPage: React.FC = () => {
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="p-6">
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">Informations de Contact</h2>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={(e) => { e.preventDefault(); handleCheckout(paymentMethod); }}>
                   <div className="space-y-4">
                     <Input
                       label="Nom Complet"
@@ -185,13 +198,25 @@ const CartPage: React.FC = () => {
                     </div>
                     
                     <div className="pt-6">
-                      <Button type="submit" variant="primary" fullWidth>
+                      <Button 
+                        type="submit" 
+                        variant="primary" 
+                        fullWidth
+                        isLoading={isProcessing}
+                        disabled={isProcessing}
+                      >
                         {paymentMethod === 'online' 
                           ? 'Payer avec Stripe' 
                           : 'Finaliser la Commande'
                         }
                       </Button>
                     </div>
+                    
+                    {error && (
+                      <div className="text-red-500 text-sm mt-4">
+                        {error}
+                      </div>
+                    )}
                   </div>
                 </form>
               </div>

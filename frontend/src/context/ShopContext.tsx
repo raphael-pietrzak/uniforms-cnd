@@ -187,14 +187,14 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         const newOrder = await ordersApi.create(orderData);
         
-        // Mettre à jour le stock pour chaque produit
-        for (const item of cart) {
-          await updateInventory(item.product.id, item.selectedSize, -item.quantity);
-        }
+        // La mise à jour du stock est maintenant gérée par le backend
+        // Il n'est plus nécessaire d'appeler updateInventory ici
         
         setOrders([newOrder, ...orders]);
         clearCart();
-        return {};
+        
+        // Retourner une redirection vers la page de succès
+        return { redirect: `/checkout/success?orderId=${newOrder.id}` };
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');

@@ -81,26 +81,66 @@ async function createOrderAndNotify(orderData) {
   const { items, customerName, customerEmail, paymentMethod, total, status } = orderData;
   
   try {
+    // Vérifier que items est bien un tableau
+    if (!Array.isArray(items)) {
+      throw new Error('Les articles doivent être fournis sous forme de tableau');
+    }
+    
     // Démarrer une transaction pour garantir l'intégrité
     const result = await db.transaction(async trx => {
       // Insérer la commande
-      const [orderId] = await trx('orders').insert({
+      const orderId = await trx('orders').insert({
         customer_name: customerName,
         customer_email: customerEmail,
         payment_method: paymentMethod,
         total,
-        status
+        status: status || 'pending'
+      }).returning(['id']).then(ids => ids[0].id);
+      
+      // Vérifier que chaque item a les propriétés nécessaires
+      const orderItemsToInsert = items.map(item => {
+        if (!item.product || !item.product.id || !item.quantity || !item.selectedSize) {
+          throw new Error('Format d\'article invalide - Chaque article doit avoir product.id, quantity et selectedSize');
+        }
+        
+        return {
+          order_id: orderId,
+          product_id: item.product.id,
+          quantity: item.quantity,
+          selected_size: item.selectedSize
+        };
       });
       
-      // Insérer les items de commande
-      const orderItemsToInsert = items.map(item => ({
-        order_id: orderId,
-        product_id: item.product.id,
-        quantity: item.quantity,
-        selected_size: item.selectedSize
-      }));
-      
       await trx('order_items').insert(orderItemsToInsert);
+      
+      // Mettre à jour le stock pour chaque article commandé
+      for (const item of items) {
+        // Récupérer les informations d'inventaire actuelles
+        const inventoryItem = await trx('product_inventory')
+          .where({
+            product_id: item.product.id,
+            size: item.selectedSize
+          })
+          .first();
+          
+        if (!inventoryItem) {
+          console.warn(`Inventaire non trouvé pour le produit ${item.product.id} en taille ${item.selectedSize}`);
+          continue;
+        }
+        
+        // Calculer la nouvelle quantité
+        const newQuantity = Math.max(0, inventoryItem.quantity - item.quantity);
+        
+        // Mettre à jour l'inventaire
+        await trx('product_inventory')
+          .where({
+            product_id: item.product.id,
+            size: item.selectedSize
+          })
+          .update({ quantity: newQuantity });
+          
+        console.log(`Stock mis à jour pour ${item.product.id} taille ${item.selectedSize}: ${inventoryItem.quantity} -> ${newQuantity}`);
+      }
       
       // Récupérer la commande complète
       const newOrder = await trx('orders').where({ id: orderId }).first();

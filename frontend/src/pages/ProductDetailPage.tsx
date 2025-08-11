@@ -19,7 +19,7 @@ const translateCategory = (category: string): string => {
 
 const translateGender = (gender: string): string => {
   const genderMap: Record<string, string> = {
-    'unisex': 'Unisexe',
+    'unisex': 'Mixte',
     'boys': 'Garçons',
     'girls': 'Filles',
     'men': 'Hommes',
