@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Camera, Upload, PlusCircle, MinusCircle } from 'lucide-react';
+import { X, Camera, Upload, PlusCircle, MinusCircle, Trash2 } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import { Product } from '../../types';
@@ -177,6 +177,70 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="col-span-1 md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Images du produit</label>
+          
+          <div 
+            className="mt-1 border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload size={40} className="text-gray-400 mb-4" />
+            <p className="text-sm text-gray-600">Déposez vos images ici, ou <span className="text-blue-500">parcourez</span></p>
+            <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP jusqu'à 5MB</p>
+            
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              multiple
+              accept="image/*"
+              className="hidden" 
+            />
+          </div>
+          
+          <button
+            type="button"
+            className="mt-3 flex items-center justify-center w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            onClick={() => cameraInputRef.current?.click()}
+          >
+            <Camera size={20} className="mr-2" />
+            Prendre une photo
+            
+            <input 
+              type="file" 
+              ref={cameraInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              capture="environment"
+              className="hidden" 
+            />
+          </button>
+          
+          {imagePreviews.length > 0 && (
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {imagePreviews.map((preview, index) => (
+                <div key={index} className="relative group">
+                  <img 
+                    src={preview} 
+                    alt={`Aperçu ${index + 1}`}
+                    className="h-24 w-full object-cover rounded-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-1 right-1 bg-white text-gray-500 hover:text-gray-700 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
           <Input
@@ -272,7 +336,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
             <Button 
               type="button" 
               variant="secondary"
-              className="ml-2"
+              className="ml-2 flex items-center"
               onClick={() => {
                 if (sizesInput.trim() && !formData.sizes.includes(sizesInput.trim())) {
                   setFormData({ 
@@ -333,13 +397,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <button
+                            <button
                             type="button"
                             onClick={() => removeSize(size)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <X size={18} />
-                          </button>
+                            className="text-gray-500 hover:text-gray-700"
+                            >
+                            <Trash2 size={18} />
+                            </button>
                         </td>
                       </tr>
                     );
@@ -360,70 +424,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             required
           />
-        </div>
-        
-        <div className="col-span-1 md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Images du produit</label>
-          
-          <div 
-            className="mt-1 border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Upload size={40} className="text-gray-400 mb-4" />
-            <p className="text-sm text-gray-600">Déposez vos images ici, ou <span className="text-blue-500">parcourez</span></p>
-            <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP jusqu'à 5MB</p>
-            
-            <input 
-              type="file" 
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              multiple
-              accept="image/*"
-              className="hidden" 
-            />
-          </div>
-          
-          <button
-            type="button"
-            className="mt-3 flex items-center justify-center w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-            onClick={() => cameraInputRef.current?.click()}
-          >
-            <Camera size={20} className="mr-2" />
-            Prendre une photo
-            
-            <input 
-              type="file" 
-              ref={cameraInputRef}
-              onChange={handleFileChange}
-              accept="image/*"
-              capture="environment"
-              className="hidden" 
-            />
-          </button>
-          
-          {imagePreviews.length > 0 && (
-            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {imagePreviews.map((preview, index) => (
-                <div key={index} className="relative group">
-                  <img 
-                    src={preview} 
-                    alt={`Aperçu ${index + 1}`}
-                    className="h-24 w-full object-cover rounded-md"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
       
