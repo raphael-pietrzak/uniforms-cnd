@@ -7,6 +7,7 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   error: string | null;
+  isOnline: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -31,7 +32,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const [refreshTimer, setRefreshTimer] = useState<NodeJS.Timeout | null>(null);
+  
+  // Écouteur pour l'état de la connexion réseau
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      // Essayer de rafraîchir la session quand on revient en ligne
+      if (user) {
+        refreshAccessToken();
+      }
+    };
+    
+    const handleOffline = () => {
+      setIsOnline(false);
+      setError("Vous êtes actuellement hors connexion.");
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [user]);
   
   // Configurer l'écouteur d'événements pour les tokens expirés
   useEffect(() => {
@@ -52,6 +78,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initAuth = async () => {
       try {
+        // Ne pas essayer de rafraîchir le token si l'utilisateur est hors ligne
+        if (!navigator.onLine) {
+          setIsOnline(false);
+          setError("Vous êtes actuellement hors connexion. Certaines fonctionnalités peuvent ne pas être disponibles.");
+          setLoading(false);
+          return;
+        }
+        
         // Essayer de charger l'utilisateur depuis le serveur avec le cookie actuel
         const response = await authApi.refreshToken();
         setUser(response.user);
@@ -108,6 +142,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     setError(null);
     
+    // Vérifier si l'utilisateur est en ligne
+    if (!isOnline) {
+      setError("Impossible de se connecter en mode hors ligne. Veuillez vérifier votre connexion internet.");
+      setLoading(false);
+      throw new Error("Impossible de se connecter en mode hors ligne");
+    }
+    
     try {
       const response = await authApi.login({ email, password });
       setUser(response.user);
@@ -127,6 +168,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleRegister = async (username: string, email: string, password: string) => {
     setLoading(true);
     setError(null);
+    
+    // Vérifier si l'utilisateur est en ligne
+    if (!isOnline) {
+      setError("Impossible de s'inscrire en mode hors ligne. Veuillez vérifier votre connexion internet.");
+      setLoading(false);
+      throw new Error("Impossible de s'inscrire en mode hors ligne");
+    }
     
     try {
       const response = await authApi.register({ username, email, password });
@@ -197,7 +245,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // Effacer les erreurs
   const clearError = () => {
-    setError(null);
+    // Ne pas effacer l'erreur d'état hors ligne si nous sommes toujours hors ligne
+    if (isOnline || (error && !error.includes("hors connexion") && !error.includes("hors ligne"))) {
+      setError(null);
+    }
   };
   
   const authContextValue: AuthContextType = {
@@ -206,6 +257,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAdmin: user?.role === 'admin',
     loading,
     error,
+    isOnline,
     login: handleLogin,
     register: handleRegister,
     logout: handleLogout,

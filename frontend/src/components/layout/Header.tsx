@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Menu, X, User, LogIn, LogOut } from 'lucide-react';
+import { ShoppingCart, Menu, X, LogOut } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../../assets/cnd_logo.svg';
