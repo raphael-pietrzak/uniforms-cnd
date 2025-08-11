@@ -168,6 +168,14 @@ export const ordersApi = {
     const data = await handleResponse(response);
     return data;
   },
+  
+  getById: async (orderId: string): Promise<Order> => {
+    const response = await fetch(`${API_URL}/orders/${orderId}`, {
+      headers: getDefaultHeaders()
+    });
+    const data = await handleResponse(response);
+    return data;
+  },
 
   create: async (orderData: any): Promise<Order> => {
     const response = await fetch(`${API_URL}/orders`, {
