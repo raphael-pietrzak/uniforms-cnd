@@ -95,6 +95,7 @@ export const productsApi = {
       headers: {
         ...getDefaultHeaders()
       },
+      credentials: 'include', // Ajout de cette ligne pour envoyer les cookies
       body: JSON.stringify({
         ...product,
         sizes: JSON.stringify(product.sizes),
@@ -111,6 +112,7 @@ export const productsApi = {
       headers: {
         ...getDefaultHeaders()
       },
+      credentials: 'include', // Ajout pour envoyer les cookies
       body: JSON.stringify({
         ...product,
         sizes: JSON.stringify(product.sizes),
@@ -124,7 +126,8 @@ export const productsApi = {
   delete: async (id: string): Promise<void> => {
     const response = await fetch(`${API_URL}/products/${id}`, {
       method: 'DELETE',
-      headers: getDefaultHeaders()
+      headers: getDefaultHeaders(),
+      credentials: 'include', // Ajout pour envoyer les cookies
     });
     await handleResponse(response);
   },
@@ -134,6 +137,7 @@ export const productsApi = {
     const response = await fetch(`${API_URL}/products/${productId}/inventory/${size}`, {
       method: 'PATCH',
       headers: getDefaultHeaders(),
+      credentials: 'include', // Ajout pour envoyer les cookies
       body: JSON.stringify({ quantity }),
     });
     await handleResponse(response);
@@ -150,7 +154,8 @@ export const uploadApi = {
 
     const response = await fetch(`${API_URL}/upload`, {
       method: 'POST',
-      headers: getDefaultHeaders(),
+      // Ne pas inclure Content-Type pour FormData, le navigateur le définira automatiquement
+      credentials: 'include', // Ajouter pour l'authentification
       body: formData,
     });
 

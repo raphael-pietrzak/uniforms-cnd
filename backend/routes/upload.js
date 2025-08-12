@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const router = express.Router();
+const { verifyToken, verifyAdmin } = require('../middleware/auth');
 
 // Configuration de Cloudinary
 cloudinary.config({
@@ -23,8 +24,8 @@ const upload = multer({
   }
 });
 
-// Route pour l'upload d'images
-router.post('/', upload.array('images', 10), async (req, res) => {
+// Route pour l'upload d'images - doit être authentifié comme admin
+router.post('/', verifyToken, verifyAdmin, upload.array('images', 10), async (req, res) => {
   try {
     const uploadPromises = req.files.map(file => {
       return new Promise((resolve, reject) => {
