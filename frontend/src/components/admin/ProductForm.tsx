@@ -2,18 +2,13 @@ import React, { useState, useRef } from 'react';
 import { X, Camera, Upload, PlusCircle, MinusCircle, Trash2 } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-import { Product } from '../../types';
+import { Product, InventoryItem } from '../../types';
 import { uploadApi } from '../../services/api';
 
 interface ProductFormProps {
   initialValues?: Product;
   onSubmit: (productData: Product) => void;
   onCancel: () => void;
-}
-
-interface InventoryItem {
-  size: string;
-  quantity: number;
 }
 
 const defaultValues = {
@@ -23,7 +18,6 @@ const defaultValues = {
   price: 10,
   brand: 'M&S',
   category: 'tops',
-  sizes: ['M', 'L'] as string[],
   condition: 'new' as 'new' | 'used',
   gender: 'unisex' as 'unisex' | 'boys' | 'girls',
   images: [] as string[],
@@ -83,12 +77,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
       const newSize = sizesInput.trim();
-      if (newSize && !formData.sizes.includes(newSize)) {
-        // Ajouter la taille à la liste des tailles
+      if (newSize && !formData.inventory.some(item => item.size === newSize)) {
+        // Ajouter la taille directement à l'inventaire avec quantité 0
         setFormData({ 
           ...formData, 
-          sizes: [...formData.sizes, newSize],
-          // Ajouter également dans l'inventaire avec quantité 0 par défaut
           inventory: [...formData.inventory, { size: newSize, quantity: 0 }]
         });
         setSizesInput('');
@@ -99,8 +91,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   const removeSize = (size: string) => {
     setFormData({ 
       ...formData, 
-      sizes: formData.sizes.filter(s => s !== size),
-      // Supprimer également de l'inventaire
       inventory: formData.inventory.filter(item => item.size !== size)
     });
   };
@@ -335,10 +325,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
               variant="secondary"
               className="ml-2 flex items-center"
               onClick={() => {
-                if (sizesInput.trim() && !formData.sizes.includes(sizesInput.trim())) {
+                if (sizesInput.trim() && !formData.inventory.some(item => item.size === sizesInput.trim())) {
                   setFormData({ 
                     ...formData, 
-                    sizes: [...formData.sizes, sizesInput.trim()],
                     inventory: [...formData.inventory, { size: sizesInput.trim(), quantity: 0 }]
                   });
                   setSizesInput('');
@@ -349,7 +338,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
             </Button>
           </div>
           
-          {formData.sizes.length > 0 && (
+          {formData.inventory.length > 0 && (
             <div className="border rounded-md overflow-hidden mt-2">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -360,51 +349,46 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {formData.sizes.map((size) => {
-                    // Trouver l'entrée d'inventaire correspondante
-                    const inventoryItem = formData.inventory.find(item => item.size === size) || { size, quantity: 0 };
-                    
-                    return (
-                      <tr key={size}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{size}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <div className="flex items-center">
-                            <button
-                              type="button"
-                              className="text-gray-500 hover:text-gray-700"
-                              onClick={() => updateInventoryQuantity(size, Math.max(0, inventoryItem.quantity - 1))}
-                              disabled={inventoryItem.quantity <= 0}
-                            >
-                              <MinusCircle size={18} />
-                            </button>
-                            <Input
-                              type="number"
-                              min="0"
-                              value={inventoryItem.quantity}
-                              onChange={(e) => updateInventoryQuantity(size, parseInt(e.target.value) || 0)}
-                              className="mx-2 w-16 text-center"
-                            />
-                            <button
-                              type="button"
-                              className="text-gray-500 hover:text-gray-700"
-                              onClick={() => updateInventoryQuantity(size, inventoryItem.quantity + 1)}
-                            >
-                              <PlusCircle size={18} />
-                            </button>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <button
+                  {formData.inventory.map((item) => (
+                    <tr key={item.size}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.size}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex items-center">
+                          <button
                             type="button"
-                            onClick={() => removeSize(size)}
                             className="text-gray-500 hover:text-gray-700"
-                            >
-                            <Trash2 size={18} />
-                            </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                            onClick={() => updateInventoryQuantity(item.size, Math.max(0, item.quantity - 1))}
+                            disabled={item.quantity <= 0}
+                          >
+                            <MinusCircle size={18} />
+                          </button>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={item.quantity}
+                            onChange={(e) => updateInventoryQuantity(item.size, parseInt(e.target.value) || 0)}
+                            className="mx-2 w-16 text-center"
+                          />
+                          <button
+                            type="button"
+                            className="text-gray-500 hover:text-gray-700"
+                            onClick={() => updateInventoryQuantity(item.size, item.quantity + 1)}
+                          >
+                            <PlusCircle size={18} />
+                          </button>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <button
+                          type="button"
+                          onClick={() => removeSize(item.size)}
+                          className="text-gray-500 hover:text-gray-700"
+                          >
+                          <Trash2 size={18} />
+                          </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

@@ -67,10 +67,26 @@ const formatProduct = (product: any): Product => {
     parsedImages = ['https://placehold.co/600x400?text=Image+placeholder'];
   }
 
+  // Préparer l'inventaire
+  let inventory = [];
+  if (product.inventory) {
+    // Si l'inventaire est déjà présent, l'utiliser directement
+    inventory = product.inventory;
+  } else if (product.sizes) {
+    // Sinon, créer un inventaire à partir des tailles (pour compatibilité avec l'ancien format)
+    try {
+      const sizes = typeof product.sizes === 'string' ? JSON.parse(product.sizes) : product.sizes;
+      inventory = sizes.map((size: string) => ({ size, quantity: 0 }));
+    } catch (e) {
+      console.error('Erreur de parsing des tailles:', e);
+      inventory = [];
+    }
+  }
+
   return {
     ...product,
-    sizes: typeof product.sizes === 'string' ? JSON.parse(product.sizes) : product.sizes,
     images: parsedImages.map(getFullImageUrl),
+    inventory: inventory,
     id: product.id.toString()
   };
 };
@@ -98,7 +114,6 @@ export const productsApi = {
       credentials: 'include', // Ajout de cette ligne pour envoyer les cookies
       body: JSON.stringify({
         ...product,
-        sizes: JSON.stringify(product.sizes),
         images: JSON.stringify(product.images)
       }),
     });
@@ -115,7 +130,6 @@ export const productsApi = {
       credentials: 'include', // Ajout pour envoyer les cookies
       body: JSON.stringify({
         ...product,
-        sizes: JSON.stringify(product.sizes),
         images: JSON.stringify(product.images)
       }),
     });

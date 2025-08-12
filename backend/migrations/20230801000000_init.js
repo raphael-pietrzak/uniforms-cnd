@@ -10,6 +10,7 @@ exports.up = function(knex) {
       table.string('brand');
       table.string('gender');
       table.json('images');
+      table.boolean('inStock').defaultTo(true);
       table.string('category');
       table.timestamps(true, true);
     })

@@ -17,7 +17,17 @@ exports.up = function(knex) {
       // Index composite pour assurer l'unicité de la combinaison produit/taille
       table.unique(['product_id', 'size']);
     })
-    
+    .then(function() {
+      // Vérifier d'abord si la colonne inStock existe encore
+      return knex.schema.hasColumn('products', 'inStock').then(function(exists) {
+        if (exists) {
+          return knex.schema.alterTable('products', function(table) {
+            table.dropColumn('inStock');
+          });
+        }
+        return Promise.resolve();
+      });
+    });
 };
 
 /**
@@ -26,6 +36,15 @@ exports.up = function(knex) {
  */
 exports.down = function(knex) {
   return knex.schema
+    .hasColumn('products', 'inStock')
+    .then(function(exists) {
+      if (!exists) {
+        return knex.schema.alterTable('products', function(table) {
+          table.boolean('inStock').defaultTo(true);
+        });
+      }
+      return Promise.resolve();
+    })
     .then(function() {
       return knex.schema.dropTableIfExists('product_inventory');
     });

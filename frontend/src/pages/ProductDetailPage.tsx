@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ShoppingCart, ArrowLeft, Heart } from 'lucide-react';
+import { ShoppingCart, ArrowLeft } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
-import { getFullImageUrl } from '../services/api';
 
 // Fonctions auxiliaires pour traduire les catégories et genres
 const translateCategory = (category: string): string => {
@@ -47,7 +46,12 @@ const ProductDetailPage: React.FC = () => {
   
   const product = products.find((p) => p.id === productId);
   
-  const [selectedSize, setSelectedSize] = useState<string>(product?.sizes[0] || '');
+  // Si le produit n'existe pas ou n'a pas d'inventaire, utiliser une valeur par défaut
+  const defaultSize = product?.inventory && product.inventory.length > 0 
+    ? product.inventory[0].size 
+    : '';
+  
+  const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
   const [selectedImage, setSelectedImage] = useState<number>(0);
   
   if (!product) {
@@ -144,17 +148,15 @@ const ProductDetailPage: React.FC = () => {
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-900 mb-4">Sélectionner une Taille</h3>
             <div className="grid grid-cols-4 gap-2">
-              {product.sizes.map((size) => {
-                // Vérifier le stock pour cette taille
-                const inventoryItem = product.inventory?.find(item => item.size === size);
-                const isInStock = inventoryItem && inventoryItem.quantity > 0;
+              {product.inventory.map((item) => {
+                const isInStock = item.quantity > 0;
                 
                 return (
                   <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
+                    key={item.size}
+                    onClick={() => setSelectedSize(item.size)}
                     className={`py-2 px-4 border rounded-md text-center ${
-                      selectedSize === size
+                      selectedSize === item.size
                         ? 'border-blue-600 bg-blue-50 text-blue-700'
                         : isInStock
                           ? 'border-gray-300 text-gray-700 hover:border-gray-400'
@@ -163,12 +165,10 @@ const ProductDetailPage: React.FC = () => {
                     disabled={!isInStock}
                   >
                     <div className="flex flex-col">
-                      <span>{size}</span>
-                      {inventoryItem && (
-                        <span className={`text-xs ${isInStock ? 'text-green-600' : 'text-red-500'}`}>
-                          {isInStock ? `En stock (${inventoryItem.quantity})` : 'Épuisé'}
-                        </span>
-                      )}
+                      <span>{item.size}</span>
+                      <span className={`text-xs ${isInStock ? 'text-green-600' : 'text-red-500'}`}>
+                        {isInStock ? `En stock (${item.quantity})` : 'Épuisé'}
+                      </span>
                     </div>
                   </button>
                 );
@@ -188,14 +188,6 @@ const ProductDetailPage: React.FC = () => {
               <ShoppingCart size={20} className="mr-2" />
               {sizeInStock ? 'Ajouter au Panier' : 'Taille non disponible'}
             </Button>
-            {/* <Button
-              variant="outline"
-              size="lg"
-              className="flex items-center justify-center"
-            >
-              <Heart size={20} className="mr-2" />
-              Sauvegarder
-            </Button> */}
           </div>
           
           <div className="mt-8 pt-8 border-t border-gray-200">

@@ -8,13 +8,12 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  sizes: string[];
   condition: 'new' | 'used';
   brand: string;
   gender: 'boys' | 'girls' | 'unisex';
   images: string[];
   category: string;
-  inventory?: InventoryItem[];
+  inventory: InventoryItem[];
 }
 
 export interface CartItem {

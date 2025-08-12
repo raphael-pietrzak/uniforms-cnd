@@ -49,9 +49,11 @@ const ShopPage: React.FC = () => {
       filtered = filtered.filter(product => product.price <= parseFloat(filters.maxPrice));
     }
 
-    // Filter by size
+    // Filter by size - maintenant utilise l'inventaire
     if (filters.size) {
-      filtered = filtered.filter(product => product.sizes.includes(filters.size));
+      filtered = filtered.filter(product => 
+        product.inventory.some(item => item.size === filters.size)
+      );
     }
 
     // Filter by brand
@@ -59,6 +61,13 @@ const ShopPage: React.FC = () => {
       const brandLower = filters.brand.toLowerCase();
       filtered = filtered.filter(product => 
         product.brand.toLowerCase().includes(brandLower)
+      );
+    }
+
+    // Filter by stock status
+    if (filters.inStock === true) {
+      filtered = filtered.filter(product => 
+        product.inventory.some(item => item.quantity > 0)
       );
     }
 
@@ -225,13 +234,25 @@ const ShopPage: React.FC = () => {
                 <div className="mt-2 flex justify-between items-center">
                   <span className="text-blue-900 font-bold">{Number(product.price).toFixed(2)}&nbsp;€</span>
                   <div className="flex space-x-1">
-                    {product.sizes.slice(0, 3).map((size) => (
-                      <span key={size} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                        {size}
-                      </span>
-                    ))}
-                    {product.sizes.length > 3 && (
-                      <span className="text-xs bg-gray-100 px-2 py-1 rounded">+{product.sizes.length - 3}</span>
+                    {/* Afficher les tailles disponibles (avec stock > 0) */}
+                    {product.inventory
+                      .filter(item => item.quantity > 0)
+                      .slice(0, 3)
+                      .map((item) => (
+                        <span key={item.size} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                          {item.size}
+                        </span>
+                      ))}
+                    {/* Ou afficher toutes les tailles si aucune n'est en stock */}
+                    {product.inventory.every(item => item.quantity <= 0) &&
+                      product.inventory.slice(0, 3).map((item) => (
+                        <span key={item.size} className="text-xs bg-gray-100 px-2 py-1 rounded">
+                          {item.size}
+                        </span>
+                      ))
+                    }
+                    {product.inventory.length > 3 && (
+                      <span className="text-xs bg-gray-100 px-2 py-1 rounded">+{product.inventory.length - 3}</span>
                     )}
                   </div>
                 </div>

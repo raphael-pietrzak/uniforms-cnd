@@ -17,8 +17,6 @@ router.get('/', async (req, res) => {
       
       product.inventory = inventory;
       
-      // Calculer si le produit est en stock (au moins une taille disponible)
-      product.inStock = inventory.some(item => item.quantity > 0);
     }
     
     res.json(products);
@@ -42,9 +40,6 @@ router.get('/:id', async (req, res) => {
       .select('size', 'quantity');
     
     product.inventory = inventory;
-    
-    // Calculer si le produit est en stock (au moins une taille disponible)
-    product.inStock = inventory.some(item => item.quantity > 0);
     
     res.json(product);
   } catch (error) {
@@ -95,8 +90,6 @@ router.post('/', verifyToken, verifyAdmin, async (req, res) => {
       .where({ product_id: product.id })
       .select('size', 'quantity');
     
-    // Calculer si le produit est en stock
-    product.inStock = product.inventory.some(item => item.quantity > 0);
     
     res.status(201).json(product);
   } catch (error) {
@@ -152,9 +145,6 @@ router.put('/:id', verifyToken, verifyAdmin, async (req, res) => {
     updatedProduct.inventory = await db('product_inventory')
       .where({ product_id: updatedProduct.id })
       .select('size', 'quantity');
-    
-    // Calculer si le produit est en stock
-    updatedProduct.inStock = updatedProduct.inventory.some(item => item.quantity > 0);
     
     res.json(updatedProduct);
   } catch (error) {
