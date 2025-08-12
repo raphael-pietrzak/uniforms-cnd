@@ -9,6 +9,29 @@ import AddProductModal from '../../components/admin/AddProductModal';
 import DeleteConfirmationModal from '../../components/admin/DeleteConfirmationModal';
 import { productsApi, getFullImageUrl } from '../../services/api';
 
+// Fonction pour traduire les catégories
+const translateCategory = (category: string): string => {
+  const categoryMap: Record<string, string> = {
+    'tops': 'Hauts',
+    'bottoms': 'Bas',
+    'outerwear': 'Vêtements d\'extérieur',
+    'sportswear': 'Vêtements de sport',
+    'accessories': 'Accessoires',
+    'footwear': 'Chaussures',
+    'uniforms': 'Uniformes',
+    'sweaters': 'Pulls',
+    'shirts': 'Chemises',
+    'pants': 'Pantalons',
+    'skirts': 'Jupes',
+    'dresses': 'Robes',
+    'jackets': 'Vestes',
+    'bags': 'Sacs',
+    'socks': 'Chaussettes',
+    'school-supplies': 'Fournitures scolaires'
+  };
+  return categoryMap[category] || category;
+};
+
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -289,7 +312,7 @@ const ProductsPage: React.FC = () => {
                         </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {product.category}
+                        {translateCategory(product.category)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">

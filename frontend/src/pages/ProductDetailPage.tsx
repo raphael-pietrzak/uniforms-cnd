@@ -13,6 +13,18 @@ const translateCategory = (category: string): string => {
     'bottoms': 'Bas',
     'outerwear': 'Vêtements d\'extérieur',
     'sportswear': 'Vêtements de sport',
+    'accessories': 'Accessoires',
+    'footwear': 'Chaussures',
+    'uniforms': 'Uniformes',
+    'sweaters': 'Pulls',
+    'shirts': 'Chemises',
+    'pants': 'Pantalons',
+    'skirts': 'Jupes',
+    'dresses': 'Robes',
+    'jackets': 'Vestes',
+    'bags': 'Sacs',
+    'socks': 'Chaussettes',
+    'school-supplies': 'Fournitures scolaires'
   };
   return categoryMap[category] || category;
 };

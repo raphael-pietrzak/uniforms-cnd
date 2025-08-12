@@ -42,9 +42,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   const [imagePreviews, setImagePreviews] = useState<string[]>(
     initialValues?.images || []
   );
-  const [uploadedImages, setUploadedImages] = useState<string[]>(
-    initialValues?.images?.filter(url => url.startsWith('/uploads/')) || []
-  );
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,7 +59,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       
       const productData = {
         ...formData,
-        images: serverImagePaths.length > 0 ? serverImagePaths : ['https://placehold.co/600x400?text=Image+placeholder']
+        images: serverImagePaths
       };
 
       onSubmit(productData);
@@ -268,11 +266,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           <Input
             name="price"
             type="number"
-            step="0.01"
+            step="1"
             min="0"
             value={formData.price || ''}
             onChange={handleChange}
-            required
             fullWidth
           />
         </div>
