@@ -61,7 +61,6 @@ router.post('/', verifyToken, verifyAdmin, async (req, res) => {
         name: productData.name,
         description: productData.description,
         price: productData.price,
-        sizes: productData.sizes,
         condition: productData.condition,
         brand: productData.brand,
         gender: productData.gender,
