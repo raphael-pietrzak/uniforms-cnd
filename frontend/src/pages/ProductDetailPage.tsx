@@ -131,11 +131,6 @@ const ProductDetailPage: React.FC = () => {
               <Badge variant={product.condition === 'new' ? 'primary' : 'warning'}>
                 {product.condition === 'new' ? 'Neuf' : 'Occasion'}
               </Badge>
-              {!product.inventory || product.inventory.length === 0 || !product.inventory.some(item => item.quantity > 0) ?
-                <Badge variant="danger" className="ml-2">Rupture de Stock</Badge> :
-                product.inventory.some(item => item.quantity > 0) &&
-                <Badge variant="success" className="ml-2">En Stock</Badge>
-              }
             </div>
             <p className="text-gray-700 mb-6">{product.description}</p>
           </div>

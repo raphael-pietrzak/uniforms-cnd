@@ -4,6 +4,7 @@ import ProductCard from '../components/shop/ProductCard';
 import ProductFilters from '../components/shop/ProductFilters';
 import { Product } from '../types';
 import { Grid, List, Search, SlidersHorizontal, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const ShopPage: React.FC = () => {
   const { products } = useShop();
@@ -102,7 +103,11 @@ const ShopPage: React.FC = () => {
 
   // Initialize filtered products
   useEffect(() => {
-    setFilteredProducts(products);
+    // Ne garder que les produits qui ont au moins une taille disponible en stock
+    const productsInStock = products.filter(product => 
+      product.inventory.some(item => item.quantity > 0)
+    );
+    setFilteredProducts(productsInStock);
   }, [products]);
 
   return (
@@ -219,45 +224,39 @@ const ShopPage: React.FC = () => {
       ) : (
         <div className="space-y-4">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="flex border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-              <div className="w-40 h-40 flex-shrink-0">
-                <img
-                  src={product.images[0]}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex-1 p-4">
-                <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-                <p className="text-gray-500 text-sm">{product.brand}</p>
-                <p className="mt-2 text-gray-600 line-clamp-2">{product.description}</p>
-                <div className="mt-2 flex justify-between items-center">
-                  <span className="text-blue-900 font-bold">{Number(product.price).toFixed(2)}&nbsp;€</span>
-                  <div className="flex space-x-1">
-                    {/* Afficher les tailles disponibles (avec stock > 0) */}
-                    {product.inventory
-                      .filter(item => item.quantity > 0)
-                      .slice(0, 3)
-                      .map((item) => (
-                        <span key={item.size} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                          {item.size}
-                        </span>
-                      ))}
-                    {/* Ou afficher toutes les tailles si aucune n'est en stock */}
-                    {product.inventory.every(item => item.quantity <= 0) &&
-                      product.inventory.slice(0, 3).map((item) => (
-                        <span key={item.size} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                          {item.size}
-                        </span>
-                      ))
-                    }
-                    {product.inventory.length > 3 && (
-                      <span className="text-xs bg-gray-100 px-2 py-1 rounded">+{product.inventory.length - 3}</span>
-                    )}
+            <Link key={product.id} to={`/product/${product.id}`} className="block">
+              <div className="flex border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                <div className="w-40 h-40 flex-shrink-0">
+                  <img
+                    src={product.images[0] || '/placeholder.png'}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 p-4">
+                  <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
+                  <p className="text-gray-500 text-sm">{product.brand}</p>
+                  <p className="mt-2 text-gray-600 line-clamp-2">{product.description}</p>
+                  <div className="mt-2 flex justify-between items-center">
+                    <span className="text-blue-900 font-bold">{Number(product.price).toFixed(2)}&nbsp;€</span>
+                    <div className="flex space-x-1">
+                      {/* Afficher les tailles disponibles (avec stock > 0) */}
+                      {product.inventory
+                        .filter(item => item.quantity > 0)
+                        .slice(0, 3)
+                        .map((item) => (
+                          <span key={item.size} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                            {item.size}
+                          </span>
+                        ))}
+                      {product.inventory.length > 3 && (
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">+{product.inventory.length - 3}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

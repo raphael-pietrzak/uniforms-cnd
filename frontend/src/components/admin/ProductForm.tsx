@@ -15,7 +15,7 @@ const defaultValues = {
   id: '',
   name: 'test',
   description: 'description',
-  price: 10,
+  price: 0,
   brand: 'M&S',
   category: 'tops',
   condition: 'new' as 'new' | 'used',
@@ -260,7 +260,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
             type="number"
             step="1"
             min="0"
-            value={formData.price || ''}
+            value={formData.price || 0}
             onChange={handleChange}
             fullWidth
           />

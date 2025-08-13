@@ -41,17 +41,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <Badge variant="warning">Occasion</Badge>
             </div>
           )}
-          {!isInStock ? (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">
-                Indisponible
-              </span>
-            </div>
-          ) : (
-            <div className="absolute top-2 right-2">
-              <Badge variant="success">En Stock</Badge>
-            </div>
-          )}
         </div>
         <div className="p-4">
           <h3 className="text-lg font-semibold text-gray-800 mb-1 truncate">{product.name}</h3>
