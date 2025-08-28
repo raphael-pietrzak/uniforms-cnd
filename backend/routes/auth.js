@@ -172,7 +172,6 @@ router.post('/refresh-token', async (req, res) => {
   try {
     // Récupérer le refresh token du cookie
     const refreshToken = req.cookies.refreshToken;
-    console.log('Refresh token reçu:', refreshToken);
     
     if (!refreshToken) {
       return res.status(401).json({ error: 'Refresh token manquant' });
@@ -188,8 +187,6 @@ router.post('/refresh-token', async (req, res) => {
       // Générer de nouveaux tokens
       const newTokens = generateTokens(decoded.id);
 
-      console.log('Nouveau refresh token généré:', newTokens.refreshToken);
-      
       // Stocker le nouveau refresh token
       await db('refresh_tokens').insert({
         user_id: decoded.id,
@@ -201,7 +198,9 @@ router.post('/refresh-token', async (req, res) => {
       setAuthCookies(res, newTokens.accessToken, newTokens.refreshToken);
       
       const user = await db('users').where({ id: decoded.id }).first();
-      res.json({ success: true, accessToken: newTokens.accessToken, user: { id: decoded.id, username: user.username, email: user.email, role: user.role } });
+      const userResponse = { id: decoded.id, username: user.username, email: user.email, role: user.role };
+
+      res.json({ success: true, accessToken: newTokens.accessToken, user: userResponse });
     } catch (error) {
       console.error('Erreur token:', error.message);
       return res.status(401).json({ error: 'Refresh token invalide' });
