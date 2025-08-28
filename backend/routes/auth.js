@@ -105,7 +105,8 @@ router.post('/register', registerValidation, async (req, res) => {
     setAuthCookies(res, accessToken, refreshToken);
     
     res.status(201).json({
-      user: { id: userId.id, username, email, role: 'user' }
+      user: { id: userId.id, username, email, role: 'user' },
+      accessToken: accessToken
     });
   } catch (error) {
     console.error('Erreur lors de l\'inscription:', error);
@@ -120,7 +121,7 @@ router.post('/login', loginValidation, loginLimiter, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
-    }
+    } 
     
     const { email, password } = req.body;
     
@@ -157,7 +158,8 @@ router.post('/login', loginValidation, loginLimiter, async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role
-      }
+      },
+      accessToken: accessToken
     });
   } catch (error) {
     console.error('Erreur lors de la connexion:', error);
@@ -170,6 +172,7 @@ router.post('/refresh-token', async (req, res) => {
   try {
     // Récupérer le refresh token du cookie
     const refreshToken = req.cookies.refreshToken;
+    console.log('Refresh token reçu:', refreshToken);
     
     if (!refreshToken) {
       return res.status(401).json({ error: 'Refresh token manquant' });
@@ -184,6 +187,8 @@ router.post('/refresh-token', async (req, res) => {
       
       // Générer de nouveaux tokens
       const newTokens = generateTokens(decoded.id);
+
+      console.log('Nouveau refresh token généré:', newTokens.refreshToken);
       
       // Stocker le nouveau refresh token
       await db('refresh_tokens').insert({
@@ -195,7 +200,8 @@ router.post('/refresh-token', async (req, res) => {
       // Définir les nouveaux cookies
       setAuthCookies(res, newTokens.accessToken, newTokens.refreshToken);
       
-      res.json({ success: true });
+      const user = await db('users').where({ id: decoded.id }).first();
+      res.json({ success: true, accessToken: newTokens.accessToken, user: { id: decoded.id, username: user.username, email: user.email, role: user.role } });
     } catch (error) {
       console.error('Erreur token:', error.message);
       return res.status(401).json({ error: 'Refresh token invalide' });

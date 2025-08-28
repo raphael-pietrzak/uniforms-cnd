@@ -4,9 +4,31 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 console.log(import.meta.env.VITE_BACKEND_URL)
 const API_URL = `${BASE_URL}/api`;
 
+// Variable globale pour stocker l'access token
+let currentAccessToken: string | null = null;
+
+// Fonction pour définir l'access token
+export const setAccessToken = (token: string | null) => {
+  currentAccessToken = token;
+};
+
+// Fonction pour obtenir l'access token actuel
+export const getAccessToken = (): string | null => {
+  return currentAccessToken;
+};
+
 // Fonction pour obtenir les en-têtes par défaut
 const getDefaultHeaders = (): Record<string, string> => {
   return { 'Content-Type': 'application/json' };
+};
+
+// Fonction pour obtenir les en-têtes avec authentification
+const getAuthHeaders = (): Record<string, string> => {
+  const headers = getDefaultHeaders();
+  if (currentAccessToken) {
+    headers['Authorization'] = `Bearer ${currentAccessToken}`;
+  }
+  return headers;
 };
 
 // Fonction utilitaire pour gérer les erreurs des requêtes
@@ -108,10 +130,8 @@ export const productsApi = {
   create: async (product: Omit<Product, 'id'>): Promise<Product> => {
     const response = await fetch(`${API_URL}/products`, {
       method: 'POST',
-      headers: {
-        ...getDefaultHeaders()
-      },
-      credentials: 'include', // Ajout de cette ligne pour envoyer les cookies
+      headers: getAuthHeaders(),
+      credentials: 'include',
       body: JSON.stringify({
         ...product,
         images: JSON.stringify(product.images)
@@ -124,10 +144,8 @@ export const productsApi = {
   update: async (product: Product): Promise<Product> => {
     const response = await fetch(`${API_URL}/products/${product.id}`, {
       method: 'PUT',
-      headers: {
-        ...getDefaultHeaders()
-      },
-      credentials: 'include', // Ajout pour envoyer les cookies
+      headers: getAuthHeaders(),
+      credentials: 'include',
       body: JSON.stringify({
         ...product,
         images: JSON.stringify(product.images)
@@ -140,8 +158,8 @@ export const productsApi = {
   delete: async (id: string): Promise<void> => {
     const response = await fetch(`${API_URL}/products/${id}`, {
       method: 'DELETE',
-      headers: getDefaultHeaders(),
-      credentials: 'include', // Ajout pour envoyer les cookies
+      headers: getAuthHeaders(),
+      credentials: 'include',
     });
     await handleResponse(response);
   },
@@ -150,8 +168,8 @@ export const productsApi = {
   updateInventory: async (productId: string, size: string, quantity: number): Promise<void> => {
     const response = await fetch(`${API_URL}/products/${productId}/inventory/${size}`, {
       method: 'PATCH',
-      headers: getDefaultHeaders(),
-      credentials: 'include', // Ajout pour envoyer les cookies
+      headers: getAuthHeaders(),
+      credentials: 'include',
       body: JSON.stringify({ quantity }),
     });
     await handleResponse(response);
@@ -166,10 +184,17 @@ export const uploadApi = {
       formData.append('images', file);
     });
 
+    const authHeaders = getAuthHeaders();
+    // Supprimer Content-Type pour FormData, mais garder Authorization
+    const headers: Record<string, string> = {};
+    if (authHeaders.Authorization) {
+      headers.Authorization = authHeaders.Authorization;
+    }
+
     const response = await fetch(`${API_URL}/upload`, {
       method: 'POST',
-      // Ne pas inclure Content-Type pour FormData, le navigateur le définira automatiquement
-      credentials: 'include', // Ajouter pour l'authentification
+      headers: headers,
+      credentials: 'include',
       body: formData,
     });
 
@@ -182,7 +207,8 @@ export const uploadApi = {
 export const ordersApi = {
   getAll: async (): Promise<Order[]> => {
     const response = await fetch(`${API_URL}/orders`, {
-      headers: getDefaultHeaders()
+      headers: getAuthHeaders(),
+      credentials: 'include'
     });
     const data = await handleResponse(response);
     return data;
@@ -190,7 +216,8 @@ export const ordersApi = {
   
   getById: async (orderId: string): Promise<Order> => {
     const response = await fetch(`${API_URL}/orders/${orderId}`, {
-      headers: getDefaultHeaders()
+      headers: getAuthHeaders(),
+      credentials: 'include'
     });
     const data = await handleResponse(response);
     return data;
@@ -209,7 +236,8 @@ export const ordersApi = {
   updateStatus: async (orderId: string, status: string): Promise<Order> => {
     const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
       method: 'PUT',
-      headers: getDefaultHeaders(),
+      headers: getAuthHeaders(),
+      credentials: 'include',
       body: JSON.stringify({ status }),
     });
     const data = await handleResponse(response);
@@ -219,7 +247,8 @@ export const ordersApi = {
   delete: async (orderId: string): Promise<void> => {
     const response = await fetch(`${API_URL}/orders/${orderId}`, {
       method: 'DELETE',
-      headers: getDefaultHeaders(),
+      headers: getAuthHeaders(),
+      credentials: 'include',
     });
     await handleResponse(response);
   },
@@ -250,7 +279,7 @@ export const authApi = {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Important pour inclure les cookies
+      credentials: 'include',
       body: JSON.stringify(credentials),
     });
     return handleResponse(response);
@@ -260,7 +289,7 @@ export const authApi = {
     const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Important pour inclure les cookies
+      credentials: 'include',
       body: JSON.stringify(userData),
     });
     return handleResponse(response);
@@ -270,7 +299,7 @@ export const authApi = {
     const response = await fetch(`${API_URL}/auth/refresh-token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Important pour inclure les cookies
+      credentials: 'include',
     });
     return handleResponse(response);
   },
@@ -279,7 +308,7 @@ export const authApi = {
     const response = await fetch(`${API_URL}/auth/logout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Important pour inclure les cookies
+      credentials: 'include',
     });
     return handleResponse(response);
   },

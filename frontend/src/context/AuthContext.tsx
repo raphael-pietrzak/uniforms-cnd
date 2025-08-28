@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authApi } from '../services/api';
+import { authApi, setAccessToken } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -89,12 +89,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Essayer de charger l'utilisateur depuis le serveur avec le cookie actuel
         const response = await authApi.refreshToken();
         setUser(response.user);
+        setAccessToken(response.accessToken);
         
         // Configurer le rafraîchissement automatique des tokens
         setupTokenRefresh();
       } catch (err) {
         console.log('Non authentifié ou erreur de rafraîchissement de session');
         setUser(null);
+        setAccessToken(null);
       } finally {
         setLoading(false);
       }
@@ -125,11 +127,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshAccessToken = async () => {
     try {
       // Appeler l'API de rafraîchissement (elle gère la mise à jour des cookies)
-      await authApi.refreshToken();
+      const response = await authApi.refreshToken();
+      setAccessToken(response.accessToken);
+
     } catch (err) {
       console.error('Erreur lors du rafraîchissement du token:', err);
       // En cas d'échec, déconnecter l'utilisateur
       setUser(null);
+      setAccessToken(null);
       if (refreshTimer) {
         clearInterval(refreshTimer);
         setRefreshTimer(null);
@@ -152,6 +157,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await authApi.login({ email, password });
       setUser(response.user);
+      
+      // Définir l'access token pour les futures requêtes API
+      if (response.accessToken) {
+        setAccessToken(response.accessToken);
+      }
       
       // Configurer le rafraîchissement automatique des tokens
       setupTokenRefresh();
@@ -180,6 +190,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await authApi.register({ username, email, password });
       setUser(response.user);
       
+      // Définir l'access token pour les futures requêtes API
+      if (response.accessToken) {
+        setAccessToken(response.accessToken);
+      }
+      
       // Configurer le rafraîchissement automatique des tokens
       setupTokenRefresh();
     } catch (err) {
@@ -203,6 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       // Nettoyer l'état local
       setUser(null);
+      setAccessToken(null);
       if (refreshTimer) {
         clearInterval(refreshTimer);
         setRefreshTimer(null);
