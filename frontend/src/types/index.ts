@@ -1,15 +1,19 @@
+export interface InventoryItem {
+  size: string;
+  quantity: number;
+}
+
 export interface Product {
   id: string;
   name: string;
   description: string;
   price: number;
-  sizes: string[];
   condition: 'new' | 'used';
   brand: string;
   gender: 'boys' | 'girls' | 'unisex';
   images: string[];
-  inStock: boolean;
   category: string;
+  inventory: InventoryItem[];
 }
 
 export interface CartItem {

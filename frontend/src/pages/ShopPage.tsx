@@ -3,7 +3,8 @@ import { useShop } from '../context/ShopContext';
 import ProductCard from '../components/shop/ProductCard';
 import ProductFilters from '../components/shop/ProductFilters';
 import { Product } from '../types';
-import { Grid, List, ArrowUpDown, SlidersHorizontal, X } from 'lucide-react';
+import { Grid, List, Search, SlidersHorizontal, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const ShopPage: React.FC = () => {
   const { products } = useShop();
@@ -11,9 +12,20 @@ const ShopPage: React.FC = () => {
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [sortOption, setSortOption] = useState<string>('default');
   const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const handleFilterChange = (filters: any) => {
     let filtered = [...products];
+
+    // Apply search query filtering
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(product => 
+        product.name.toLowerCase().includes(query) ||
+        product.description.toLowerCase().includes(query) ||
+        product.brand.toLowerCase().includes(query)
+      );
+    }
 
     // Filter by gender
     if (filters.gender) {
@@ -38,9 +50,11 @@ const ShopPage: React.FC = () => {
       filtered = filtered.filter(product => product.price <= parseFloat(filters.maxPrice));
     }
 
-    // Filter by size
+    // Filter by size - maintenant utilise l'inventaire
     if (filters.size) {
-      filtered = filtered.filter(product => product.sizes.includes(filters.size));
+      filtered = filtered.filter(product => 
+        product.inventory.some(item => item.size === filters.size)
+      );
     }
 
     // Filter by brand
@@ -48,6 +62,13 @@ const ShopPage: React.FC = () => {
       const brandLower = filters.brand.toLowerCase();
       filtered = filtered.filter(product => 
         product.brand.toLowerCase().includes(brandLower)
+      );
+    }
+
+    // Filter by stock status
+    if (filters.inStock === true) {
+      filtered = filtered.filter(product => 
+        product.inventory.some(item => item.quantity > 0)
       );
     }
 
@@ -82,37 +103,64 @@ const ShopPage: React.FC = () => {
 
   // Initialize filtered products
   useEffect(() => {
-    setFilteredProducts(products);
+    // Ne garder que les produits qui ont au moins une taille disponible en stock
+    const productsInStock = products.filter(product => 
+      product.inventory.some(item => item.quantity > 0)
+    );
+    setFilteredProducts(productsInStock);
   }, [products]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex flex-col md:flex-row justify-between items-start mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Boutique d'Uniformes Scolaires</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">Boutique d'Uniformes Scolaires</h1>
 
-        {/* Filters Toggle Button */}
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors"
-        >
-          {showFilters ? (
-            <>
-              <X size={18} />
-              <span>Masquer les filtres</span>
-            </>
-          ) : (
-            <>
-              <SlidersHorizontal size={18} />
-              <span>Afficher les filtres</span>
-            </>
-          )}
-        </button>
+        <div className="flex items-center space-x-4 mb-4 md:mb-0">
+          {/* Search Bar - Integrated before filters */}
+          <div className="mb-4 md:mb-0">
+            <div className="relative max-w-md mx-auto md:mx-0">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  handleFilterChange({});
+                }}
+                placeholder="Rechercher des produits..."
+                className="w-full border border-gray-300 rounded-md py-2 pl-4 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                <Search size={16} className="text-gray-400" />
+              </div>
+            </div>
+          </div>
+
+
+          {/* Filters Toggle Button - Redesigned to be more discreet */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center space-x-1 px-3 py-1.5 text-sm border border-gray-300 text-gray-600 rounded hover:bg-gray-50 transition-colors"
+          >
+            {showFilters ? (
+              <>
+                <X size={16} />
+                <span>Masquer</span>
+              </>
+            ) : (
+              <>
+                <SlidersHorizontal size={16} />
+                <span>Filtres</span>
+              </>
+            )}
+          </button>
+        </div>
+
       </div>
 
+
       {/* Filters - Conditionally rendered */}
-      <div className={`mb-6`}>
-      {showFilters && <ProductFilters onFilterChange={handleFilterChange} 
-      />}
+      <div className={`mb-6 ${showFilters ? 'block' : 'hidden'}`}>
+        <ProductFilters onFilterChange={handleFilterChange} />
       </div>
 
       {/* Toolbar */}
@@ -176,33 +224,39 @@ const ShopPage: React.FC = () => {
       ) : (
         <div className="space-y-4">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="flex border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-              <div className="w-40 h-40 flex-shrink-0">
-                <img
-                  src={product.images[0]}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex-1 p-4">
-                <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-                <p className="text-gray-500 text-sm">{product.brand}</p>
-                <p className="mt-2 text-gray-600 line-clamp-2">{product.description}</p>
-                <div className="mt-2 flex justify-between items-center">
-                  <span className="text-blue-900 font-bold">{Number(product.price).toFixed(2)}&nbsp;€</span>
-                  <div className="flex space-x-1">
-                    {product.sizes.slice(0, 3).map((size) => (
-                      <span key={size} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                        {size}
-                      </span>
-                    ))}
-                    {product.sizes.length > 3 && (
-                      <span className="text-xs bg-gray-100 px-2 py-1 rounded">+{product.sizes.length - 3}</span>
-                    )}
+            <Link key={product.id} to={`/product/${product.id}`} className="block">
+              <div className="flex border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                <div className="w-40 h-40 flex-shrink-0">
+                  <img
+                    src={product.images[0] || '/placeholder.png'}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 p-4">
+                  <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
+                  <p className="text-gray-500 text-sm">{product.brand}</p>
+                  <p className="mt-2 text-gray-600 line-clamp-2">{product.description}</p>
+                  <div className="mt-2 flex justify-between items-center">
+                    <span className="text-blue-900 font-bold">{Number(product.price).toFixed(2)}&nbsp;€</span>
+                    <div className="flex space-x-1">
+                      {/* Afficher les tailles disponibles (avec stock > 0) */}
+                      {product.inventory
+                        .filter(item => item.quantity > 0)
+                        .slice(0, 3)
+                        .map((item) => (
+                          <span key={item.size} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                            {item.size}
+                          </span>
+                        ))}
+                      {product.inventory.length > 3 && (
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">+{product.inventory.length - 3}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

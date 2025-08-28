@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ShoppingCart, ArrowLeft, Heart } from 'lucide-react';
+import { ShoppingCart, ArrowLeft } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
-import { getFullImageUrl } from '../services/api';
 
 // Fonctions auxiliaires pour traduire les catégories et genres
 const translateCategory = (category: string): string => {
@@ -13,13 +12,25 @@ const translateCategory = (category: string): string => {
     'bottoms': 'Bas',
     'outerwear': 'Vêtements d\'extérieur',
     'sportswear': 'Vêtements de sport',
+    'accessories': 'Accessoires',
+    'footwear': 'Chaussures',
+    'uniforms': 'Uniformes',
+    'sweaters': 'Pulls',
+    'shirts': 'Chemises',
+    'pants': 'Pantalons',
+    'skirts': 'Jupes',
+    'dresses': 'Robes',
+    'jackets': 'Vestes',
+    'bags': 'Sacs',
+    'socks': 'Chaussettes',
+    'school-supplies': 'Fournitures scolaires'
   };
   return categoryMap[category] || category;
 };
 
 const translateGender = (gender: string): string => {
   const genderMap: Record<string, string> = {
-    'unisex': 'Unisexe',
+    'unisex': 'Mixte',
     'boys': 'Garçons',
     'girls': 'Filles',
     'men': 'Hommes',
@@ -35,7 +46,12 @@ const ProductDetailPage: React.FC = () => {
   
   const product = products.find((p) => p.id === productId);
   
-  const [selectedSize, setSelectedSize] = useState<string>(product?.sizes[0] || '');
+  // Si le produit n'existe pas ou n'a pas d'inventaire, utiliser une valeur par défaut
+  const defaultSize = product?.inventory && product.inventory.length > 0 
+    ? product.inventory[0].size 
+    : '';
+  
+  const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
   const [selectedImage, setSelectedImage] = useState<number>(0);
   
   if (!product) {
@@ -53,8 +69,12 @@ const ProductDetailPage: React.FC = () => {
     );
   }
   
+  // Vérifier la disponibilité du stock pour la taille sélectionnée
+  const selectedInventoryItem = product.inventory?.find(item => item.size === selectedSize);
+  const sizeInStock = selectedInventoryItem && selectedInventoryItem.quantity > 0;
+  
   const handleAddToCart = () => {
-    if (selectedSize) {
+    if (selectedSize && sizeInStock) {
       addToCart(product, selectedSize);
       // Show a toast or notification here
       navigate('/cart');
@@ -111,7 +131,6 @@ const ProductDetailPage: React.FC = () => {
               <Badge variant={product.condition === 'new' ? 'primary' : 'warning'}>
                 {product.condition === 'new' ? 'Neuf' : 'Occasion'}
               </Badge>
-              {!product.inStock && <Badge variant="danger" className="ml-2">Rupture de Stock</Badge>}
             </div>
             <p className="text-gray-700 mb-6">{product.description}</p>
           </div>
@@ -124,19 +143,31 @@ const ProductDetailPage: React.FC = () => {
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-900 mb-4">Sélectionner une Taille</h3>
             <div className="grid grid-cols-4 gap-2">
-              {product.sizes.map((size) => (
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={`py-2 px-4 border rounded-md text-center ${
-                    selectedSize === size
-                      ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
+              {product.inventory.map((item) => {
+                const isInStock = item.quantity > 0;
+                
+                return (
+                  <button
+                    key={item.size}
+                    onClick={() => setSelectedSize(item.size)}
+                    className={`py-2 px-4 border rounded-md text-center ${
+                      selectedSize === item.size
+                        ? 'border-blue-600 bg-blue-50 text-blue-700'
+                        : isInStock
+                          ? 'border-gray-300 text-gray-700 hover:border-gray-400'
+                          : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                    disabled={!isInStock}
+                  >
+                    <div className="flex flex-col">
+                      <span>{item.size}</span>
+                      <span className={`text-xs ${isInStock ? 'text-green-600' : 'text-red-500'}`}>
+                        {isInStock ? `En stock (${item.quantity})` : 'Épuisé'}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
           
@@ -146,20 +177,12 @@ const ProductDetailPage: React.FC = () => {
               variant="primary"
               size="lg"
               fullWidth
-              disabled={!product.inStock}
+              disabled={!sizeInStock}
               className="flex items-center justify-center"
             >
               <ShoppingCart size={20} className="mr-2" />
-              {product.inStock ? 'Ajouter au Panier' : 'Rupture de Stock'}
+              {sizeInStock ? 'Ajouter au Panier' : 'Taille non disponible'}
             </Button>
-            {/* <Button
-              variant="outline"
-              size="lg"
-              className="flex items-center justify-center"
-            >
-              <Heart size={20} className="mr-2" />
-              Sauvegarder
-            </Button> */}
           </div>
           
           <div className="mt-8 pt-8 border-t border-gray-200">

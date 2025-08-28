@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Product } from '../../types';
 import Card from '../ui/Card';
 import Badge from '../ui/Badge';
-import { getFullImageUrl } from '../../services/api';
 
 interface ProductCardProps {
   product: Product;
@@ -14,6 +13,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const imageUrl = product.images && product.images.length > 0 
     ? product.images[0] 
     : 'https://placehold.co/600x400?text=Image+placeholder';
+    
+  // Vérifier si le produit est en stock (au moins une taille disponible)
+  const isInStock = product.inventory.some(item => item.quantity > 0);
+  
+  // Obtenir les tailles disponibles
+  const availableSizes = product.inventory
+    .filter(item => item.quantity > 0)
+    .map(item => item.size);
+
+  // Si aucune taille n'est disponible, afficher toutes les tailles
+  const sizesToDisplay = availableSizes.length > 0 
+    ? availableSizes 
+    : product.inventory.map(item => item.size);
     
   return (
     <Card className="h-full transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
@@ -29,25 +41,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <Badge variant="warning">Occasion</Badge>
             </div>
           )}
-          {!product.inStock && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">
-                Indisponible
-              </span>
-            </div>
-          )}
         </div>
         <div className="p-4">
           <h3 className="text-lg font-semibold text-gray-800 mb-1 truncate">{product.name}</h3>
           <p className="text-gray-500 text-sm mb-2">{product.brand}</p>
           <div className="flex justify-between items-center">
             <span className="text-blue-900 font-bold">{Number(product.price).toFixed(2)}&nbsp;€</span>
-            <div className="flex space-x-1">
-              {product.sizes.map((size) => (
-                <span key={size} className="text-xs bg-gray-100 px-2 py-1 rounded">
+            <div className="flex flex-wrap gap-1 justify-end">
+              {sizesToDisplay.slice(0, 3).map((size) => (
+                <span key={size} className={`text-xs px-2 py-1 rounded ${
+                  availableSizes.includes(size) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                }`}>
                   {size}
                 </span>
               ))}
+              {sizesToDisplay.length > 3 && (
+                <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                  +{sizesToDisplay.length - 3}
+                </span>
+              )}
             </div>
           </div>
         </div>

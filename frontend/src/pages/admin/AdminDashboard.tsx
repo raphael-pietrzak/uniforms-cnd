@@ -17,6 +17,7 @@ const AdminDashboard: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   
   useEffect(() => {
     // Charger les données au montage du composant
@@ -45,7 +46,7 @@ const AdminDashboard: React.FC = () => {
   
   // Calculate stats
   const totalProducts = products.length;
-  const inStockProducts = products.filter(p => p.inStock).length;
+  const inStockProducts = products.filter(p => p.inventory && p.inventory.length > 0 && p.inventory[0].quantity > 0).length;
   const outOfStockProducts = totalProducts - inStockProducts;
   const usedProducts = products.filter(p => p.condition === 'used').length;
   
@@ -57,7 +58,8 @@ const AdminDashboard: React.FC = () => {
         .filter(o => o.status === 'paid' || o.status === 'ready' || o.status === 'collected')
         .reduce((sum, order) => sum + (order.total ? parseFloat(order.total.toString()) : 0), 0) 
     : 0;
-  
+
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -178,7 +180,7 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="mt-4 flex justify-between text-sm">
               <div>
-                <span className="text-purple-600 font-medium">{Math.round((usedProducts / totalProducts) * 100)}%</span> de l'inventaire
+                <span className="text-purple-600 font-medium">{totalProducts > 0 ? Math.round((Number(usedProducts) / Number(totalProducts)) * 100) : 0}%</span> de l'inventaire
               </div>
               <Link to="/admin/products" className="text-blue-600 hover:text-blue-800">
                 Voir tout

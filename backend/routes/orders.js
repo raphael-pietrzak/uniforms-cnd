@@ -20,6 +20,7 @@ router.get('/', async (req, res) => {
           'order_items.quantity',
           'order_items.selected_size'
         );
+
       order.items = items.map(item => ({
         product: {
           id: item.id,
@@ -58,7 +59,6 @@ router.get('/:id', async (req, res) => {
         'order_items.quantity',
         'order_items.selected_size'
       );
-    
     order.items = items.map(item => ({
       product: {
         id: item.id,
@@ -82,19 +82,30 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { items, customerName, customerEmail, paymentMethod, total, status } = req.body;
+
     
-    // Utilisation de la nouvelle fonction réutilisable
+    // Validation des données d'entrée
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Les articles de la commande sont requis et doivent être un tableau non vide' });
+    }
+    
+    if (!customerName || !customerEmail || !paymentMethod || !total) {
+      return res.status(400).json({ error: 'Informations client incomplètes' });
+    }
+    
+    // Utilisation de la fonction réutilisable
     const result = await createOrderAndNotify({
       items,
       customerName,
       customerEmail,
       paymentMethod,
       total,
-      status
+      status: status || 'pending'
     });
     
     res.status(201).json(result);
   } catch (error) {
+    console.error('Erreur lors de la création de la commande:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -152,6 +163,24 @@ router.put('/:id/status', async (req, res) => {
     }));
     
     res.json(updatedOrder);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Supprimer une commande
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await db('orders').where({ id }).first();
+    if (!order) {
+      return res.status(404).json({ error: 'Commande non trouvée' });
+    }
+    // Supprimer les items de la commande
+    await db('order_items').where({ order_id: id }).delete();
+    // Supprimer la commande
+    await db('orders').where({ id }).delete();
+    res.json({ message: 'Commande supprimée avec succès' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

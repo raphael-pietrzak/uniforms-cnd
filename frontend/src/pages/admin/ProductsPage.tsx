@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Edit, Trash2, Plus, Search } from 'lucide-react';
+import { Edit, Trash2, Plus, Search, ArrowLeft } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Badge from '../../components/ui/Badge';
@@ -8,6 +8,29 @@ import { Product } from '../../types';
 import AddProductModal from '../../components/admin/AddProductModal';
 import DeleteConfirmationModal from '../../components/admin/DeleteConfirmationModal';
 import { productsApi, getFullImageUrl } from '../../services/api';
+
+// Fonction pour traduire les catégories
+const translateCategory = (category: string): string => {
+  const categoryMap: Record<string, string> = {
+    'tops': 'Hauts',
+    'bottoms': 'Bas',
+    'outerwear': 'Vêtements d\'extérieur',
+    'sportswear': 'Vêtements de sport',
+    'accessories': 'Accessoires',
+    'footwear': 'Chaussures',
+    'uniforms': 'Uniformes',
+    'sweaters': 'Pulls',
+    'shirts': 'Chemises',
+    'pants': 'Pantalons',
+    'skirts': 'Jupes',
+    'dresses': 'Robes',
+    'jackets': 'Vestes',
+    'bags': 'Sacs',
+    'socks': 'Chaussettes',
+    'school-supplies': 'Fournitures scolaires'
+  };
+  return categoryMap[category] || category;
+};
 
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -52,7 +75,6 @@ const ProductsPage: React.FC = () => {
       // Mettre à jour le statut
       const updatedProduct = {
         ...product,
-        inStock: !product.inStock
       };
 
       // Appeler l'API pour mettre à jour
@@ -109,7 +131,9 @@ const ProductsPage: React.FC = () => {
       product.description.toLowerCase().includes(searchTerm.toLowerCase());
 
     // Filter by stock status if enabled
-    const matchesStock = showOnlyOutOfStock ? !product.inStock : true;
+    const matchesStock = showOnlyOutOfStock 
+      ? product.inventory.every(item => item.quantity <= 0)
+      : true;
 
     return matchesSearch && matchesStock;
   });
@@ -117,7 +141,13 @@ const ProductsPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Produits</h1>
+        <div>
+          <Link to="/admin" className="flex items-center text-gray-600 hover:text-blue-800 mb-2">
+            <ArrowLeft size={18} className="mr-1" />
+            Retour au Tableau de Bord
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900">Produits</h1>
+        </div>
         <Button
           variant="primary"
           className="flex items-center"
@@ -194,7 +224,7 @@ const ProductsPage: React.FC = () => {
                     Prix
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tailles
+                    Tailles & Stock
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     État
@@ -237,7 +267,7 @@ const ProductsPage: React.FC = () => {
                           onClick={() => handleToggleProductStatus(product.id)}
                           className="flex items-center text-sm"
                         >
-                          {product.inStock ? (
+                          {product.inventory.some(item => item.quantity > 0) ? (
                             <>
                               <span className="h-2.5 w-2.5 rounded-full bg-green-500 mr-2"></span>
                               <span className="text-green-800">En Stock</span>
@@ -255,9 +285,17 @@ const ProductsPage: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex flex-wrap gap-1">
-                          {product.sizes.map((size) => (
-                            <span key={size} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                              {size}
+                          {product.inventory.map((item) => (
+                            <span 
+                              key={item.size} 
+                              className={`text-xs px-2 py-1 rounded flex items-center ${
+                                item.quantity > 0 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-red-100 text-red-800'
+                              }`}
+                              title={`${item.size}: ${item.quantity} en stock`}
+                            >
+                              {item.size} <span className="ml-1 font-medium">({item.quantity})</span>
                             </span>
                           ))}
                         </div>
@@ -268,7 +306,7 @@ const ProductsPage: React.FC = () => {
                         </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {product.category}
+                        {translateCategory(product.category)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">

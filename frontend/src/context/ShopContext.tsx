@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { Product, CartItem, Order } from '../types';
+import { Product, CartItem, Order, InventoryItem } from '../types';
 import { productsApi, ordersApi, stripeApi } from '../services/api';
 
 // Clé pour le localStorage
@@ -19,8 +19,10 @@ interface ShopContextType {
   addProduct: (product: Product) => Promise<void>;
   updateProduct: (product: Product) => Promise<void>;
   toggleProductStatus: (productId: string) => Promise<void>;
+  updateInventory: (productId: string, size: string, quantity: number) => Promise<void>;
   loading: boolean;
   error: string | null;
+  lastOrder?: Order;
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
@@ -90,11 +92,24 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Fonctions de manipulation du panier
   const addToCart = (product: Product, selectedSize: string) => {
+    // Vérifier la disponibilité du stock
+    const inventoryItem = product.inventory?.find(item => item.size === selectedSize);
+    if (!inventoryItem || inventoryItem.quantity <= 0) {
+      setError('Ce produit n\'est plus disponible dans cette taille.');
+      return;
+    }
+    
     const existingItem = cart.find(
       (item) => item.product.id === product.id && item.selectedSize === selectedSize
     );
 
+    // Si le produit est déjà dans le panier, vérifier si on peut augmenter la quantité
     if (existingItem) {
+      // Vérifier si on a assez de stock pour augmenter la quantité
+      if (existingItem.quantity + 1 > inventoryItem.quantity) {
+        setError(`Il ne reste que ${inventoryItem.quantity} exemplaire(s) de ce produit en taille ${selectedSize}.`);
+        return;
+      }
       updateQuantity(product.id, selectedSize, existingItem.quantity + 1);
     } else {
       setCart([...cart, { product, quantity: 1, selectedSize }]);
@@ -106,10 +121,23 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const updateQuantity = (productId: string, size: string, quantity: number) => {
+    const cartItem = cart.find(item => item.product.id === productId && item.selectedSize === size);
+    if (!cartItem) return;
+    
+    // Vérifier la disponibilité du stock
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    
+    const inventoryItem = product.inventory?.find(item => item.size === size);
+    if (!inventoryItem) return;
+    
+    // Ne pas autoriser une quantité supérieure au stock disponible
+    const newQuantity = Math.min(Math.max(1, quantity), inventoryItem.quantity);
+    
     setCart(
       cart.map((item) =>
         item.product.id === productId && item.selectedSize === size
-          ? { ...item, quantity: Math.max(1, quantity) }
+          ? { ...item, quantity: newQuantity }
           : item
       )
     );
@@ -119,7 +147,7 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCart([]);
   };
 
-  // Mise à jour de checkout pour utiliser Stripe
+  // Mise à jour de checkout pour utiliser Stripe et gérer le stock
   const checkout = async (
     paymentMethod: 'online' | 'inperson',
     customerInfo: { name: string; email: string }
@@ -127,9 +155,22 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     setError(null);
     try {
+      // Vérifier le stock avant de procéder
+      for (const item of cart) {
+        const product = products.find(p => p.id === item.product.id);
+        if (!product) continue;
+        
+        const inventoryItem = product.inventory?.find(inv => inv.size === item.selectedSize);
+        if (!inventoryItem || inventoryItem.quantity < item.quantity) {
+          throw new Error(`Le produit "${product.name}" en taille ${item.selectedSize} n'est plus disponible en quantité suffisante.`);
+        }
+      }
+      
       if (paymentMethod === 'online') {
         // Utiliser Stripe pour le paiement en ligne
         const session = await stripeApi.createCheckoutSession(cart, customerInfo.email);
+        
+        // Note: Le stock sera mis à jour lors de la confirmation du paiement par le webhook Stripe
         
         // Retourner l'URL de redirection Stripe
         return { redirect: session.url };
@@ -145,9 +186,15 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
 
         const newOrder = await ordersApi.create(orderData);
+        
+        // La mise à jour du stock est maintenant gérée par le backend
+        // Il n'est plus nécessaire d'appeler updateInventory ici
+        
         setOrders([newOrder, ...orders]);
         clearCart();
-        return {};
+        
+        // Retourner une redirection vers la page de succès
+        return { redirect: `/checkout/success?orderId=${newOrder.id}` };
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
@@ -191,6 +238,51 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const updateInventory = async (productId: string, size: string, quantityChange: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Trouver le produit actuel
+      const product = products.find(p => p.id === productId);
+      if (!product) {
+        throw new Error('Produit non trouvé');
+      }
+
+      // Trouver l'entrée d'inventaire correspondante
+      const inventoryItem = product.inventory?.find(item => item.size === size);
+      if (!inventoryItem) {
+        throw new Error(`Taille ${size} non trouvée dans l'inventaire du produit`);
+      }
+
+      // Calculer la nouvelle quantité
+      const newQuantity = Math.max(0, inventoryItem.quantity + quantityChange);
+      
+      // Appeler l'API pour mettre à jour l'inventaire
+      await productsApi.updateInventory(productId, size, newQuantity);
+      
+      // Mettre à jour le state local
+      setProducts(products.map(p => {
+        if (p.id !== productId) return p;
+        
+        const updatedInventory = (p.inventory || []).map(item => 
+          item.size === size ? { ...item, quantity: newQuantity } : item
+        );
+        
+        return {
+          ...p,
+          inventory: updatedInventory,
+          inStock: updatedInventory.some(item => item.quantity > 0)
+        };
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
+      console.error('Erreur:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const toggleProductStatus = async (productId: string) => {
     setLoading(true);
     setError(null);
@@ -204,7 +296,6 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Mettre à jour le statut
       const updatedProduct = {
         ...product,
-        inStock: !product.inStock
       };
 
       // Appeler l'API pour mettre à jour
@@ -234,6 +325,7 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         addProduct,
         updateProduct,
         toggleProductStatus,
+        updateInventory,
         loading,
         error
       }}
