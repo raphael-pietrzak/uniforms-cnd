@@ -14,12 +14,8 @@ const Footer: React.FC = () => {
               Des uniformes scolaires de qualité à des prix abordables.
             </p>
             <div className="flex items-center mb-2">
-              <Phone size={16} className="mr-2" />
-              <span className="text-gray-300">+33 9 51 34 26 76</span>
-            </div>
-            <div className="flex items-center mb-2">
               <Mail size={16} className="mr-2" />
-              <span className="text-gray-300">cours.notre.dame@icrsp.org</span>
+              <span className="text-gray-300">cnd.secretariat@icrsp.org</span>
             </div>
             <div className="flex items-start">
               <MapPin size={16} className="mr-2 mt-1 flex-shrink-0" />
@@ -67,12 +63,8 @@ const Footer: React.FC = () => {
                 <span className="font-medium">Lundi - Vendredi:</span>
                 <br />8h30 - 16h30
               </p>
-              <p>
-                <span className="font-medium">Samedi:</span>
-                <br />9h00 - 12h00
-              </p>
               <p className="mt-4 text-sm">
-                Fermé les dimanches et pendant les vacances scolaires
+                Fermé le week-end et pendant les vacances scolaires.
               </p>
             </div>
           </div>

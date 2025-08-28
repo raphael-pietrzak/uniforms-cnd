@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authApi } from '../services/api';
+import { authApi, setAccessToken } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -7,6 +7,7 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   error: string | null;
+  isOnline: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -22,11 +23,6 @@ interface User {
   role: string;
 }
 
-interface Tokens {
-  accessToken: string;
-  refreshToken: string;
-}
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Délai avant l'expiration du token pour le rafraîchir (14 minutes)
@@ -34,61 +30,116 @@ const REFRESH_TOKEN_THRESHOLD = 14 * 60 * 1000;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [tokens, setTokens] = useState<Tokens | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
+  const [refreshTimer, setRefreshTimer] = useState<NodeJS.Timeout | null>(null);
+  
+  // Écouteur pour l'état de la connexion réseau
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      // Essayer de rafraîchir la session quand on revient en ligne
+      if (user) {
+        refreshAccessToken();
+      }
+    };
+    
+    const handleOffline = () => {
+      setIsOnline(false);
+      setError("Vous êtes actuellement hors connexion.");
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [user]);
+  
+  // Configurer l'écouteur d'événements pour les tokens expirés
+  useEffect(() => {
+    const handleTokenExpired = () => {
+      console.log('Token expiré, tentative de rafraîchissement...');
+      refreshAccessToken();
+    };
+    
+    window.addEventListener('auth:tokenExpired', handleTokenExpired);
+    
+    // Nettoyage
+    return () => {
+      window.removeEventListener('auth:tokenExpired', handleTokenExpired);
+    };
+  }, []);
   
   // Vérifier l'état de l'authentification au chargement
   useEffect(() => {
     const initAuth = async () => {
-      const storedTokens = localStorage.getItem('tokens');
-      const storedUser = localStorage.getItem('user');
-      
-      if (storedTokens && storedUser) {
-        try {
-          const parsedTokens = JSON.parse(storedTokens);
-          const parsedUser = JSON.parse(storedUser);
-          
-          setTokens(parsedTokens);
-          setUser(parsedUser);
-          
-          // Configurer le rafraîchissement automatique des tokens
-          setupTokenRefresh(parsedTokens.refreshToken);
-        } catch (err) {
-          console.error('Erreur lors de la récupération des données d\'authentification:', err);
-          localStorage.removeItem('tokens');
-          localStorage.removeItem('user');
+      try {
+        // Ne pas essayer de rafraîchir le token si l'utilisateur est hors ligne
+        if (!navigator.onLine) {
+          setIsOnline(false);
+          setError("Vous êtes actuellement hors connexion. Certaines fonctionnalités peuvent ne pas être disponibles.");
+          setLoading(false);
+          return;
         }
+        
+        // Essayer de charger l'utilisateur depuis le serveur avec le cookie actuel
+        const response = await authApi.refreshToken();
+        setUser(response.user);
+        setAccessToken(response.accessToken);
+        
+        // Configurer le rafraîchissement automatique des tokens
+        setupTokenRefresh();
+      } catch (err) {
+        console.log('Non authentifié ou erreur de rafraîchissement de session');
+        setUser(null);
+        setAccessToken(null);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
     
     initAuth();
+    
+    return () => {
+      if (refreshTimer) {
+        clearInterval(refreshTimer);
+      }
+    };
   }, []);
   
   // Configurer le rafraîchissement automatique des tokens
-  const setupTokenRefresh = (refreshToken: string) => {
-    // Rafraîchir le token périodiquement avant qu'il n'expire
-    const refreshTimer = setInterval(async () => {
-      try {
-        const response = await authApi.refreshToken(refreshToken);
-        setTokens(response.tokens);
-        localStorage.setItem('tokens', JSON.stringify(response.tokens));
-        
-        // Mettre à jour le timer avec le nouveau refresh token
-        clearInterval(refreshTimer);
-        setupTokenRefresh(response.tokens.refreshToken);
-      } catch (err) {
-        console.error('Erreur lors du rafraîchissement du token:', err);
-        // En cas d'échec, déconnecter l'utilisateur
-        handleLogout();
-        clearInterval(refreshTimer);
-      }
-    }, REFRESH_TOKEN_THRESHOLD);
+  const setupTokenRefresh = () => {
+    // Nettoyer le timer existant s'il y en a un
+    if (refreshTimer) {
+      clearInterval(refreshTimer);
+    }
     
-    // Nettoyer le timer lors du démontage du composant
-    return () => clearInterval(refreshTimer);
+    // Rafraîchir le token périodiquement avant qu'il n'expire
+    const timer = setInterval(refreshAccessToken, REFRESH_TOKEN_THRESHOLD);
+    setRefreshTimer(timer);
+  };
+  
+  // Rafraîchir le token d'accès
+  const refreshAccessToken = async () => {
+    try {
+      // Appeler l'API de rafraîchissement (elle gère la mise à jour des cookies)
+      const response = await authApi.refreshToken();
+      setAccessToken(response.accessToken);
+
+    } catch (err) {
+      console.error('Erreur lors du rafraîchissement du token:', err);
+      // En cas d'échec, déconnecter l'utilisateur
+      setUser(null);
+      setAccessToken(null);
+      if (refreshTimer) {
+        clearInterval(refreshTimer);
+        setRefreshTimer(null);
+      }
+    }
   };
   
   // Gérer la connexion
@@ -96,18 +147,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     setError(null);
     
+    // Vérifier si l'utilisateur est en ligne
+    if (!isOnline) {
+      setError("Impossible de se connecter en mode hors ligne. Veuillez vérifier votre connexion internet.");
+      setLoading(false);
+      throw new Error("Impossible de se connecter en mode hors ligne");
+    }
+    
     try {
       const response = await authApi.login({ email, password });
-      
       setUser(response.user);
-      setTokens(response.tokens);
       
-      // Stocker les données dans localStorage
-      localStorage.setItem('user', JSON.stringify(response.user));
-      localStorage.setItem('tokens', JSON.stringify(response.tokens));
+      // Définir l'access token pour les futures requêtes API
+      if (response.accessToken) {
+        setAccessToken(response.accessToken);
+      }
       
       // Configurer le rafraîchissement automatique des tokens
-      setupTokenRefresh(response.tokens.refreshToken);
+      setupTokenRefresh();
     } catch (err) {
       console.error('Erreur de connexion:', err);
       setError(err instanceof Error ? err.message : 'Erreur de connexion. Veuillez réessayer.');
@@ -122,18 +179,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     setError(null);
     
+    // Vérifier si l'utilisateur est en ligne
+    if (!isOnline) {
+      setError("Impossible de s'inscrire en mode hors ligne. Veuillez vérifier votre connexion internet.");
+      setLoading(false);
+      throw new Error("Impossible de s'inscrire en mode hors ligne");
+    }
+    
     try {
       const response = await authApi.register({ username, email, password });
-      
       setUser(response.user);
-      setTokens(response.tokens);
       
-      // Stocker les données dans localStorage
-      localStorage.setItem('user', JSON.stringify(response.user));
-      localStorage.setItem('tokens', JSON.stringify(response.tokens));
+      // Définir l'access token pour les futures requêtes API
+      if (response.accessToken) {
+        setAccessToken(response.accessToken);
+      }
       
       // Configurer le rafraîchissement automatique des tokens
-      setupTokenRefresh(response.tokens.refreshToken);
+      setupTokenRefresh();
     } catch (err) {
       console.error('Erreur d\'inscription:', err);
       setError(err instanceof Error ? err.message : 'Erreur d\'inscription. Veuillez réessayer.');
@@ -149,17 +212,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     
     try {
-      if (tokens?.refreshToken) {
-        await authApi.logout(tokens.refreshToken);
-      }
+      await authApi.logout();
     } catch (err) {
       console.error('Erreur lors de la déconnexion:', err);
     } finally {
-      // Supprimer les données d'authentification
+      // Nettoyer l'état local
       setUser(null);
-      setTokens(null);
-      localStorage.removeItem('user');
-      localStorage.removeItem('tokens');
+      setAccessToken(null);
+      if (refreshTimer) {
+        clearInterval(refreshTimer);
+        setRefreshTimer(null);
+      }
       setLoading(false);
     }
   };
@@ -198,7 +261,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // Effacer les erreurs
   const clearError = () => {
-    setError(null);
+    // Ne pas effacer l'erreur d'état hors ligne si nous sommes toujours hors ligne
+    if (isOnline || (error && !error.includes("hors connexion") && !error.includes("hors ligne"))) {
+      setError(null);
+    }
   };
   
   const authContextValue: AuthContextType = {
@@ -207,6 +273,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAdmin: user?.role === 'admin',
     loading,
     error,
+    isOnline,
     login: handleLogin,
     register: handleRegister,
     logout: handleLogout,

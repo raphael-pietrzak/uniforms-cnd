@@ -4,26 +4,29 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 console.log(import.meta.env.VITE_BACKEND_URL)
 const API_URL = `${BASE_URL}/api`;
 
-// Fonction utilitaire pour récupérer le token d'accès
-const getAccessToken = (): string | null => {
-  const tokensStr = localStorage.getItem('tokens');
-  if (!tokensStr) return null;
-  
-  try {
-    const tokens = JSON.parse(tokensStr);
-    return tokens.accessToken || null;
-  } catch (e) {
-    console.error('Erreur lors de la récupération du token:', e);
-    return null;
-  }
+// Variable globale pour stocker l'access token
+let currentAccessToken: string | null = null;
+
+// Fonction pour définir l'access token
+export const setAccessToken = (token: string | null) => {
+  currentAccessToken = token;
 };
 
-// Fonction pour obtenir les en-têtes d'authentification
+// Fonction pour obtenir l'access token actuel
+export const getAccessToken = (): string | null => {
+  return currentAccessToken;
+};
+
+// Fonction pour obtenir les en-têtes par défaut
+const getDefaultHeaders = (): Record<string, string> => {
+  return { 'Content-Type': 'application/json' };
+};
+
+// Fonction pour obtenir les en-têtes avec authentification
 const getAuthHeaders = (): Record<string, string> => {
-  const token = getAccessToken();
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  const headers = getDefaultHeaders();
+  if (currentAccessToken) {
+    headers['Authorization'] = `Bearer ${currentAccessToken}`;
   }
   return headers;
 };
@@ -86,10 +89,26 @@ const formatProduct = (product: any): Product => {
     parsedImages = ['https://placehold.co/600x400?text=Image+placeholder'];
   }
 
+  // Préparer l'inventaire
+  let inventory = [];
+  if (product.inventory) {
+    // Si l'inventaire est déjà présent, l'utiliser directement
+    inventory = product.inventory;
+  } else if (product.sizes) {
+    // Sinon, créer un inventaire à partir des tailles (pour compatibilité avec l'ancien format)
+    try {
+      const sizes = typeof product.sizes === 'string' ? JSON.parse(product.sizes) : product.sizes;
+      inventory = sizes.map((size: string) => ({ size, quantity: 0 }));
+    } catch (e) {
+      console.error('Erreur de parsing des tailles:', e);
+      inventory = [];
+    }
+  }
+
   return {
     ...product,
-    sizes: typeof product.sizes === 'string' ? JSON.parse(product.sizes) : product.sizes,
     images: parsedImages.map(getFullImageUrl),
+    inventory: inventory,
     id: product.id.toString()
   };
 };
@@ -111,12 +130,10 @@ export const productsApi = {
   create: async (product: Omit<Product, 'id'>): Promise<Product> => {
     const response = await fetch(`${API_URL}/products`, {
       method: 'POST',
-      headers: {
-        ...getAuthHeaders()
-      },
+      headers: getAuthHeaders(),
+      credentials: 'include',
       body: JSON.stringify({
         ...product,
-        sizes: JSON.stringify(product.sizes),
         images: JSON.stringify(product.images)
       }),
     });
@@ -127,12 +144,10 @@ export const productsApi = {
   update: async (product: Product): Promise<Product> => {
     const response = await fetch(`${API_URL}/products/${product.id}`, {
       method: 'PUT',
-      headers: {
-        ...getAuthHeaders()
-      },
+      headers: getAuthHeaders(),
+      credentials: 'include',
       body: JSON.stringify({
         ...product,
-        sizes: JSON.stringify(product.sizes),
         images: JSON.stringify(product.images)
       }),
     });
@@ -143,7 +158,19 @@ export const productsApi = {
   delete: async (id: string): Promise<void> => {
     const response = await fetch(`${API_URL}/products/${id}`, {
       method: 'DELETE',
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
+      credentials: 'include',
+    });
+    await handleResponse(response);
+  },
+  
+  // Nouvelle méthode pour mettre à jour l'inventaire
+  updateInventory: async (productId: string, size: string, quantity: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/products/${productId}/inventory/${size}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      credentials: 'include',
+      body: JSON.stringify({ quantity }),
     });
     await handleResponse(response);
   },
@@ -157,15 +184,17 @@ export const uploadApi = {
       formData.append('images', file);
     });
 
-    const token = getAccessToken();
-    const headers: HeadersInit = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+    const authHeaders = getAuthHeaders();
+    // Supprimer Content-Type pour FormData, mais garder Authorization
+    const headers: Record<string, string> = {};
+    if (authHeaders.Authorization) {
+      headers.Authorization = authHeaders.Authorization;
     }
 
     const response = await fetch(`${API_URL}/upload`, {
       method: 'POST',
-      headers,
+      headers: headers,
+      credentials: 'include',
       body: formData,
     });
 
@@ -178,7 +207,17 @@ export const uploadApi = {
 export const ordersApi = {
   getAll: async (): Promise<Order[]> => {
     const response = await fetch(`${API_URL}/orders`, {
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
+      credentials: 'include'
+    });
+    const data = await handleResponse(response);
+    return data;
+  },
+  
+  getById: async (orderId: string): Promise<Order> => {
+    const response = await fetch(`${API_URL}/orders/${orderId}`, {
+      headers: getAuthHeaders(),
+      credentials: 'include'
     });
     const data = await handleResponse(response);
     return data;
@@ -187,7 +226,7 @@ export const ordersApi = {
   create: async (orderData: any): Promise<Order> => {
     const response = await fetch(`${API_URL}/orders`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: getDefaultHeaders(),
       body: JSON.stringify(orderData),
     });
     const data = await handleResponse(response);
@@ -198,10 +237,20 @@ export const ordersApi = {
     const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
       method: 'PUT',
       headers: getAuthHeaders(),
+      credentials: 'include',
       body: JSON.stringify({ status }),
     });
     const data = await handleResponse(response);
     return data;
+  },
+  
+  delete: async (orderId: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/orders/${orderId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+      credentials: 'include',
+    });
+    await handleResponse(response);
   },
 };
 
@@ -230,6 +279,7 @@ export const authApi = {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(credentials),
     });
     return handleResponse(response);
@@ -239,25 +289,26 @@ export const authApi = {
     const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(userData),
     });
     return handleResponse(response);
   },
 
-  refreshToken: async (refreshToken: string) => {
+  refreshToken: async () => {
     const response = await fetch(`${API_URL}/auth/refresh-token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
+      credentials: 'include',
     });
     return handleResponse(response);
   },
 
-  logout: async (refreshToken: string) => {
+  logout: async () => {
     const response = await fetch(`${API_URL}/auth/logout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
+      credentials: 'include',
     });
     return handleResponse(response);
   },

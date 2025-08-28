@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Filter, X } from 'lucide-react';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
@@ -19,6 +19,7 @@ interface ProductFiltersProps {
 }
 
 const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
+  
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<FiltersState>({
     gender: '',
@@ -30,12 +31,19 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
     brand: '',
   });
 
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     const updatedFilters = { ...filters, [name]: value };
     setFilters(updatedFilters);
     onFilterChange(updatedFilters);
   };
+
+  // Appliquer les filtres au chargement initial
+  useEffect(() => {
+    onFilterChange(filters);
+  }, []);
 
   const handleReset = () => {
     const resetFilters = {
@@ -50,6 +58,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
     setFilters(resetFilters);
     onFilterChange(resetFilters);
   };
+
 
   return (
     <div className="bg-white rounded-lg">
@@ -78,7 +87,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
               { value: '', label: 'Tous les genres' },
               { value: 'boys', label: 'Garçons' },
               { value: 'girls', label: 'Filles' },
-              { value: 'unisex', label: 'Unisexe' },
+              { value: 'unisex', label: 'Mixte' },
             ]}
             className="border-gray-200 focus:border-gray-300 focus:ring-0 text-sm rounded-md"
             fullWidth
