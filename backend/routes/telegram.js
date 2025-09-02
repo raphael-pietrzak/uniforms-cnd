@@ -63,9 +63,13 @@ async function editTelegramMessage(chatId, messageId, messageText, parseMode = '
 
 // Fonction pour formater le résumé d'une commande
 function formatOrderSummary(order, isCollected = false) {
-  const paymentMethod = order.payment_method === 'online' ? 'En ligne' : 'À la livraison';
   const statusEmoji = isCollected ? '✅' : '📦';
   const statusText = isCollected ? 'COMMANDE COLLECTÉE' : 'NOUVELLE COMMANDE';
+  
+  // Déterminer le statut de paiement de façon plus claire
+  const isOnlinePayment = order.payment_method === 'online';
+  const paymentEmoji = isOnlinePayment ? '✅' : '⚠️';
+  const paymentStatus = isOnlinePayment ? 'PAYÉE EN LIGNE' : 'NON PAYÉE';
   
   // Convertir le total en nombre et gérer les cas où il pourrait être null/undefined
   const totalAmount = parseFloat(order.total) || 0;
@@ -73,7 +77,7 @@ function formatOrderSummary(order, isCollected = false) {
   let summary = `${statusEmoji} *${statusText} #${order.id}*\n\n`;
   summary += `👤 *Client:* ${order.customer_name}\n`;
   summary += `📧 *Email:* ${order.customer_email}\n`;
-  summary += `💳 *Méthode de paiement:* ${paymentMethod}\n`;
+  summary += `${paymentEmoji} *Paiement:* ${paymentStatus}\n`;
   summary += `🏷️ *Total:* ${totalAmount.toFixed(2)}€\n\n`;
   
   summary += `*Articles commandés:*\n`;

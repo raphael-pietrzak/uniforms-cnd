@@ -10,8 +10,8 @@ const CartPage: React.FC = () => {
   const { cart, checkout } = useShop();
   const [paymentMethod, setPaymentMethod] = useState<'online' | 'inperson'>('online');
   const [customerInfo, setCustomerInfo] = useState({
-    name: 'Jean Dupont',
-    email: 'jean.dupont@example.com',
+    name: '',
+    email: '',
   });
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'confirmation'>('cart');
   const [isProcessing, setIsProcessing] = useState(false);
