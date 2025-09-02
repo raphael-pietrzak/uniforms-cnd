@@ -1,7 +1,7 @@
 const express = require('express');
 const db = require('../config/database');
 const { createOrderAndNotify } = require('../utils/orderUtils');
-const whatsappRoutes = require('./whatsapp'); // Importer les routes WhatsApp
+const telegramRoutes = require('./telegram'); // Remplacer WhatsApp par Telegram
 
 const router = express.Router();
 

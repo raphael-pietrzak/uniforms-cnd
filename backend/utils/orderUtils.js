@@ -1,5 +1,5 @@
 const db = require('../config/database');
-const whatsappRoutes = require('../routes/whatsapp');
+const telegramRoutes = require('../routes/telegram');
 const nodemailer = require('nodemailer');
 
 /**
@@ -67,7 +67,7 @@ ${order.items.map(item => `<li><strong>${item.product.name}</strong> (Taille: ${
 }
 
 /**
- * Fonction réutilisable pour créer une commande et envoyer une notification WhatsApp
+ * Fonction réutilisable pour créer une commande et envoyer une notification Telegram
  * @param {Object} orderData - Données de la commande
  * @param {Array} orderData.items - Articles de la commande
  * @param {string} orderData.customerName - Nom du client
@@ -166,21 +166,21 @@ async function createOrderAndNotify(orderData) {
         selectedSize: item.selected_size
       }));
       
-      // Envoyer une notification WhatsApp et récupérer l'ID du message
+      // Envoyer une notification Telegram et récupérer l'ID du message
       try {
-        const whatsappMessageId = await whatsappRoutes.sendOrderNotification(newOrder);
+        const telegramMessageId = await telegramRoutes.sendOrderNotification(newOrder);
         
-        // Mettre à jour la commande avec l'ID du message WhatsApp
-        if (whatsappMessageId) {
+        // Mettre à jour la commande avec l'ID du message Telegram
+        if (telegramMessageId) {
           await trx('orders').where({ id: orderId }).update({
-            whatsapp_message_id: whatsappMessageId,
+            telegram_message_id: telegramMessageId,
             notification_sent_at: new Date().toISOString()
           });
-          newOrder.whatsapp_message_id = whatsappMessageId;
+          newOrder.telegram_message_id = telegramMessageId;
           newOrder.notification_sent_at = new Date().toISOString();
         }
       } catch (notifError) {
-        console.error('Erreur lors de l\'envoi de la notification WhatsApp:', notifError);
+        console.error('Erreur lors de l\'envoi de la notification Telegram:', notifError);
         // On continue même si la notification échoue
       }
       

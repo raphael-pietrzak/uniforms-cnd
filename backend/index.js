@@ -13,7 +13,7 @@ const productsRoutes = require('./routes/products');
 const ordersRoutes = require('./routes/orders');
 const uploadRoutes = require('./routes/upload');
 const stripeRoutes = require('./routes/stripe');
-const whatsappRoutes = require('./routes/whatsapp');
+const telegramRoutes = require('./routes/telegram'); // Remplacer WhatsApp par Telegram
 const { verifyAdmin, verifyToken } = require('./middleware/auth');
 
 
@@ -48,7 +48,7 @@ app.use('/api/products', productsRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/stripe', stripeRoutes);
-app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/telegram', telegramRoutes); // Remplacer WhatsApp par Telegram
 
 // Route de base pour tester l'API
 app.get('/api', (req, res) => {
