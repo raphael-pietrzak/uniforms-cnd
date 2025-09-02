@@ -67,18 +67,21 @@ function formatOrderSummary(order, isCollected = false) {
   if (isCollected) {
     return `✅ *COLLECTÉE #${order.id}* - ${order.customer_name}`;
   }
+
+    // Déterminer le statut de paiement de façon plus claire
+    const isOnlinePayment = order.payment_method === 'online';
+    const paymentEmoji = isOnlinePayment ? '✅' : '⚠️';
+    const paymentStatus = isOnlinePayment ? 'PAYÉE EN LIGNE' : 'NON PAYÉE';
+
+    // Convertir le total en nombre et gérer les cas où il pourrait être null/undefined
+    const totalAmount = parseFloat(order.total) || 0;
+
+    let summary = `${statusEmoji} *${statusText} #${order.id}*\n\n`;
+    summary += `👤 *Client:* ${order.customer_name}\n`;
+    summary += `📧 *Email:* ${order.customer_email}\n`;
+    summary += `${paymentEmoji} *Paiement:* ${paymentStatus}\n`;
+    summary += `🏷️ *Total:* ${totalAmount.toFixed(2)}€\n\n`;
   
-  // Pour les nouvelles commandes, affichage complet
-  const paymentMethod = order.payment_method === 'online' ? 'En ligne' : 'À la livraison';
-  
-  // Convertir le total en nombre et gérer les cas où il pourrait être null/undefined
-  const totalAmount = parseFloat(order.total) || 0;
-  
-  let summary = `📦 *NOUVELLE COMMANDE #${order.id}*\n\n`;
-  summary += `👤 *Client:* ${order.customer_name}\n`;
-  summary += `📧 *Email:* ${order.customer_email}\n`;
-  summary += `💳 *Méthode de paiement:* ${paymentMethod}\n`;
-  summary += `🏷️ *Total:* ${totalAmount.toFixed(2)}€\n\n`;
   
   summary += `*Articles commandés:*\n`;
   order.items.forEach(item => {
@@ -87,7 +90,7 @@ function formatOrderSummary(order, isCollected = false) {
     summary += `• ${item.quantity}x ${item.product.name} (Taille: ${item.selectedSize}) - ${itemPrice.toFixed(2)}€/unité\n`;
   });
   
-  summary += `\n💡 Cliquez sur le bouton ci-dessous pour marquer comme collectée`;
+//   summary += `\n💡 Cliquez sur le bouton ci-dessous pour marquer comme collectée`;
   
   return summary;
 }
