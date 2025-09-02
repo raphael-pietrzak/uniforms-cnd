@@ -89,7 +89,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Les articles de la commande sont requis et doivent être un tableau non vide' });
     }
     
-    if (!customerName || !customerEmail || !paymentMethod || !total) {
+    if (!customerName || !customerEmail || !paymentMethod) {
       return res.status(400).json({ error: 'Informations client incomplètes' });
     }
     
