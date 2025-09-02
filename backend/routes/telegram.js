@@ -126,6 +126,8 @@ router.post('/webhook', async (req, res) => {
       const callbackData = callbackQuery.data;
       const messageId = callbackQuery.message.message_id;
       const chatId = callbackQuery.message.chat.id;
+
+      console.log(`Callback reçu: ${callbackData} pour le message ${messageId}`);
       
       // Trouver la commande correspondant au message
       const order = await db('orders')
