@@ -1,16 +1,107 @@
-import React, { useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { CheckCircle, ArrowLeft, ShoppingBag } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { CheckCircle, ArrowLeft, ShoppingBag, Loader } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { useShop } from '../context/ShopContext';
+import { sumupApi } from '../services/api';
 
 const CheckoutSuccessPage: React.FC = () => {
   const navigate = useNavigate();
   const { clearCart, lastOrder } = useShop();
+  const [searchParams] = useSearchParams();
+  const [loading, setLoading] = useState(true);
+  const [checkoutStatus, setCheckoutStatus] = useState<'success' | 'pending' | 'failed'>('pending');
   
   useEffect(() => {
+    const checkCheckoutStatus = async () => {
+      // Vérifier si nous avons un checkout_id depuis SumUp
+      const checkoutId = searchParams.get('checkout_id');
+      
+      if (checkoutId) {
+        try {
+          // Vérifier le statut du checkout SumUp
+          const checkout = await sumupApi.getCheckout(checkoutId);
+          
+          if (checkout.status === 'PAID') {
+            setCheckoutStatus('success');
+          } else if (checkout.status === 'PENDING') {
+            setCheckoutStatus('pending');
+            // Optionnel : Réessayer après un délai
+            setTimeout(() => checkCheckoutStatus(), 3000);
+            return;
+          } else {
+            setCheckoutStatus('failed');
+          }
+        } catch (error) {
+          console.error('Erreur lors de la vérification du statut:', error);
+          setCheckoutStatus('failed');
+        }
+      } else {
+        // Si pas de checkout_id, c'est probablement un paiement en personne
+        setCheckoutStatus('success');
+      }
+      
+      setLoading(false);
+    };
+
+    checkCheckoutStatus();
     clearCart();
-  }, [clearCart]);
+  }, [clearCart, searchParams]);
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100">
+            <Loader className="h-10 w-10 text-blue-600 animate-spin" />
+          </div>
+          <h1 className="mt-6 text-2xl font-bold text-gray-900">Vérification du paiement...</h1>
+          <p className="mt-4 text-gray-600">
+            Nous vérifions le statut de votre paiement. Veuillez patienter.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (checkoutStatus === 'failed') {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100">
+            <svg className="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <h1 className="mt-6 text-3xl font-bold text-gray-900">Paiement Échoué</h1>
+          <p className="mt-4 text-lg text-gray-600">
+            Il y a eu un problème avec votre paiement. Veuillez réessayer.
+          </p>
+          <div className="mt-8">
+            <Link to="/cart">
+              <Button variant="primary">Retour au Panier</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (checkoutStatus === 'pending') {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100">
+            <Loader className="h-10 w-10 text-yellow-600 animate-spin" />
+          </div>
+          <h1 className="mt-6 text-3xl font-bold text-gray-900">Paiement en Cours</h1>
+          <p className="mt-4 text-lg text-gray-600">
+            Votre paiement est en cours de traitement. Nous mettons à jour le statut automatiquement.
+          </p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

@@ -1,21 +1,31 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CreditCard, ArrowRight, ShoppingBag } from 'lucide-react';
+import { CreditCard, ArrowRight, ShoppingBag, Lock } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import CartItem from '../components/shop/CartItem';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import { sumupApi } from '../services/api';
+import { SumUpCard } from '../types';
 
 const CartPage: React.FC = () => {
-  const { cart, checkout } = useShop();
+  const { cart, checkout, createOrderAfterPayment } = useShop();
   const [paymentMethod, setPaymentMethod] = useState<'online' | 'inperson'>('online');
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
   });
+  const [cardInfo, setCardInfo] = useState<SumUpCard>({
+    name: '',
+    number: '',
+    expiry_month: '',
+    expiry_year: '',
+    cvv: ''
+  });
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'confirmation'>('cart');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checkoutId, setCheckoutId] = useState<string | null>(null);
   const navigate = useNavigate();
   
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
@@ -29,6 +39,37 @@ const CartPage: React.FC = () => {
       [name]: value,
     });
   };
+
+  const handleCardInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    let formattedValue = value;
+
+    // Formatage spécial pour le numéro de carte
+    if (name === 'number') {
+      formattedValue = value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
+      if (formattedValue.length > 19) formattedValue = formattedValue.substring(0, 19);
+    }
+    
+    // Limitation pour le CVV
+    if (name === 'cvv' && value.length > 4) {
+      formattedValue = value.substring(0, 4);
+    }
+
+    // Limitation pour le mois d'expiration
+    if (name === 'expiry_month' && value.length > 2) {
+      formattedValue = value.substring(0, 2);
+    }
+
+    // Limitation pour l'année d'expiration
+    if (name === 'expiry_year' && value.length > 2) {
+      formattedValue = value.substring(0, 2);
+    }
+
+    setCardInfo({
+      ...cardInfo,
+      [name]: formattedValue,
+    });
+  };
   
   const handleCheckout = async (method: 'online' | 'inperson') => {
     setIsProcessing(true);
@@ -40,17 +81,55 @@ const CartPage: React.FC = () => {
         setIsProcessing(false);
         return;
       }
-      
-      const result = await checkout(method, customerInfo);
-      
-      // Si nous avons une URL de redirection, rediriger l'utilisateur
-      if (result && result.redirect) {
-        window.location.href = result.redirect;
-        return;
+
+      if (method === 'online') {
+        // Validation des informations de carte
+        if (!cardInfo.name || !cardInfo.number || !cardInfo.expiry_month || 
+            !cardInfo.expiry_year || !cardInfo.cvv) {
+          setError('Veuillez remplir toutes les informations de carte');
+          setIsProcessing(false);
+          return;
+        }
+
+        // Créer d'abord le checkout SumUp
+        const checkoutResult = await sumupApi.createCheckout(cart, customerInfo.email);
+        setCheckoutId(checkoutResult.id);
+
+        // Puis finaliser le paiement avec les informations de carte
+        const paymentResult = await sumupApi.completePayment(checkoutResult.id, {
+          ...cardInfo,
+          number: cardInfo.number.replace(/\s/g, '') // Enlever les espaces du numéro
+        });
+
+        console.log('Réponse de paiement SumUp:', paymentResult);
+        
+        // Vérifier le statut du paiement
+        if (paymentResult.status !== 'PAID') {
+          // Le paiement a échoué
+          let errorMessage = 'Le paiement a échoué. Veuillez vérifier vos informations de carte et réessayer.';
+          
+          // Chercher des détails d'erreur dans les transactions
+          if (paymentResult.transactions && paymentResult.transactions.length > 0) {
+            const transaction = paymentResult.transactions[0];
+            if (transaction.status === 'FAILED') {
+              errorMessage = 'Paiement refusé. Veuillez vérifier vos informations de carte ou utiliser une autre carte.';
+            }
+          }
+          
+          setError(errorMessage);
+          setIsProcessing(false);
+          return;
+        }
+        
+        // Si le paiement est réussi, créer la commande dans notre système
+        await createOrderAfterPayment(customerInfo);
+        
+        setCheckoutStep('confirmation');
+      } else {
+        // Paiement en personne (pas de carte nécessaire)
+        const result = await checkout(method, customerInfo);
+        setCheckoutStep('confirmation');
       }
-      
-      // Sinon, c'est un paiement en personne, montrer la confirmation
-      setCheckoutStep('confirmation');
     } catch (error) {
       console.error('Erreur lors du paiement:', error);
       setError(error instanceof Error ? error.message : 'Une erreur est survenue lors du traitement de votre commande');
@@ -170,7 +249,7 @@ const CartPage: React.FC = () => {
                               Payer en Ligne (Carte de Crédit)
                             </span>
                             <span className="block text-xs text-gray-500">
-                              Traitement sécurisé des paiements via Stripe
+                              Traitement sécurisé des paiements via SumUp
                             </span>
                           </div>
                           <CreditCard size={20} className="ml-auto text-gray-400" />
@@ -196,6 +275,68 @@ const CartPage: React.FC = () => {
                         </label>
                       </div>
                     </div>
+
+                    {/* Formulaire de carte de crédit */}
+                    {paymentMethod === 'online' && (
+                      <div className="mt-6 p-6 bg-gray-50 rounded-lg border">
+                        <div className="flex items-center mb-4">
+                          <h4 className="text-md font-semibold text-gray-800">Informations de Carte de Crédit</h4>
+                        </div>
+                        <div className="space-y-4">
+                          <Input
+                            label="Nom sur la carte"
+                            name="name"
+                            value={cardInfo.name}
+                            onChange={handleCardInputChange}
+                            placeholder="Nom Prénom"
+                            required
+                            fullWidth
+                          />
+                          <Input
+                            label="Numéro de carte"
+                            name="number"
+                            value={cardInfo.number}
+                            onChange={handleCardInputChange}
+                            placeholder="1234 5678 9012 3456"
+                            required
+                            fullWidth
+                          />
+                          <div className="grid grid-cols-3 gap-4">
+                            <Input
+                              label="Mois"
+                              name="expiry_month"
+                              value={cardInfo.expiry_month}
+                              onChange={handleCardInputChange}
+                              placeholder="12"
+                              maxLength={2}
+                              required
+                            />
+                            <Input
+                              label="Année"
+                              name="expiry_year"
+                              value={cardInfo.expiry_year}
+                              onChange={handleCardInputChange}
+                              placeholder="25"
+                              maxLength={2}
+                              required
+                            />
+                            <Input
+                              label="CVV"
+                              name="cvv"
+                              value={cardInfo.cvv}
+                              onChange={handleCardInputChange}
+                              placeholder="123"
+                              maxLength={4}
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-4 text-xs text-gray-500">
+                          <Lock size={12} className="inline mr-1" />
+                          Vos informations de paiement sont protégées par le chiffrement SSL
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="pt-6">
                       <Button 
@@ -204,15 +345,18 @@ const CartPage: React.FC = () => {
                         fullWidth
                         disabled={isProcessing}
                       >
-                        {paymentMethod === 'online' 
-                          ? 'Payer avec Stripe' 
-                          : 'Finaliser la Commande'
-                        }
+                        {isProcessing ? (
+                          'Traitement en cours...'
+                        ) : paymentMethod === 'online' ? (
+                          'Payer Maintenant'
+                        ) : (
+                          'Finaliser la Commande'
+                        )}
                       </Button>
                     </div>
                     
                     {error && (
-                      <div className="text-red-500 text-sm mt-4">
+                      <div className="text-red-500 text-sm mt-4 p-3 bg-red-50 rounded-lg border border-red-200">
                         {error}
                       </div>
                     )}

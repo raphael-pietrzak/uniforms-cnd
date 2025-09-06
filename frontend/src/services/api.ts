@@ -1,4 +1,4 @@
-import { Product, Order } from '../types';
+import { Product, Order, SumUpCard, SumUpPaymentRequest, SumUpPaymentResponse } from '../types';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 console.log(import.meta.env.VITE_BACKEND_URL)
@@ -254,10 +254,10 @@ export const ordersApi = {
   },
 };
 
-// Stripe API
-export const stripeApi = {
-  createCheckoutSession: async (items: any[], customerEmail: string) => {
-    const response = await fetch(`${API_URL}/stripe/create-checkout-session`, {
+// SumUp API (remplace Stripe API)
+export const sumupApi = {
+  createCheckout: async (items: any[], customerEmail: string) => {
+    const response = await fetch(`${API_URL}/sumup/create-checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items, customerEmail }),
@@ -266,10 +266,51 @@ export const stripeApi = {
     return data;
   },
   
-  getCheckoutSession: async (sessionId: string) => {
-    const response = await fetch(`${API_URL}/stripe/checkout-session/${sessionId}`);
+  getCheckout: async (checkoutId: string) => {
+    const response = await fetch(`${API_URL}/sumup/checkout/${checkoutId}`);
     const data = await handleResponse(response);
     return data;
+  },
+
+  // Obtenir le token d'accès depuis le backend
+  getAccessToken: async (): Promise<string> => {
+    const response = await fetch(`${API_URL}/sumup/access-token`);
+    const data = await handleResponse(response);
+    return data.access_token;
+  },
+
+  // Finaliser le paiement directement via l'API SumUp (côté client)
+  completePayment: async (checkoutId: string, cardData: SumUpCard): Promise<SumUpPaymentResponse> => {
+    // Obtenir le token d'accès depuis le backend
+    const accessToken = await sumupApi.getAccessToken();
+    
+    const paymentData: SumUpPaymentRequest = {
+      payment_type: 'card',
+      card: cardData
+    };
+
+    const response = await fetch(`https://api.sumup.com/v0.1/checkouts/${checkoutId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(paymentData)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage;
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.message || errorData.error || response.statusText;
+      } catch (e) {
+        errorMessage = errorText || response.statusText;
+      }
+      throw new Error(`Erreur de paiement SumUp: ${errorMessage}`);
+    }
+
+    return response.json();
   }
 };
 

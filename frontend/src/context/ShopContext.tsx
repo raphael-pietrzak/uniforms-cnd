@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Product, CartItem, Order, InventoryItem } from '../types';
-import { productsApi, ordersApi, stripeApi } from '../services/api';
+import { productsApi, ordersApi, sumupApi } from '../services/api';
 
 // Clé pour le localStorage
 const CART_STORAGE_KEY = 'cnd-uniformes-cart';
@@ -14,6 +14,7 @@ interface ShopContextType {
   updateQuantity: (productId: string, size: string, quantity: number) => void;
   clearCart: () => void;
   checkout: (paymentMethod: 'online' | 'inperson', customerInfo: { name: string; email: string }) => Promise<{ redirect?: string }>;
+  createOrderAfterPayment: (customerInfo: { name: string; email: string }) => Promise<Order>;
   isAdmin: boolean;
   setIsAdmin: (value: boolean) => void;
   addProduct: (product: Product) => Promise<void>;
@@ -147,7 +148,45 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCart([]);
   };
 
-  // Mise à jour de checkout pour utiliser Stripe et gérer le stock
+  // Nouvelle fonction pour créer une commande après un paiement SumUp réussi
+  const createOrderAfterPayment = async (customerInfo: { name: string; email: string }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Vérifier qu'il y a des articles dans le panier
+      if (cart.length === 0) {
+        throw new Error('Le panier est vide');
+      }
+
+      // Créer la commande directement
+      const orderData = {
+        items: cart,
+        customerName: customerInfo.name,
+        customerEmail: customerInfo.email,
+        paymentMethod: 'online' as const,
+        total: cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+        status: 'paid',
+      };
+
+      const newOrder = await ordersApi.create(orderData);
+      
+      // Ajouter la commande à la liste locale
+      setOrders([newOrder, ...orders]);
+      
+      // Vider le panier
+      clearCart();
+      
+      return newOrder;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur s\'est produite');
+      console.error('Erreur:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Mise à jour de checkout pour utiliser SumUp et gérer le stock
   const checkout = async (
     paymentMethod: 'online' | 'inperson',
     customerInfo: { name: string; email: string }
@@ -167,13 +206,13 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       
       if (paymentMethod === 'online') {
-        // Utiliser Stripe pour le paiement en ligne
-        const session = await stripeApi.createCheckoutSession(cart, customerInfo.email);
+        // Utiliser SumUp pour le paiement en ligne
+        const checkout = await sumupApi.createCheckout(cart, customerInfo.email);
         
-        // Note: Le stock sera mis à jour lors de la confirmation du paiement par le webhook Stripe
+        // Note: Le stock sera mis à jour lors de la confirmation du paiement par le webhook SumUp
         
-        // Retourner l'URL de redirection Stripe
-        return { redirect: session.url };
+        // Retourner l'URL de redirection SumUp
+        return { redirect: checkout.url };
       } else {
         // Utiliser l'API de commande existante pour le paiement en personne
         const orderData = {
@@ -320,6 +359,7 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         updateQuantity,
         clearCart,
         checkout,
+        createOrderAfterPayment,
         isAdmin,
         setIsAdmin,
         addProduct,

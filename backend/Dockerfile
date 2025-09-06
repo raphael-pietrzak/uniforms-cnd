@@ -12,8 +12,8 @@ RUN npm install
 # Copie des autres fichiers du projet
 COPY . .
 
-# Exposition du port (à adapter selon votre configuration)
-EXPOSE $PORT
+# Exposition du port
+EXPOSE 3000
 
 # Commande pour démarrer l'application
 CMD ["npm", "run", "start"]

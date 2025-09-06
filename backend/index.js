@@ -2,8 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
-require('dotenv').config();
-const SECRETARY_PHONE_NUMBER = process.env.SECRETARY_PHONE_NUMBER;
+
+require('dotenv').config({
+  path: `.env.${process.env.NODE_ENV || 'development'}`
+});
+
+
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 
@@ -12,10 +16,8 @@ const authRoutes = require('./routes/auth');
 const productsRoutes = require('./routes/products');
 const ordersRoutes = require('./routes/orders');
 const uploadRoutes = require('./routes/upload');
-const stripeRoutes = require('./routes/stripe');
-const telegramRoutes = require('./routes/telegram'); // Remplacer WhatsApp par Telegram
-const { verifyAdmin, verifyToken } = require('./middleware/auth');
-
+const sumupRoutes = require('./routes/sumup');
+const telegramRoutes = require('./routes/telegram'); 
 
 // Création de l'application Express
 const app = express();
@@ -27,13 +29,13 @@ app.get('/ping', (req, res) => {
 app.use(cors({
   origin: FRONTEND_URL,
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true, // Important pour permettre l'envoi de cookies avec CORS
+  credentials: true, // Important permet l'envoi de cookies avec CORS
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 
-// Configuration du middleware pour les webhooks Stripe (doit être avant express.json())
-app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+// Configuration du middleware pour les webhooks SumUp (doit être avant express.json())
+app.use('/api/sumup/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
 app.use(cookieParser()); // Middleware pour analyser les cookies
@@ -47,8 +49,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/upload', uploadRoutes);
-app.use('/api/stripe', stripeRoutes);
-app.use('/api/telegram', telegramRoutes); // Remplacer WhatsApp par Telegram
+app.use('/api/sumup', sumupRoutes);
+app.use('/api/telegram', telegramRoutes);
 
 // Route de base pour tester l'API
 app.get('/api', (req, res) => {
@@ -73,7 +75,7 @@ const PORT = process.env.PORT || 3000;
 
 // Démarrage du serveur
 app.listen(PORT, () => {
-  console.log(`✅ Serveur en écoute sur le port ${PORT}`);
+  console.log(`✅ Serveur en écoute sur le port ${PORT} (${process.env.NODE_ENV.toUpperCase() || 'DEVELOPMENT'})`);
   console.log(`🌐 URL API test : http://localhost:${PORT}/api`);
 });
 

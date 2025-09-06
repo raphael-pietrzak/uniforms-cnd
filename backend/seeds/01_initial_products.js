@@ -2,6 +2,7 @@ exports.seed = async function(knex) {
   // Vider les tables existantes
   await knex('order_items').del();
   await knex('orders').del();
+  await knex('product_inventory').del();
   await knex('products').del();
   
   // Préparer tous les produits de sample
@@ -87,5 +88,67 @@ exports.seed = async function(knex) {
   ];
   
   // Insérer les produits
-  await knex('products').insert(sampleProducts);
+  const insertedProducts = await knex('products').insert(sampleProducts).returning('id');
+  
+  // Créer l'inventaire pour chaque produit
+  const inventoryData = [];
+  
+  // Pour chaque produit, ajouter différentes tailles avec du stock
+  insertedProducts.forEach((productId, index) => {
+    const id = typeof productId === 'object' ? productId.id : productId;
+    
+    switch(index) {
+      case 0: // Polo avec Logo de l'École
+        inventoryData.push(
+          { product_id: id, size: 'S', quantity: 15 },
+          { product_id: id, size: 'M', quantity: 20 },
+          { product_id: id, size: 'L', quantity: 18 },
+          { product_id: id, size: 'XL', quantity: 12 }
+        );
+        break;
+      case 1: // Jupe Plissée
+        inventoryData.push(
+          { product_id: id, size: 'XS', quantity: 8 },
+          { product_id: id, size: 'S', quantity: 12 },
+          { product_id: id, size: 'M', quantity: 15 },
+          { product_id: id, size: 'L', quantity: 10 }
+        );
+        break;
+      case 2: // Pantalon Chino
+        inventoryData.push(
+          { product_id: id, size: 'S', quantity: 10 },
+          { product_id: id, size: 'M', quantity: 16 },
+          { product_id: id, size: 'L', quantity: 14 },
+          { product_id: id, size: 'XL', quantity: 8 }
+        );
+        break;
+      case 3: // Cardigan Scolaire
+        inventoryData.push(
+          { product_id: id, size: 'S', quantity: 6 },
+          { product_id: id, size: 'M', quantity: 9 },
+          { product_id: id, size: 'L', quantity: 8 },
+          { product_id: id, size: 'XL', quantity: 5 }
+        );
+        break;
+      case 4: // Blazer Scolaire
+        inventoryData.push(
+          { product_id: id, size: 'S', quantity: 4 },
+          { product_id: id, size: 'M', quantity: 7 },
+          { product_id: id, size: 'L', quantity: 6 },
+          { product_id: id, size: 'XL', quantity: 3 }
+        );
+        break;
+      case 5: // T-shirt d'EPS
+        inventoryData.push(
+          { product_id: id, size: 'S', quantity: 20 },
+          { product_id: id, size: 'M', quantity: 25 },
+          { product_id: id, size: 'L', quantity: 22 },
+          { product_id: id, size: 'XL', quantity: 15 }
+        );
+        break;
+    }
+  });
+  
+  // Insérer l'inventaire
+  await knex('product_inventory').insert(inventoryData);
 };

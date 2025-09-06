@@ -39,3 +39,49 @@ export interface User {
   email: string;
   role: 'admin' | 'customer';
 }
+
+// Types pour SumUp
+export interface SumUpCard {
+  name: string;
+  number: string;
+  expiry_month: string;
+  expiry_year: string;
+  cvv: string;
+}
+
+export interface SumUpPaymentRequest {
+  payment_type: 'card';
+  card: SumUpCard;
+}
+
+export interface SumUpCheckout {
+  id: string;
+  url: string;
+}
+
+
+export interface SumUpPaymentResponse {
+  id: string;
+  status: 'PENDING' | 'PAID' | 'FAILED' | 'CANCELLED';
+  amount: number;
+  currency: string;
+  description: string;
+  checkout_reference: string;
+  merchant_code: string;
+  date: string;
+  transaction_code?: string;
+  transaction_id?: string;
+  transactions?: {
+    id: string;
+    amount: number;
+    currency: string;
+    status: 'PENDING' | 'SUCCESSFUL' | 'FAILED' | 'CANCELLED';
+    payment_type: string;
+    entry_mode: string;
+    installments_count: number;
+    internal_id: number;
+    merchant_code: string;
+    timestamp: string;
+    transaction_code: string;
+  }[];
+}

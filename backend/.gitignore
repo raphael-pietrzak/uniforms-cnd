@@ -4,3 +4,5 @@ npm-debug.log
 *.sqlite
 .DS_Store
 package-lock.json
+.env.development
+.env.production
