@@ -122,7 +122,7 @@ const CartPage: React.FC = () => {
         }
         
         // Si le paiement est réussi, créer la commande dans notre système
-        await createOrderAfterPayment(customerInfo);
+        await checkout(method, customerInfo);
         
         setCheckoutStep('confirmation');
       } else {
@@ -130,9 +130,12 @@ const CartPage: React.FC = () => {
         const result = await checkout(method, customerInfo);
         setCheckoutStep('confirmation');
       }
-    } catch (error) {
-      console.error('Erreur lors du paiement:', error);
-      setError(error instanceof Error ? error.message : 'Une erreur est survenue lors du traitement de votre commande');
+    } catch (error : any) {
+
+      let errorMessage = 'Une erreur est survenue lors du traitement de votre commande';
+
+
+      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }

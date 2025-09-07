@@ -76,7 +76,7 @@ function formatOrderSummary(order, isCollected = false) {
     // Convertir le total en nombre et gérer les cas où il pourrait être null/undefined
     const totalAmount = parseFloat(order.total) || 0;
 
-    let summary = `${statusEmoji} *${statusText} #${order.id}*\n\n`;
+    let summary = `🆕 *NOUVELLE COMMANDE #${order.id}*\n\n`;
     summary += `👤 *Client:* ${order.customer_name}\n`;
     summary += `📧 *Email:* ${order.customer_email}\n`;
     summary += `${paymentEmoji} *Paiement:* ${paymentStatus}\n`;
