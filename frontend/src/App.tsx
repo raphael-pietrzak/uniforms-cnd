@@ -11,13 +11,15 @@ import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import CartPage from './pages/CartPage';
-import InfoPage from './pages/InfoPage';
 import CheckoutSuccessPage from './pages/CheckoutSuccessPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import OfflinePage from './pages/OfflinePage';
+import Info from './pages/Info';
+import CGV from './pages/CGV';
+import PolitiqueConfidentialite from './pages/PolitiqueConfidentialite';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -58,7 +60,9 @@ function App() {
                   <Route path="/shop" element={<ShopPage />} />
                   <Route path="/product/:productId" element={<ProductDetailPage />} />
                   <Route path="/cart" element={<CartPage />} />
-                  <Route path="/info" element={<InfoPage />} />
+                  <Route path="/info" element={<Info />} />
+                  <Route path="/cgv" element={<CGV />} />
+                  <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
                   <Route path="/checkout-success" element={<CheckoutSuccessPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
