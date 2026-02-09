@@ -57,7 +57,7 @@ app.use('/api/sumup', sumupRoutes);
 app.use('/api/telegram', telegramRoutes);
 
 // Route de base pour tester l'API
-app.get('/api', (req, res) => {
+app.get('/', (req, res) => {
   res.json({ message: 'Bienvenue sur l\'API CND-Uniformes' });
 });
 
