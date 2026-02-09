@@ -12,9 +12,6 @@ RUN npm install
 # Copie des autres fichiers du projet
 COPY . .
 
-# Création du dossier uploads avec les bonnes permissions
-RUN mkdir -p /app/uploads && chmod 755 /app/uploads
-
 # Exposition du port
 EXPOSE 3000
 
