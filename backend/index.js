@@ -24,8 +24,6 @@ const telegramRoutes = require('./routes/telegram');
 // Création de l'application Express
 const app = express();
 
-app.set('trust proxy', true)
-
 app.get('/ping', (req, res) => {
   res.send('pong');
 });

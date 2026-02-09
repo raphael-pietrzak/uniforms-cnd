@@ -20,7 +20,7 @@ module.exports = {
     client: 'pg',
     connection: {
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false }  // souvent requis sur bases cloud type Heroku, Supabase...
+      ssl: false
     },
     migrations: {
       directory: './migrations'
