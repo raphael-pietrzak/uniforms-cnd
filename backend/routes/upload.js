@@ -1,18 +1,30 @@
 const express = require('express');
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
+const path = require('path');
+const fs = require('fs');
 const router = express.Router();
 const { verifyToken, verifyAdmin } = require('../middleware/auth');
 
-// Configuration de Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+// Créer le dossier uploads s'il n'existe pas
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Configuration de Multer pour stocker localement
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, uploadsDir);
+  },
+  filename: function(req, file, cb) {
+    // Générer un nom de fichier unique avec timestamp et nom original
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    const nameWithoutExt = path.basename(file.originalname, ext);
+    cb(null, nameWithoutExt + '-' + uniqueSuffix + ext);
+  }
 });
 
-// Configuration de Multer pour stocker temporairement en mémoire
-const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // limite à 5MB
@@ -27,20 +39,11 @@ const upload = multer({
 // Route pour l'upload d'images - doit être authentifié comme admin
 router.post('/', verifyToken, verifyAdmin, upload.array('images', 10), async (req, res) => {
   try {
-    const uploadPromises = req.files.map(file => {
-      return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: 'cnd-uniformes' },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result.secure_url);
-          }
-        );
-        stream.end(file.buffer);
-      });
+    // Récupérer les URLs des fichiers uploadés
+    const uploadedUrls = req.files.map(file => {
+      // Retourner l'URL relative pour accéder au fichier
+      return `/uploads/${file.filename}`;
     });
-
-    const uploadedUrls = await Promise.all(uploadPromises);
     
     res.json({ 
       success: true, 

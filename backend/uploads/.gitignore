@@ -1,0 +1,6 @@
+# Ignorer tous les fichiers dans uploads
+*
+# Mais garder le .gitignore lui-même
+!.gitignore
+# Et le .gitkeep
+!.gitkeep

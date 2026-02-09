@@ -10,6 +10,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - uploads-data:/app/uploads
     environment:
       - NODE_ENV=development
     restart: unless-stopped
@@ -19,3 +20,7 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  uploads-data:
+    driver: local

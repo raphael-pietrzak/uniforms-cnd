@@ -9,6 +9,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - uploads-data:/app/uploads
     restart: unless-stopped
     networks:
       - cnd-network
@@ -29,3 +30,7 @@ services:
 networks:
   cnd-network:
     driver: bridge
+
+volumes:
+  uploads-data:
+    driver: local
