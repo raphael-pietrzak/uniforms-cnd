@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
-  const [refreshTimer, setRefreshTimer] = useState<NodeJS.Timeout | null>(null);
+  const [refreshTimer, setRefreshTimer] = useState<ReturnType<typeof setInterval> | null>(null);
   
   // Écouteur pour l'état de la connexion réseau
   useEffect(() => {

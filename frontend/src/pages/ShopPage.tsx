@@ -111,9 +111,9 @@ const ShopPage: React.FC = () => {
   }, [products]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="animate-rise max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex flex-col md:flex-row justify-between items-start mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Boutique d'Uniformes Scolaires</h1>
+        <h1 className="mb-4 text-4xl font-bold text-[#1b2430]">Boutique d'Uniformes Scolaires</h1>
 
         <div className="flex items-center space-x-4 mb-4 md:mb-0">
           {/* Search Bar - Integrated before filters */}
@@ -127,10 +127,10 @@ const ShopPage: React.FC = () => {
                   handleFilterChange({});
                 }}
                 placeholder="Rechercher des produits..."
-                className="w-full border border-gray-300 rounded-md py-2 pl-4 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
+                className="w-full rounded-xl border border-[#133b63]/15 bg-white/80 py-2.5 pl-4 pr-10 text-sm text-slate-700 shadow-sm focus:border-[#133b63]/40 focus:outline-none focus:ring-2 focus:ring-[#133b63]/20"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                <Search size={16} className="text-gray-400" />
+                <Search size={16} className="text-slate-400" />
               </div>
             </div>
           </div>
@@ -139,7 +139,7 @@ const ShopPage: React.FC = () => {
           {/* Filters Toggle Button - Redesigned to be more discreet */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center space-x-1 px-3 py-1.5 text-sm border border-gray-300 text-gray-600 rounded hover:bg-gray-50 transition-colors"
+            className="flex items-center space-x-1 rounded-xl border border-[#133b63]/15 bg-white/80 px-3 py-2 text-sm text-slate-700 shadow-sm transition-colors hover:bg-white"
           >
             {showFilters ? (
               <>
@@ -164,20 +164,20 @@ const ShopPage: React.FC = () => {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
+      <div className="surface-panel mb-6 flex flex-col items-start justify-between space-y-4 p-4 md:flex-row md:items-center md:space-y-0">
         <div>
-          <p className="text-gray-600">
+          <p className="text-slate-600">
             Affichage de <span className="font-medium">{filteredProducts.length}</span> produits
           </p>
         </div>
 
         <div className="flex space-x-4 items-center">
           <div className="flex items-center space-x-2">
-            <span className="text-gray-600 text-sm">Trier par :</span>
+            <span className="text-sm text-slate-600">Trier par :</span>
             <select
               value={sortOption}
               onChange={(e) => handleSortChange(e.target.value)}
-              className="border rounded-md p-1 text-sm outline-none"
+              className="rounded-xl border border-[#133b63]/15 bg-white px-3 py-2 text-sm text-slate-700 outline-none"
             >
               <option value="default">Par défaut</option>
               <option value="price-asc">Prix : Croissant</option>
@@ -187,11 +187,11 @@ const ShopPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="flex border rounded-md overflow-hidden">
+          <div className="flex overflow-hidden rounded-xl border border-[#133b63]/15">
             <button
               onClick={() => setView('grid')}
               className={`p-2 ${
-                view === 'grid' ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-600'
+                view === 'grid' ? 'bg-[#133b63]/10 text-[#133b63]' : 'bg-white text-slate-600'
               }`}
               title="Vue en grille"
             >
@@ -200,7 +200,7 @@ const ShopPage: React.FC = () => {
             <button
               onClick={() => setView('list')}
               className={`p-2 ${
-                view === 'list' ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-600'
+                view === 'list' ? 'bg-[#133b63]/10 text-[#133b63]' : 'bg-white text-slate-600'
               }`}
               title="Vue en liste"
             >
@@ -213,7 +213,7 @@ const ShopPage: React.FC = () => {
       {/* Product Grid or List */}
       {filteredProducts.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">Aucun produit ne correspond à vos critères.</p>
+          <p className="text-lg text-slate-500">Aucun produit ne correspond à vos critères.</p>
         </div>
       ) : view === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -225,7 +225,7 @@ const ShopPage: React.FC = () => {
         <div className="space-y-4">
           {filteredProducts.map((product) => (
             <Link key={product.id} to={`/product/${product.id}`} className="block">
-              <div className="flex border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+              <div className="surface-panel flex overflow-hidden rounded-2xl transition-shadow hover:shadow-lg">
                 <div className="w-40 h-40 flex-shrink-0">
                   <img
                     src={product.images[0] || '/placeholder.png'}
@@ -234,23 +234,23 @@ const ShopPage: React.FC = () => {
                   />
                 </div>
                 <div className="flex-1 p-4">
-                  <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-                  <p className="text-gray-500 text-sm">{product.brand}</p>
-                  <p className="mt-2 text-gray-600 line-clamp-2">{product.description}</p>
+                  <h3 className="text-lg font-semibold text-slate-800">{product.name}</h3>
+                  <p className="text-sm text-slate-500">{product.brand}</p>
+                  <p className="mt-2 line-clamp-2 text-slate-600">{product.description}</p>
                   <div className="mt-2 flex justify-between items-center">
-                    <span className="text-blue-900 font-bold">{Number(product.price).toFixed(2)}&nbsp;€</span>
+                    <span className="font-bold text-[#133b63]">{Number(product.price).toFixed(2)}&nbsp;€</span>
                     <div className="flex space-x-1">
                       {/* Afficher les tailles disponibles (avec stock > 0) */}
                       {product.inventory
                         .filter(item => item.quantity > 0)
                         .slice(0, 3)
                         .map((item) => (
-                          <span key={item.size} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                          <span key={item.size} className="rounded-full bg-[#1d7a72]/12 px-2 py-1 text-xs font-semibold text-[#16645d]">
                             {item.size}
                           </span>
                         ))}
                       {product.inventory.length > 3 && (
-                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">+{product.inventory.length - 3}</span>
+                        <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">+{product.inventory.length - 3}</span>
                       )}
                     </div>
                   </div>

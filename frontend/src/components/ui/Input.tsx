@@ -13,14 +13,14 @@ const Input: React.FC<InputProps> = ({
   className = '',
   ...props
 }) => {
-  const baseClasses = 'border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors';
-  const errorClasses = error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300';
+  const baseClasses = 'rounded-xl border bg-white/85 px-3 py-2.5 text-slate-700 shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#133b63]/35';
+  const errorClasses = error ? 'border-red-500 focus:ring-red-500/30' : 'border-[#133b63]/15 focus:border-[#133b63]/45';
   const widthClass = fullWidth ? 'w-full' : '';
   
   return (
     <div className={fullWidth ? 'w-full' : ''}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="mb-1.5 block text-sm font-medium text-slate-700">
           {label}
         </label>
       )}

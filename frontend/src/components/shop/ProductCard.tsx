@@ -14,9 +14,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     ? product.images[0] 
     : 'https://placehold.co/600x400?text=Image+placeholder';
     
-  // Vérifier si le produit est en stock (au moins une taille disponible)
-  const isInStock = product.inventory.some(item => item.quantity > 0);
-  
   // Obtenir les tailles disponibles
   const availableSizes = product.inventory
     .filter(item => item.quantity > 0)
@@ -28,13 +25,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     : product.inventory.map(item => item.size);
     
   return (
-    <Card className="h-full transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
+    <Card className="h-full rounded-2xl transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#133b63]/10">
       <Link to={`/product/${product.id}`}>
-        <div className="relative h-64 overflow-hidden">
+        <div className="relative h-64 overflow-hidden rounded-t-2xl">
           <img
             src={imageUrl}
             alt={product.name}
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
           />
           {product.condition === 'used' && (
             <div className="absolute top-2 left-2">
@@ -43,20 +40,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
         <div className="p-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-1 truncate">{product.name}</h3>
-          <p className="text-gray-500 text-sm mb-2">{product.brand}</p>
+          <h3 className="mb-1 truncate text-lg font-semibold text-slate-800">{product.name}</h3>
+          <p className="mb-2 text-sm text-slate-500">{product.brand}</p>
           <div className="flex justify-between items-center">
-            <span className="text-blue-900 font-bold">{Number(product.price).toFixed(2)}&nbsp;€</span>
+            <span className="font-bold text-[#133b63]">{Number(product.price).toFixed(2)}&nbsp;€</span>
             <div className="flex flex-wrap gap-1 justify-end">
               {sizesToDisplay.slice(0, 3).map((size) => (
-                <span key={size} className={`text-xs px-2 py-1 rounded ${
-                  availableSizes.includes(size) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                <span key={size} className={`rounded-full px-2 py-1 text-xs font-semibold ${
+                  availableSizes.includes(size) ? 'bg-[#1d7a72]/12 text-[#16645d]' : 'bg-slate-100 text-slate-700'
                 }`}>
                   {size}
                 </span>
               ))}
               {sizesToDisplay.length > 3 && (
-                <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
                   +{sizesToDisplay.length - 3}
                 </span>
               )}

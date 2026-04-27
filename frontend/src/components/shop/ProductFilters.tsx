@@ -61,14 +61,14 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
 
 
   return (
-    <div className="bg-white rounded-lg">
+    <div className="surface-panel rounded-2xl">
       {/* Mobile filter button */}
       <div className="md:hidden p-4">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center justify-between w-full bg-gray-50 p-2 rounded border border-gray-200"
+          className="flex w-full items-center justify-between rounded-xl border border-[#133b63]/15 bg-white p-2.5"
         >
-          <span className="font-medium flex items-center text-gray-600">
+          <span className="flex items-center font-medium text-slate-700">
             <Filter size={16} className="mr-2" /> Filtres
           </span>
           {isOpen ? <X size={16} /> : <span className="text-xs">Afficher</span>}
@@ -89,7 +89,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
               { value: 'girls', label: 'Filles' },
               { value: 'unisex', label: 'Mixte' },
             ]}
-            className="border-gray-200 focus:border-gray-300 focus:ring-0 text-sm rounded-md"
+            className="text-sm"
             fullWidth
           />
 
@@ -103,7 +103,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
               { value: 'new', label: 'Neuf' },
               { value: 'used', label: 'Occasion' },
             ]}
-            className="border-gray-200 focus:border-gray-300 focus:ring-0 text-sm rounded-md"
+            className="text-sm"
             fullWidth
           />
 
@@ -119,7 +119,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
               { value: 'outerwear', label: 'Vêtements d\'extérieur' },
               { value: 'sportswear', label: 'Vêtements de sport' },
             ]}
-            className="border-gray-200 focus:border-gray-300 focus:ring-0 text-sm rounded-md"
+            className="text-sm"
             fullWidth
           />
 
@@ -132,7 +132,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
               value={filters.minPrice}
               onChange={handleChange}
               placeholder="Min €"
-              className="border-gray-200 focus:border-gray-300 focus:ring-0 text-sm rounded-md"
+              className="text-sm"
               fullWidth
             />
             <Input
@@ -143,7 +143,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
               value={filters.maxPrice}
               onChange={handleChange}
               placeholder="Max €"
-              className="border-gray-200 focus:border-gray-300 focus:ring-0 text-sm rounded-md"
+              className="text-sm"
               fullWidth
             />
           </div>
@@ -160,7 +160,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
               { value: 'L', label: 'Grand (L)' },
               { value: 'XL', label: 'Très grand (XL)' },
             ]}
-            className="border-gray-200 focus:border-gray-300 focus:ring-0 text-sm rounded-md"
+            className="text-sm"
             fullWidth
           />
 
@@ -170,7 +170,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
             value={filters.brand}
             onChange={handleChange}
             placeholder="Toutes les marques"
-            className="border-gray-200 focus:border-gray-300 focus:ring-0 text-sm rounded-md"
+            className="text-sm"
             fullWidth
           />
         </div>
@@ -179,7 +179,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
           <Button
             onClick={handleReset}
             variant="outline"
-            className="text-gray-600 border-gray-200 hover:bg-gray-50 text-sm"
+            className="text-sm"
           >
             Réinitialiser les filtres
           </Button>

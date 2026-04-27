@@ -33,31 +33,49 @@ const getAuthHeaders = (): Record<string, string> => {
 
 // Fonction utilitaire pour gérer les erreurs des requêtes
 const handleResponse = async (response: Response) => {
-  if (!response.ok) {
-    // Pour les erreurs 401 avec code spécifique, on peut déclencher un événement personnalisé
-    if (response.status === 401) {
+  const contentType = response.headers.get('content-type') || '';
+  const rawBody = response.status === 204 ? '' : await response.text();
+
+  let parsedBody: any = null;
+  if (rawBody) {
+    if (contentType.includes('application/json')) {
       try {
-        const errorData = await response.json();
-        if (errorData.code === 'TOKEN_EXPIRED') {
-          // Déclencher un événement que le contexte d'authentification peut écouter
-          window.dispatchEvent(new CustomEvent('auth:tokenExpired'));
-        }
+        parsedBody = JSON.parse(rawBody);
       } catch (e) {
-        // Si on ne peut pas parser la réponse, on continue avec le traitement d'erreur normal
+        parsedBody = rawBody;
+      }
+    } else {
+      try {
+        parsedBody = JSON.parse(rawBody);
+      } catch (e) {
+        parsedBody = rawBody;
       }
     }
-    
-    const errorText = await response.text();
-    let errorMessage;
-    try {
-      const errorData = JSON.parse(errorText);
-      errorMessage = errorData.error || errorData.message || response.statusText;
-    } catch (e) {
-      errorMessage = errorText || response.statusText;
+  }
+
+  if (!response.ok) {
+    // Pour les erreurs 401 avec code spécifique, on peut déclencher un événement personnalisé
+    if (
+      response.status === 401 &&
+      parsedBody &&
+      typeof parsedBody === 'object' &&
+      parsedBody.code === 'TOKEN_EXPIRED'
+    ) {
+      // Déclencher un événement que le contexte d'authentification peut écouter
+      window.dispatchEvent(new CustomEvent('auth:tokenExpired'));
     }
+
+    let errorMessage;
+    if (parsedBody && typeof parsedBody === 'object') {
+      errorMessage = parsedBody.error || parsedBody.message || response.statusText;
+    } else {
+      errorMessage = (typeof parsedBody === 'string' ? parsedBody : '') || response.statusText;
+    }
+
     throw new Error(errorMessage);
   }
-  return response.json();
+
+  return parsedBody;
 };
 
 // Fonction pour construire l'URL complète des images

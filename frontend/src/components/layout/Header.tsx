@@ -29,28 +29,28 @@ const Header: React.FC = () => {
   };
   
   // Classes pour les liens actifs et inactifs
-  const activeLinkClass = "inline-flex items-center px-1 pt-1 text-sm font-medium text-blue-900 border-b-2 border-blue-900";
-  const inactiveLinkClass = "inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-blue-900 hover:border-b-2 hover:border-gray-300";
+  const activeLinkClass = 'inline-flex items-center rounded-full bg-[#133b63]/10 px-4 py-2 text-sm font-semibold text-[#133b63]';
+  const inactiveLinkClass = 'inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-white/70 hover:text-[#133b63]';
   
   // Classes pour les liens mobiles actifs et inactifs
-  const activeMobileLinkClass = "block pl-3 pr-4 py-2 text-base font-medium text-blue-900 bg-gray-50 border-l-4 border-blue-900";
-  const inactiveMobileLinkClass = "block pl-3 pr-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-l-4 hover:border-gray-300";
+  const activeMobileLinkClass = 'block rounded-xl bg-[#133b63]/10 px-4 py-3 text-base font-semibold text-[#133b63]';
+  const inactiveMobileLinkClass = 'block rounded-xl px-4 py-3 text-base font-medium text-slate-600 hover:bg-slate-100';
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex-1 flex items-center justify-between">
+    <header className="sticky top-3 z-50 px-3 sm:px-6 lg:px-8">
+      <div className="glass-panel mx-auto max-w-7xl rounded-2xl">
+        <div className="flex h-16 justify-between px-3 sm:px-5">
+          <div className="flex flex-1 items-center justify-between">
             <div className="flex-shrink-0 flex items-center">
               {/* Logo */}
-              <Link to="/" className="flex items-center space-x-2">
+              <Link to="/" className="flex items-center space-x-2 rounded-full p-1">
                 <img src={Logo} alt="Logo Cours Notre Dame" className="h-10 w-auto" />
-                <span className="text-2xl font-bold text-blue-900">Cours Notre Dame</span>
+                <span className="hidden text-lg font-bold text-[#133b63] sm:inline">Cours Notre Dame</span>
               </Link>
             </div>
             
             {/* Navigation Bureau */}
-            <nav className="hidden md:ml-6 md:flex md:space-x-8">
+            <nav className="hidden md:ml-6 md:flex md:space-x-1">
               <Link to="/" className={isActive('/') ? activeLinkClass : inactiveLinkClass}>
                 Accueil
               </Link>
@@ -67,10 +67,10 @@ const Header: React.FC = () => {
               )}
             </nav>
             
-            <div className="flex items-center">
+            <div className="flex items-center gap-1">
               {/* Afficher le nom d'utilisateur si connecté */}
               {isAuthenticated && user && (
-                <span className="mr-2 hidden md:inline text-sm text-gray-700">
+                <span className="mr-2 hidden rounded-full bg-[#133b63]/10 px-3 py-1 text-xs font-semibold text-[#133b63] md:inline">
                   {user.username}
                 </span>
               )}
@@ -79,7 +79,7 @@ const Header: React.FC = () => {
               {isAuthenticated && (
                 <button 
                   onClick={handleLogout}
-                  className="mr-2 md:mr-4 p-2 rounded-full text-gray-500 hover:text-blue-900 focus:outline-none flex items-center"
+                  className="mr-1 flex items-center rounded-full p-2 text-slate-500 transition-colors hover:bg-white/80 hover:text-[#133b63] focus:outline-none"
                   title="Déconnexion"
                 >
                   <LogOut size={20} />
@@ -97,10 +97,10 @@ const Header: React.FC = () => {
               )} */}
               
               {/* Panier */}
-              <Link to="/cart" className={`mr-2 md:mr-0 p-2 rounded-full focus:outline-none relative ${isActive('/cart') ? 'text-blue-900' : 'text-gray-500 hover:text-blue-900'}`}>
+              <Link to="/cart" className={`relative mr-1 rounded-full p-2 focus:outline-none ${isActive('/cart') ? 'bg-[#133b63]/10 text-[#133b63]' : 'text-slate-500 hover:bg-white/80 hover:text-[#133b63]'}`}>
                 <ShoppingCart size={20} />
                 {totalItems > 0 && (
-                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-blue-800 rounded-full">
+                  <span className="absolute right-0 top-0 inline-flex -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-[#1d7a72] px-2 py-1 text-xs font-bold leading-none text-white">
                     {totalItems}
                   </span>
                 )}
@@ -109,7 +109,7 @@ const Header: React.FC = () => {
               {/* Bouton menu mobile */}
               <button
                 type="button"
-                className="md:hidden p-2 rounded-md text-gray-500 hover:text-blue-900 focus:outline-none"
+                className="rounded-lg p-2 text-slate-500 hover:bg-white/80 hover:text-[#133b63] focus:outline-none md:hidden"
                 onClick={toggleMenu}
               >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -117,12 +117,12 @@ const Header: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+        </div>
       
       {/* Menu mobile */}
       {isMenuOpen && (
-        <div className="md:hidden">
-          <div className="pt-2 pb-3 space-y-1">
+        <div className="mx-2 mt-2 md:hidden sm:mx-6 lg:mx-8">
+          <div className="glass-panel space-y-1 rounded-2xl p-3">
             <Link
               to="/"
               className={isActive('/') ? activeMobileLinkClass : inactiveMobileLinkClass}
@@ -156,7 +156,7 @@ const Header: React.FC = () => {
             {isAuthenticated && (
               <button
                 onClick={() => { handleLogout(); setIsMenuOpen(false); }}
-                className="block w-full text-left pl-3 pr-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-l-4 hover:border-gray-300"
+                className="block w-full rounded-xl px-4 py-3 text-left text-base font-medium text-slate-600 hover:bg-slate-100"
               >
                 Déconnexion
               </button>
