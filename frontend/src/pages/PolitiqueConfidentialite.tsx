@@ -2,18 +2,16 @@ import React from 'react';
 
 const PolitiqueConfidentialite: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="flex items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Politique de Confidentialité</h1>
-          </div>
-          
-          <p className="text-sm text-gray-600 mb-8">Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}</p>
-          
-          <div className="space-y-6 text-gray-700">
+    <div className="min-h-screen bg-canvas py-12">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-xl border border-line bg-surface p-8">
+          <h1 className="mb-6 text-2xl font-bold text-ink">Politique de Confidentialité</h1>
+
+          <p className="mb-8 text-sm text-ink-muted">Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}</p>
+
+          <div className="space-y-6 text-sm text-ink-muted">
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">1. Introduction</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">1. Introduction</h2>
               <p>
                 L'association Cours Notre Dame - ICRSP (ci-après "l'Association") s'engage à protéger 
                 la vie privée des familles et des élèves. Cette politique de confidentialité explique 
@@ -23,12 +21,12 @@ const PolitiqueConfidentialite: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">2. Responsable du traitement</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">2. Responsable du traitement</h2>
               <p>
                 Le responsable du traitement des données est :
               </p>
               <div className="mt-2 pl-6">
-                <p className="font-semibold">Cours Notre Dame - ICRSP</p>
+                <p className="font-semibold text-ink">Cours Notre Dame - ICRSP</p>
                 <p>334 Rue du Pioch de Boutonnet</p>
                 <p>34090 Montpellier, France</p>
                 <p>Email : cnd.secretariat@icrsp.org</p>
@@ -36,7 +34,7 @@ const PolitiqueConfidentialite: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">3. Données collectées</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">3. Données collectées</h2>
               <p className="mb-2">
                 Dans le cadre de la vente d'uniformes scolaires, nous collectons les données suivantes :
               </p>
@@ -49,7 +47,7 @@ const PolitiqueConfidentialite: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">4. Finalités du traitement</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">4. Finalités du traitement</h2>
               <p className="mb-2">
                 Les données collectées sont utilisées exclusivement pour :
               </p>
@@ -63,7 +61,7 @@ const PolitiqueConfidentialite: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">5. Base légale du traitement</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">5. Base légale du traitement</h2>
               <p>
                 Le traitement de vos données personnelles repose sur :
               </p>
@@ -75,7 +73,7 @@ const PolitiqueConfidentialite: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">6. Destinataires des données</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">6. Destinataires des données</h2>
               <p>
                 Vos données personnelles sont accessibles uniquement :
               </p>
@@ -89,7 +87,7 @@ const PolitiqueConfidentialite: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">7. Durée de conservation</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">7. Durée de conservation</h2>
               <p>
                 Vos données sont conservées :
               </p>
@@ -102,7 +100,7 @@ const PolitiqueConfidentialite: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">8. Vos droits</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">8. Vos droits</h2>
               <p className="mb-2">
                 Conformément au RGPD, vous disposez des droits suivants :
               </p>
@@ -120,7 +118,7 @@ const PolitiqueConfidentialite: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">9. Sécurité des données</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">9. Sécurité des données</h2>
               <p>
                 Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour 
                 protéger vos données personnelles contre tout accès non autorisé, toute perte ou 
@@ -130,7 +128,7 @@ const PolitiqueConfidentialite: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">10. Cookies</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">10. Cookies</h2>
               <p>
                 Notre site utilise des cookies strictement nécessaires au fonctionnement du site 
                 (gestion du panier, authentification). Ces cookies techniques ne nécessitent pas 
@@ -140,7 +138,7 @@ const PolitiqueConfidentialite: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">11. Modifications</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">11. Modifications</h2>
               <p>
                 Nous nous réservons le droit de modifier cette politique de confidentialité à tout moment. 
                 Toute modification sera publiée sur cette page avec une nouvelle date de mise à jour.
@@ -148,7 +146,7 @@ const PolitiqueConfidentialite: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">12. Réclamation</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">12. Réclamation</h2>
               <p>
                 Si vous estimez que vos droits ne sont pas respectés, vous pouvez introduire une 
                 réclamation auprès de la Commission Nationale de l'Informatique et des Libertés (CNIL) :
@@ -157,12 +155,12 @@ const PolitiqueConfidentialite: React.FC = () => {
                 <p>CNIL - 3 Place de Fontenoy</p>
                 <p>TSA 80715 - 75334 PARIS CEDEX 07</p>
                 <p>Tél : 01 53 73 22 22</p>
-                <p>Site web : <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">www.cnil.fr</a></p>
+                <p>Site web : <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-hover hover:underline">www.cnil.fr</a></p>
               </div>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">13. Contact</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">13. Contact</h2>
               <p>
                 Pour toute question concernant cette politique de confidentialité ou l'exercice de vos droits, 
                 vous pouvez nous contacter :

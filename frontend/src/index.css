@@ -1,41 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600;700&display=swap');
-
 :root {
-  --bg: #f5f4ef;
-  --surface: #fffefb;
-  --surface-soft: #f2f0e8;
-  --ink: #1b2430;
-  --ink-muted: #576072;
-  --brand: #133b63;
-  --brand-strong: #0f2f50;
-  --accent: #1d7a72;
-  --ring: rgba(19, 59, 99, 0.28);
-}
-
-html {
-  /* font-size: 14px; */
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --line: #e5e7eb;
+  --ink: #0f172a;
+  --ink-muted: #64748b;
+  --accent: #14233c;
+  --accent-hover: #0a1424;
+  --ring: rgba(20, 35, 60, 0.25);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
   color: var(--ink);
-  font-family: 'Sora', 'Segoe UI', sans-serif;
-  background:
-    radial-gradient(circle at 10% 10%, rgba(19, 59, 99, 0.08), transparent 36%),
-    radial-gradient(circle at 90% 0%, rgba(29, 122, 114, 0.1), transparent 42%),
-    linear-gradient(180deg, #f7f6f1 0%, #f1efe6 100%);
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
 h2,
 h3,
 h4 {
-  font-family: 'Fraunces', Georgia, serif;
   letter-spacing: -0.02em;
 }
 
@@ -44,27 +36,19 @@ h4 {
 }
 
 @layer components {
-  .glass-panel {
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(20px);
-    background: rgba(255, 255, 255, 0.7);
-    box-shadow: 0 18px 40px rgba(18, 35, 61, 0.1);
-  }
-
   .surface-panel {
-    border: 1px solid rgba(19, 59, 99, 0.12);
-    border-radius: 1rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
     background: var(--surface);
-    box-shadow: 0 12px 30px rgba(18, 35, 61, 0.08);
   }
 
   .ink-link {
     color: var(--ink-muted);
-    transition: color 0.2s ease;
+    transition: color 0.15s ease;
   }
 
   .ink-link:hover {
-    color: var(--brand);
+    color: var(--ink);
   }
 }
 
@@ -74,14 +58,14 @@ h4 {
   }
 
   .animate-rise {
-    animation: rise 0.65s ease both;
+    animation: rise 0.4s ease both;
   }
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(8px);
   }
 
   to {
@@ -89,4 +73,3 @@ h4 {
     transform: translateY(0);
   }
 }
-  

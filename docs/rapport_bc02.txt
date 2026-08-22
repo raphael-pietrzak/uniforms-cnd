@@ -1,0 +1,214 @@
+Rapport écrit - Bloc 2 - Concevoir et développer l'application
+
+Auteur : Raphaël Pietrzak
+École : Ynov Campus
+Projet : CND-Uniformes, boutique en ligne d'uniformes scolaires
+Client : Cours Notre-Dame, Montpellier
+Date : juillet 2026
+
+
+Sommaire
+1. Rappel du contexte
+2. Environnements de développement et de test
+3. Intégration et déploiement continus
+4. Architecture logicielle et prototype
+5. Développement : frameworks et paradigmes
+6. Sécurité et OWASP Top 10
+7. Accessibilité
+8. Tests unitaires
+9. Gestion du code source
+10. Déploiement
+11. Cahier de recettes
+12. Bogues et corrections
+Annexes
+
+
+1. Rappel du contexte
+
+Le Cours Notre-Dame est un petit établissement privé hors contrat de Montpellier, qui accueille 61 enfants dans 31 familles cette année. Aujourd'hui, la vente d'uniformes (neufs et d'occasion) se fait sur un tableur partagé où l'école et les parents ajoutent des annonces. En pratique, plein d'annonces restent en ligne alors que l'article a déjà été vendu, l'école se retrouve à jouer les intermédiaires entre familles, il n'y a pas de vrai suivi de stock et le paiement se fait à part.
+
+L'idée du projet, c'est de remplacer ce tableur par une vraie boutique en ligne gérée par l'école : un catalogue centralisé, du stock par taille, un tunnel de commande avec paiement SumUp, retrait à l'école, et une notif Telegram à la secrétaire dès qu'une nouvelle commande arrive. L'objectif est d'être en ligne pour la rentrée de septembre 2026.
+
+
+2. Environnements de développement et de test
+
+J'ai mis en place trois environnements séparés.
+
+Le premier est celui de développement, sur mon poste. Je travaille sur macOS, avec VS Code et les extensions ESLint, Prettier, GitLens, Docker et Tailwind. Le runtime est Node.js 20. En développement, la base de données est SQLite : c'est un simple fichier (backend/db.sqlite), donc pas d'installation et je peux tout remettre à zéro rapidement. Le frontend tourne sous Vite avec le hot reload sur http://localhost:5173, et le backend Express est lancé avec nodemon pour redémarrer tout seul à chaque changement. Les variables d'environnement sont dans un fichier .env.development, jamais commité. Pour lancer, il suffit de faire "npm install", "npm run migrate:dev", "npm run seed:dev" puis "npm run dev" côté backend, et "npm install" + "npm run dev" côté frontend.
+
+Le deuxième est un environnement de test / staging. Il utilise le docker-compose.yml du projet, avec les mêmes services qu'en prod : backend, frontend derrière nginx, et PostgreSQL. La base est séparée de la prod et pré-remplie avec des données de test (produits fictifs, quelques commandes). Je m'en sers pour faire la recette manuelle avant chaque mise en ligne.
+
+Le troisième est la production. C'est une VM Ubuntu que j'héberge moi-même, gérée avec Dokploy. Le trafic passe par Cloudflare (HTTPS, WAF, cache), sur le domaine app-all.fr acheté chez OVH. Un nginx (frontend/nginx.prod.conf) sert le build du frontend et fait proxy vers le backend Node pour toutes les URL en /api/. PostgreSQL tourne dans un conteneur avec un volume pour garder les données.
+
+Pour la qualité, j'utilise ESLint côté back et front, TypeScript en mode strict, Prettier pour l'auto-format, et je passe systématiquement par des Pull Requests pour ma propre revue de code.
+
+
+3. Intégration et déploiement continus
+
+Pour l'intégration continue, chaque évolution est faite sur une branche "feature/quelque-chose". Quand j'ouvre une PR, la CI lance "npm ci", le lint, le build du frontend (pour vérifier que TypeScript compile), les migrations sur une base vide, puis les tests. Je ne merge que si tout est vert.
+
+Pour le déploiement continu, dès qu'un commit arrive sur main, une image Docker est construite pour le back et le front, puis poussée vers un registry. Dokploy voit la nouvelle image et redémarre les services. Un healthcheck est fait sur /ping côté backend et sur / côté frontend. Si ça échoue, Dokploy garde l'ancien conteneur actif et ne bascule pas. Les migrations Knex (npm run migrate:prod) tournent avant le redémarrage du backend, et le cache Cloudflare est invalidé pour les assets du front.
+
+
+4. Architecture logicielle et prototype
+
+Le principe est classique : une SPA React côté navigateur qui parle à une API REST Node/Express, avec PostgreSQL derrière. Le navigateur d'un parent ou d'un admin va sur app-all.fr, Cloudflare gère le HTTPS et le WAF, puis nginx sur ma VM sert le frontend et fait proxy vers le backend. Le backend cause avec PostgreSQL pour les données, avec l'API SumUp pour les paiements (et reçoit ses webhooks), et avec l'API Telegram pour envoyer les notifs et recevoir les callbacks des boutons.
+
+J'ai choisi cette découpe pour plusieurs raisons : les responsabilités sont bien séparées, le frontend peut être redéployé tout seul, le backend est stateless (les sessions passent par JWT + refresh en cookie httpOnly), et c'est plus facile à tester.
+
+Côté modèle de données, les tables principales sont définies dans les migrations Knex (backend/migrations/). "products" contient le catalogue (nom, description, prix, catégorie, neuf ou occasion, photo). "product_inventory" gère le stock par couple (produit, taille), avec une contrainte d'unicité sur ce couple. "orders" contient les commandes avec leur statut (pending, paid, ready, collected, cancelled), l'id du message Telegram et les dates. "order_items" contient les lignes de chaque commande. "temp_orders" sert de tampon pendant le paiement : le panier est gelé le temps que le parent revienne de SumUp. "users" contient les comptes parents et admin, avec le mot de passe hashé en bcrypt et un rôle "user" ou "admin". "refresh_tokens" stocke les jetons de refresh pour pouvoir les révoquer.
+
+Le prototype est déjà en ligne sur app-all.fr et couvre les parcours essentiels. Côté parent : parcourir le catalogue avec des filtres, ouvrir une fiche produit, choisir une taille disponible, ajouter au panier, se créer un compte ou se connecter, passer commande, être redirigé sur SumUp puis revenir sur une page de confirmation, voir son historique, et pouvoir réinitialiser son mot de passe par mail. Côté admin (secrétaire et directrice) : un dashboard avec le nombre de commandes en attente / à préparer / prêtes, un CRUD produits avec upload d'image (via multer, stockage dans backend/uploads/), la gestion du stock par taille, et la vue commandes avec les transitions d'état. Côté Telegram : dès qu'une commande passe en "paid", un message est envoyé au bot avec deux boutons "Marquer prête" et "Annuler". Les clics reviennent via le webhook Telegram sur /api/telegram/webhook.
+
+
+5. Développement : frameworks et paradigmes
+
+Côté frontend, j'utilise React 18 en TypeScript, avec Vite 5 pour le bundler, React Router 6 pour les routes, Tailwind 3 pour le style, et lucide-react pour les icônes. jwt-decode me sert à lire le rôle de l'utilisateur côté client. Je travaille en composants fonctionnels avec des hooks, et j'ai deux contextes React : un pour l'authentification, un pour le panier.
+
+Côté backend, c'est Node.js et Express 4. Knex me sert de query builder : ça marche avec SQLite en dev et PostgreSQL en prod sans changer le code. Les migrations et les seeds sont versionnés (backend/migrations, backend/seeds). Il y a un middleware auth.js pour vérifier le JWT et le rôle, express-rate-limit pour limiter les tentatives, et express-validator pour valider les entrées. Le code est découpé par domaine : routes/auth.js, routes/products.js, routes/orders.js, routes/upload.js, routes/sumup.js, routes/telegram.js.
+
+En termes de patterns, j'utilise beaucoup la chaîne de middlewares d'Express (sécurité + validation avant les handlers), un "repository" implicite via Knex (chaque table est manipulée à un seul endroit), une séparation nette entre config et code (dotenv + knexfile.js), et le pattern webhook pour SumUp et Telegram.
+
+Sur les bonnes pratiques, j'essaie d'avoir des noms explicites, des fonctions courtes, pas de duplication. Toutes les erreurs remontent dans un middleware centralisé. Aucun secret n'est dans le dépôt (tout est en .env). Les requêtes SQL passent uniquement par Knex, donc les paramètres sont préparés automatiquement (pas de risque d'injection).
+
+
+6. Sécurité et OWASP Top 10
+
+J'ai vérifié la couverture des 10 failles principales listées par l'OWASP (édition 2021).
+
+Contrôle d'accès. Le middleware auth.js expose "authenticateToken" et "requireAdmin". Toutes les routes sensibles (POST/PUT/DELETE sur /api/products, la liste globale des commandes, /api/upload) passent par requireAdmin. Un utilisateur ne peut voir que ses propres commandes : le filtre par user_id est fait côté serveur à partir du JWT.
+
+Cryptographie. HTTPS forcé en prod via Cloudflare, avec HSTS. Mots de passe hashés en bcrypt (cost 10). JWT signés en HS256 avec un secret d'au moins 32 caractères en variable d'environnement. Cookies de refresh en httpOnly + secure + sameSite=strict.
+
+Injections. Aucune concaténation SQL, tout passe par Knex avec des bindings paramétrés. Validation systématique des entrées avec express-validator. Côté React, pas de dangerouslySetInnerHTML : l'échappement est fait automatiquement.
+
+Design non sécurisé. Le tunnel de paiement est isolé dans la table temp_orders. Le montant envoyé à SumUp est recalculé côté serveur à partir des prix en base : le client ne peut pas le manipuler. Le statut de commande ne bouge que quand le webhook SumUp signé arrive.
+
+Mauvaise configuration. Le CORS est restreint à l'origine définie dans FRONTEND_URL. Seul le webhook SumUp utilise express.raw (pour vérifier la signature), tout le reste passe en express.json. Aucun console.log de données sensibles.
+
+Composants vulnérables. Je lance npm audit à chaque mise à jour. Dependabot est activé sur le dépôt et me remonte les CVE.
+
+Authentification. Rate limit sur /api/auth/login (5 tentatives par tranche de 15 minutes par IP) via express-rate-limit. Access token court (15 min) et refresh 7 jours, révocable via la table refresh_tokens. Reset de mot de passe par email avec un jeton à usage unique et une expiration courte, envoyé via nodemailer.
+
+Intégrité. La signature HMAC du webhook SumUp est vérifiée avant tout changement d'état. package-lock.json est versionné, et la CI utilise npm ci.
+
+Logs et monitoring. Les accès sont loggés par nginx et les erreurs applicatives passent par le middleware d'erreur Express. Les alertes de dispo viennent de Dokploy et Cloudflare (voir rapport BC04).
+
+SSRF. Aucun endpoint n'accepte d'URL arbitraire. Les seuls appels sortants sont vers SumUp et Telegram, sur des domaines fixes dans la config.
+
+
+7. Accessibilité
+
+J'ai choisi le RGAA 4.1 comme référentiel, avec la cible AA sur les parcours publics principaux : accueil, catalogue, fiche produit, panier, tunnel de commande, création de compte. C'est le référentiel de référence en France, aligné sur WCAG 2.1 AA, et pertinent pour un site destiné aux familles (public varié, avec parfois des personnes en situation de handicap).
+
+Concrètement, j'utilise du HTML sémantique (header, main, nav, section, article, footer, form, label lié aux inputs via htmlFor). J'ai vérifié les contrastes avec Lighthouse (bleu marine sur blanc, au-dessus de 4,5:1). Le focus reste visible partout (je n'ai pas mis d'"outline: none" sans alternative). La navigation clavier fonctionne, avec une tabulation logique et la touche Échap qui ferme les modales panier et auth. Toutes les images produit ont un texte alternatif (le champ est obligatoire dans le CRUD). Les boutons icônes ont un aria-label. Les tailles de police sont en rem et le zoom à 200 % passe sans casser la mise en page. Les messages d'erreur des formulaires sont explicites et liés au champ concerné avec aria-describedby. J'ai testé les parcours principaux avec VoiceOver sur macOS.
+
+
+8. Tests unitaires
+
+Les tests couvrent les parties les plus critiques du backend, surtout le calcul de panier et la sécurité (auth + permissions), parce que c'est là que les bugs feraient le plus mal.
+
+J'utilise Jest avec Supertest.
+
+Un exemple, pour l'ajout au panier avec vérif de stock : un premier cas insère un stock de 2 en taille M, fait un POST /api/orders/checkout avec quantité 5, et attend un 400 avec le message "stock insuffisant". Un deuxième cas vérifie qu'avec un stock suffisant, la commande est bien créée en "pending" et que l'URL SumUp est retournée. Un troisième vérifie que le stock n'est décrémenté qu'après le webhook signé.
+
+Le harnais couvre aussi : l'auth (register, login, refresh, logout, échec bcrypt), les permissions (accès admin refusé à un user simple), le CRUD produits, les commandes (création, transitions d'état, vérification du webhook), et le stock (décrément atomique, blocage si insuffisant).
+
+L'objectif est d'avoir au moins 70 % de couverture sur les fichiers routes/ et middleware/, et 90 % sur routes/orders.js et middleware/auth.js parce que ce sont les plus sensibles.
+
+
+9. Gestion du code source
+
+J'utilise Git avec un dépôt central "CND-Uniformes". Je suis les Conventional Commits (feat, fix, chore, refactor, docs, test). Le modèle de branches est simple : main pour la prod, et des branches feature/* mergées par PR. À chaque mise en prod, je pose un tag en SemVer (v0.1.0, v0.2.0, etc.). Les migrations Knex sont versionnées et intouchables une fois passées en prod : si je dois changer quelque chose, je crée une nouvelle migration.
+
+Quelques évolutions notables tracées dans l'historique. La migration WhatsApp vers Telegram : la colonne whatsapp_message_id a été remplacée par telegram_message_id (migration 20250902122039), et la route /api/whatsapp est en train d'être supprimée (le fichier routes/whatsapp.js traîne encore, à nettoyer). La séparation du stock du produit : ajout de product_inventory (migration 20250806223932) puis retrait de la colonne "sizes" devenue obsolète (migration 20250812000000). L'introduction du tunnel de paiement isolé avec temp_orders (migration 20250906000000).
+
+
+10. Déploiement
+
+Le déploiement se fait de façon progressive. Une évolution passe d'abord par le staging (docker-compose local ou VM dédiée). La secrétaire (Ghyslaine de Gouttes) refait le parcours impacté, la directrice (Isabelle Marié) valide, et seulement après je passe en production. Je déploie hors des créneaux d'ouverture du secrétariat pour éviter de gêner.
+
+Côté perfs, j'ai vérifié avec Lighthouse que le LCP reste sous 2,5 s sur la boutique et la fiche produit. Le temps de réponse API p95 est sous 300 ms. Le cache Cloudflare est activé sur les assets statiques et les images produit.
+
+
+11. Cahier de recettes
+
+Voici les scénarios que je rejoue à chaque livraison.
+
+01 - Inscription parent : POST /api/auth/register avec un email valide, on attend 201 et le cookie refresh posé.
+02 - Inscription doublon : deux fois le même email, on attend 409.
+03 - Login OK : bon couple email + mot de passe, on attend 200 et un JWT.
+04 - Login KO : mauvais mot de passe, on attend 401.
+05 - Rate limit login : 6 tentatives KO en moins de 15 min, la 6e doit renvoyer 429.
+06 - Catalogue public : GET /api/products sans auth, on attend 200 avec la liste et le stock.
+07 - Fiche produit : GET /api/products/:id, on attend 200 avec les détails et les tailles.
+08 - CRUD produit en tant que user : POST /api/products, on attend 403.
+09 - CRUD produit en tant qu'admin : POST /api/products, on attend 201.
+10 - Ajout panier > stock : quantité supérieure au stock, on attend 400 stock insuffisant.
+11 - Checkout OK : commande valide, on attend 200 et une URL SumUp.
+12 - Webhook SumUp OK : webhook signé, la commande doit passer en "paid", le stock être décrémenté et la notif Telegram partir.
+13 - Webhook signature KO : webhook non signé, on attend 401 sans changement d'état.
+14 - Notif Telegram : clic sur "Marquer prête", statut → ready et message mis à jour.
+15 - Retrait : clic sur "Marquer collectée", statut → collected.
+16 - Reset mot de passe : email + jeton valides, mot de passe changé et jeton invalidé.
+17 - Accessibilité clavier : parcours complet au clavier, focus visible et tabulation logique.
+18 - Zoom 200 % : toutes les pages restent lisibles.
+19 - Mode hors-ligne : coupure réseau après login, on tombe sur /offline.
+20 - RGPD suppression : demande d'effacement du compte, anonymisation sous 30 jours.
+
+
+12. Bogues et corrections
+
+Trois exemples représentatifs.
+
+Bogue B-001. Le décrément de stock pouvait s'exécuter deux fois quand SumUp retentait un webhook. Analyse : pas de garde-fou d'idempotence sur l'event id SumUp. Correction : ajout d'une table processed_webhook_events avec contrainte unique, et court-circuit si l'event a déjà été traité. Vérif : test qui rejoue deux fois le même webhook et attend un seul décrément.
+
+Bogue B-002. Après un reset de mot de passe, l'ancien refresh token restait valide. Analyse : j'avais oublié la révocation à la fin du flow. Correction : DELETE FROM refresh_tokens WHERE user_id = ? dans la route de reset. Vérif : scénario 16 étendu.
+
+Bogue B-003. Le montant envoyé à SumUp venait du panier client, donc théoriquement manipulable. Analyse : le calcul se faisait uniquement côté client. Correction : recalcul systématique côté serveur à partir des prix en base, et la table temp_orders gèle l'état du panier pendant la redirection. Vérif : test qui envoie un total falsifié et vérifie qu'il est ignoré.
+
+
+Annexe A - Arborescence
+
+CND-Uniformes/
+  README.md, docker-compose.yml, vercel.json
+  backend/
+    Dockerfile, index.js, server.js, knexfile.js, package.json
+    config/
+    middleware/auth.js
+    migrations/ (20230801000000_init.js, 20250804000000_auth_improvements.js...)
+    routes/ (auth.js, products.js, orders.js, upload.js, sumup.js, telegram.js)
+    seeds/, uploads/, utils/
+  frontend/
+    Dockerfile, nginx.prod.conf, vite.config.ts, tailwind.config.js, tsconfig.app.json, eslint.config.js, package.json, index.html
+    public/
+    src/ (main.tsx, App.tsx, pages/, components/, context/, services/, types/, assets/)
+  docs/
+    contexte.md
+
+
+Annexe B - Dépendances principales
+
+Backend : express 4, knex 3, pg 8, sqlite3 5, bcrypt 5, jsonwebtoken 9, cookie-parser 1, cors 2, dotenv 16, multer 1, axios 1, express-rate-limit 8, express-validator 7, nodemailer 7. En dev : nodemon 3.
+
+Frontend : react 18, react-dom 18, react-router-dom 6, jwt-decode 4, lucide-react 0.344. En dev : vite 5, typescript 5, tailwindcss 3, autoprefixer 10, postcss 8, eslint 9, typescript-eslint 8.
+
+À nettoyer : la dépendance stripe dans le back, les fichiers routes/stripe.js et routes/whatsapp.js.
+
+
+Annexe C - Variables d'environnement
+
+Backend (.env.production) : NODE_ENV, PORT, FRONTEND_URL, DATABASE_URL, JWT_SECRET, JWT_REFRESH_SECRET, SUMUP_MERCHANT_CODE, SUMUP_API_KEY, SUMUP_WEBHOOK_SECRET, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS, MAIL_FROM.
+
+Frontend (.env.production) : VITE_API_URL.
+
+
+Annexe D - Références
+
+OWASP Top 10 (2021) - https://owasp.org/Top10/
+RGAA 4.1 - https://accessibilite.numerique.gouv.fr/
+WCAG 2.1 AA - https://www.w3.org/TR/WCAG21/
+Conventional Commits - https://www.conventionalcommits.org/
+Keep a Changelog - https://keepachangelog.com/
+Documentation SumUp Online Payments
+Documentation Telegram Bot API

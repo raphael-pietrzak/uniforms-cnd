@@ -43,23 +43,23 @@ const ProductDetailPage: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
   const { products, addToCart } = useShop();
-  
+
   const product = products.find((p) => p.id === productId);
-  
+
   // Si le produit n'existe pas ou n'a pas d'inventaire, utiliser une valeur par défaut
-  const defaultSize = product?.inventory && product.inventory.length > 0 
-    ? product.inventory[0].size 
+  const defaultSize = product?.inventory && product.inventory.length > 0
+    ? product.inventory[0].size
     : '';
-  
+
   const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
   const [selectedImage, setSelectedImage] = useState<number>(0);
-  
+
   if (!product) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <p className="text-xl text-gray-600">Produit non trouvé</p>
-        <Button 
-          onClick={() => navigate('/shop')} 
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
+        <p className="text-lg text-ink-muted">Produit non trouvé</p>
+        <Button
+          onClick={() => navigate('/shop')}
           variant="primary"
           className="mt-4"
         >
@@ -68,33 +68,32 @@ const ProductDetailPage: React.FC = () => {
       </div>
     );
   }
-  
+
   // Vérifier la disponibilité du stock pour la taille sélectionnée
   const selectedInventoryItem = product.inventory?.find(item => item.size === selectedSize);
   const sizeInStock = selectedInventoryItem && selectedInventoryItem.quantity > 0;
-  
+
   const handleAddToCart = () => {
     if (selectedSize && sizeInStock) {
       addToCart(product, selectedSize);
-      // Show a toast or notification here
       navigate('/cart');
     }
   };
-  
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <button 
-        onClick={() => navigate(-1)} 
-        className="flex items-center text-gray-600 hover:text-blue-800 mb-6"
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-6 flex items-center text-sm text-ink-muted hover:text-ink"
       >
         <ArrowLeft size={18} className="mr-1" />
         Retour
       </button>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
         {/* Product Images */}
         <div>
-          <div className="bg-gray-100 rounded-lg overflow-hidden mb-4 h-96">
+          <div className="mb-4 h-96 overflow-hidden rounded-xl border border-line bg-canvas">
             <img
               src={product.images && product.images[selectedImage] ? product.images[selectedImage] : 'https://placehold.co/600x400?text=Image+placeholder'}
               alt={product.name}
@@ -107,8 +106,8 @@ const ProductDetailPage: React.FC = () => {
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`bg-gray-100 rounded-lg overflow-hidden h-24 border-2 ${
-                    selectedImage === index ? 'border-blue-600' : 'border-transparent'
+                  className={`h-24 overflow-hidden rounded-lg border-2 bg-canvas ${
+                    selectedImage === index ? 'border-accent' : 'border-transparent'
                   }`}
                 >
                   <img
@@ -121,47 +120,47 @@ const ProductDetailPage: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         {/* Product Details */}
         <div>
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-            <div className="flex items-center mb-4">
-              <span className="text-blue-900 text-2xl font-bold mr-4">{Number(product.price).toFixed(2)}&nbsp;€</span>
+            <h1 className="mb-2 text-2xl font-bold text-ink">{product.name}</h1>
+            <div className="mb-4 flex items-center gap-3">
+              <span className="text-xl font-bold text-ink">{Number(product.price).toFixed(2)}&nbsp;€</span>
               <Badge variant={product.condition === 'new' ? 'primary' : 'warning'}>
                 {product.condition === 'new' ? 'Neuf' : 'Occasion'}
               </Badge>
             </div>
-            <p className="text-gray-700 mb-6">{product.description}</p>
+            <p className="text-ink-muted">{product.description}</p>
           </div>
-          
+
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Marque</h3>
-            <p className="text-gray-700">{product.brand}</p>
+            <h3 className="mb-2 text-sm font-medium text-ink">Marque</h3>
+            <p className="text-ink-muted">{product.brand}</p>
           </div>
-          
+
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-900 mb-4">Sélectionner une Taille</h3>
+            <h3 className="mb-4 text-sm font-medium text-ink">Sélectionner une Taille</h3>
             <div className="grid grid-cols-4 gap-2">
               {product.inventory.map((item) => {
                 const isInStock = item.quantity > 0;
-                
+
                 return (
                   <button
                     key={item.size}
                     onClick={() => setSelectedSize(item.size)}
-                    className={`py-2 px-4 border rounded-md text-center ${
+                    className={`rounded-lg border px-4 py-2 text-center ${
                       selectedSize === item.size
-                        ? 'border-blue-600 bg-blue-50 text-blue-700'
+                        ? 'border-accent bg-accent-soft text-accent'
                         : isInStock
-                          ? 'border-gray-300 text-gray-700 hover:border-gray-400'
-                          : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                          ? 'border-line text-ink hover:border-ink/30'
+                          : 'border-line text-ink-faint cursor-not-allowed'
                     }`}
                     disabled={!isInStock}
                   >
                     <div className="flex flex-col">
                       <span>{item.size}</span>
-                      <span className={`text-xs ${isInStock ? 'text-green-600' : 'text-red-500'}`}>
+                      <span className={`text-xs ${isInStock ? 'text-emerald-600' : 'text-red-500'}`}>
                         {isInStock ? `En stock (${item.quantity})` : 'Épuisé'}
                       </span>
                     </div>
@@ -170,7 +169,7 @@ const ProductDetailPage: React.FC = () => {
               })}
             </div>
           </div>
-          
+
           <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
             <Button
               onClick={handleAddToCart}
@@ -184,13 +183,13 @@ const ProductDetailPage: React.FC = () => {
               {sizeInStock ? 'Ajouter au Panier' : 'Taille non disponible'}
             </Button>
           </div>
-          
-          <div className="mt-8 pt-8 border-t border-gray-200">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Détails</h3>
-            <ul className="text-sm text-gray-700 space-y-2">
-              <li><span className="font-medium">Catégorie:</span> {translateCategory(product.category)}</li>
-              <li><span className="font-medium">Genre:</span> {translateGender(product.gender)}</li>
-              <li><span className="font-medium">État:</span> {product.condition === 'new' ? 'Neuf' : 'Occasion'}</li>
+
+          <div className="mt-8 border-t border-line pt-8">
+            <h3 className="mb-2 text-sm font-medium text-ink">Détails</h3>
+            <ul className="space-y-2 text-sm text-ink-muted">
+              <li><span className="font-medium text-ink">Catégorie:</span> {translateCategory(product.category)}</li>
+              <li><span className="font-medium text-ink">Genre:</span> {translateGender(product.gender)}</li>
+              <li><span className="font-medium text-ink">État:</span> {product.condition === 'new' ? 'Neuf' : 'Occasion'}</li>
             </ul>
           </div>
         </div>

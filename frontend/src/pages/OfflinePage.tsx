@@ -16,32 +16,30 @@ const OfflinePage: React.FC = () => {
   }, [isOnline, navigate]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
-        <div className="flex justify-center mb-6">
-          <div className="bg-red-100 p-4 rounded-full">
-            <WifiOff size={48} className="text-red-600" />
+    <div className="flex min-h-screen flex-col items-center justify-center bg-canvas px-4">
+      <div className="w-full max-w-md rounded-xl border border-line bg-surface p-8 text-center">
+        <div className="mb-6 flex justify-center">
+          <div className="rounded-full bg-red-50 p-4">
+            <WifiOff size={40} className="text-red-600" />
           </div>
         </div>
-        
-        <h1 className="text-2xl font-bold text-gray-800 mb-4"> Hors Connexion</h1>
-        
-        <p className="text-gray-600 mb-6">
-          Vous êtes actuellement hors ligne. 
+
+        <h1 className="mb-4 text-2xl font-bold text-ink">Hors Connexion</h1>
+
+        <p className="mb-2 text-ink-muted">
+          Vous êtes actuellement hors ligne.
         </p>
-        
-        <p className="text-gray-600 mb-6">
+
+        <p className="mb-6 text-ink-muted">
           Veuillez vérifier votre connexion internet et réessayer.
         </p>
-        
-        <div className="space-y-4">
-          <Button 
-            onClick={() => window.location.reload()} 
-            className="w-full"
-          >
-            Réessayer
-          </Button>
-        </div>
+
+        <Button
+          onClick={() => window.location.reload()}
+          fullWidth
+        >
+          Réessayer
+        </Button>
       </div>
     </div>
   );

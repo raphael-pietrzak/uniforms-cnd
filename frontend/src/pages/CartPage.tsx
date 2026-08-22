@@ -143,21 +143,21 @@ const CartPage: React.FC = () => {
   
   if (checkoutStep === 'confirmation') {
     return (
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="bg-white p-6 rounded-lg shadow-md text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="rounded-xl border border-line bg-surface p-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Commande Confirmée !</h2>
-          <p className="text-gray-600 mb-6">
-            {paymentMethod === 'online' 
-              ? 'Votre paiement a été effectué avec succès et votre commande a été passée.' 
+          <h2 className="mb-4 text-2xl font-bold text-ink">Commande Confirmée !</h2>
+          <p className="mb-6 text-ink-muted">
+            {paymentMethod === 'online'
+              ? 'Votre paiement a été effectué avec succès et votre commande a été passée.'
               : 'Votre commande a été passée et sera prête à être retirée. Le paiement sera effectué sur place.'}
           </p>
-          <p className="text-gray-600 mb-6">
-            Un email de confirmation a été envoyé à <span className="font-medium">{customerInfo.email}</span>
+          <p className="mb-6 text-ink-muted">
+            Un email de confirmation a été envoyé à <span className="font-medium text-ink">{customerInfo.email}</span>
           </p>
           <Link to="/shop">
             <Button
@@ -172,15 +172,15 @@ const CartPage: React.FC = () => {
       </div>
     );
   }
-  
+
   if (cart.length === 0) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <div className="inline-block p-6 bg-gray-100 rounded-full mb-6">
-          <ShoppingBag size={40} className="text-gray-400" />
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
+        <div className="mb-6 inline-block rounded-full bg-canvas p-6">
+          <ShoppingBag size={40} className="text-ink-faint" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Votre panier est vide</h2>
-        <p className="text-gray-600 mb-8">Il semble que vous n'ayez pas encore ajouté d'articles à votre panier.</p>
+        <h2 className="mb-4 text-2xl font-bold text-ink">Votre panier est vide</h2>
+        <p className="mb-8 text-ink-muted">Il semble que vous n'ayez pas encore ajouté d'articles à votre panier.</p>
         <Link to="/shop">
           <Button variant="outline" className="inline-flex items-center">
             <ShoppingBag size={18} className="mr-2" />
@@ -190,10 +190,10 @@ const CartPage: React.FC = () => {
       </div>
     );
   }
-  
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <h1 className="mb-8 text-2xl font-bold text-ink md:text-3xl">
         {checkoutStep === 'cart' ? 'Votre Panier' : 'Paiement'}
       </h1>
       
@@ -201,10 +201,10 @@ const CartPage: React.FC = () => {
         {/* Main Content */}
         <div className="lg:col-span-2">
           {checkoutStep === 'cart' ? (
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">Articles du Panier ({cart.length})</h2>
-                <div className="divide-y divide-gray-200">
+            <div className="overflow-hidden rounded-xl border border-line bg-surface">
+              <div className="border-b border-line p-6">
+                <h2 className="mb-4 text-lg font-semibold text-ink">Articles du Panier ({cart.length})</h2>
+                <div className="divide-y divide-line">
                   {cart.map((item, index) => (
                     <CartItem key={`${item.product.id}-${item.selectedSize}-${index}`} item={item} />
                   ))}
@@ -212,9 +212,9 @@ const CartPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="overflow-hidden rounded-xl border border-line bg-surface">
               <div className="p-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">Informations de Contact</h2>
+                <h2 className="mb-4 text-lg font-semibold text-ink">Informations de Contact</h2>
                 <form onSubmit={(e) => { e.preventDefault(); handleCheckout(paymentMethod); }}>
                   <div className="space-y-4">
                     <Input
@@ -236,42 +236,42 @@ const CartPage: React.FC = () => {
                     />
                     
                     <div className="mt-6">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4">Méthode de Paiement</h3>
+                      <h3 className="mb-4 text-lg font-semibold text-ink">Méthode de Paiement</h3>
                       <div className="space-y-2">
-                        <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                        <label className="flex cursor-pointer items-center rounded-lg border border-line p-4 hover:bg-canvas">
                           <input
                             type="radio"
                             name="payment"
                             value="online"
                             checked={paymentMethod === 'online'}
                             onChange={() => setPaymentMethod('online')}
-                            className="h-4 w-4 text-blue-600"
+                            className="h-4 w-4 text-accent"
                           />
                           <div className="ml-3">
-                            <span className="block text-sm font-medium text-gray-700">
+                            <span className="block text-sm font-medium text-ink">
                               Payer en Ligne (Carte de Crédit)
                             </span>
-                            <span className="block text-xs text-gray-500">
+                            <span className="block text-xs text-ink-muted">
                               Traitement sécurisé des paiements via SumUp
                             </span>
                           </div>
-                          <CreditCard size={20} className="ml-auto text-gray-400" />
+                          <CreditCard size={20} className="ml-auto text-ink-faint" />
                         </label>
-                        
-                        <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+
+                        <label className="flex cursor-pointer items-center rounded-lg border border-line p-4 hover:bg-canvas">
                           <input
                             type="radio"
                             name="payment"
                             value="inperson"
                             checked={paymentMethod === 'inperson'}
                             onChange={() => setPaymentMethod('inperson')}
-                            className="h-4 w-4 text-blue-600"
+                            className="h-4 w-4 text-accent"
                           />
                           <div className="ml-3">
-                            <span className="block text-sm font-medium text-gray-700">
+                            <span className="block text-sm font-medium text-ink">
                               Payer au Retrait
                             </span>
-                            <span className="block text-xs text-gray-500">
+                            <span className="block text-xs text-ink-muted">
                               Paiement en espèces ou par carte lors du retrait de votre commande
                             </span>
                           </div>
@@ -281,9 +281,9 @@ const CartPage: React.FC = () => {
 
                     {/* Formulaire de carte de crédit */}
                     {paymentMethod === 'online' && (
-                      <div className="mt-6 p-6 bg-gray-50 rounded-lg border">
-                        <div className="flex items-center mb-4">
-                          <h4 className="text-md font-semibold text-gray-800">Informations de Carte de Crédit</h4>
+                      <div className="mt-6 rounded-lg border border-line bg-canvas p-6">
+                        <div className="mb-4 flex items-center">
+                          <h4 className="text-sm font-semibold text-ink">Informations de Carte de Crédit</h4>
                         </div>
                         <div className="space-y-4">
                           <Input
@@ -334,17 +334,17 @@ const CartPage: React.FC = () => {
                             />
                           </div>
                         </div>
-                        <div className="mt-4 text-xs text-gray-500">
+                        <div className="mt-4 text-xs text-ink-muted">
                           <Lock size={12} className="inline mr-1" />
                           Vos informations de paiement sont protégées par le chiffrement SSL
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="pt-6">
-                      <Button 
-                        type="submit" 
-                        variant="primary" 
+                      <Button
+                        type="submit"
+                        variant="primary"
                         fullWidth
                         disabled={isProcessing}
                       >
@@ -357,9 +357,9 @@ const CartPage: React.FC = () => {
                         )}
                       </Button>
                     </div>
-                    
+
                     {error && (
-                      <div className="text-red-500 text-sm mt-4 p-3 bg-red-50 rounded-lg border border-red-200">
+                      <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
                         {error}
                       </div>
                     )}
@@ -372,21 +372,21 @@ const CartPage: React.FC = () => {
         
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-md overflow-hidden sticky top-20">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Récapitulatif de la Commande</h2>
+          <div className="sticky top-20 overflow-hidden rounded-xl border border-line bg-surface">
+            <div className="border-b border-line p-6">
+              <h2 className="mb-4 text-lg font-semibold text-ink">Récapitulatif de la Commande</h2>
               <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Sous-total</span>
-                  <span className="text-gray-800">{Number(subtotal).toFixed(2)}&nbsp;€</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-ink-muted">Sous-total</span>
+                  <span className="text-ink">{Number(subtotal).toFixed(2)}&nbsp;€</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Livraison</span>
-                  <span className="text-green-600">Gratuite</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-ink-muted">Livraison</span>
+                  <span className="text-emerald-600">Gratuite</span>
                 </div>
-                <div className="border-t pt-4 flex justify-between font-bold">
-                  <span>Total</span>
-                  <span className="text-blue-900">{Number(total).toFixed(2)}&nbsp;€</span>
+                <div className="flex justify-between border-t border-line pt-4 font-bold">
+                  <span className="text-ink">Total</span>
+                  <span className="text-ink">{Number(total).toFixed(2)}&nbsp;€</span>
                 </div>
               </div>
             </div>

@@ -61,14 +61,14 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
 
 
   return (
-    <div className="surface-panel rounded-2xl">
+    <div className="rounded-xl border border-line bg-surface">
       {/* Mobile filter button */}
       <div className="md:hidden p-4">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex w-full items-center justify-between rounded-xl border border-[#133b63]/15 bg-white p-2.5"
+          className="flex w-full items-center justify-between rounded-lg border border-line bg-surface p-2.5"
         >
-          <span className="flex items-center font-medium text-slate-700">
+          <span className="flex items-center font-medium text-ink">
             <Filter size={16} className="mr-2" /> Filtres
           </span>
           {isOpen ? <X size={16} /> : <span className="text-xs">Afficher</span>}
@@ -175,7 +175,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ onFilterChange }) => {
           />
         </div>
 
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex justify-end border-t border-line pt-4">
           <Button
             onClick={handleReset}
             variant="outline"

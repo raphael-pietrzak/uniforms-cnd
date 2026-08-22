@@ -6,9 +6,9 @@ const NetworkStatus: React.FC = () => {
   const { isOnline } = useAuth();
 
   return (
-    <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm ${
-      isOnline 
-        ? 'text-green-700 bg-green-50' 
+    <div className={`flex items-center gap-1 rounded-md px-2 py-1 text-sm ${
+      isOnline
+        ? 'text-emerald-700 bg-emerald-50'
         : 'text-red-700 bg-red-50'
     }`}>
       {isOnline ? (

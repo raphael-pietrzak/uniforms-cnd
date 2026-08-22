@@ -7,7 +7,7 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ children, className = '' }) => {
   return (
-    <div className={`surface-panel overflow-hidden ${className}`}>
+    <div className={`overflow-hidden rounded-xl border border-line bg-surface ${className}`}>
       {children}
     </div>
   );
@@ -15,7 +15,7 @@ const Card: React.FC<CardProps> = ({ children, className = '' }) => {
 
 export const CardHeader: React.FC<CardProps> = ({ children, className = '' }) => {
   return (
-    <div className={`border-b border-[#133b63]/10 px-6 py-4 ${className}`}>
+    <div className={`border-b border-line px-6 py-4 ${className}`}>
       {children}
     </div>
   );
@@ -31,7 +31,7 @@ export const CardContent: React.FC<CardProps> = ({ children, className = '' }) =
 
 export const CardFooter: React.FC<CardProps> = ({ children, className = '' }) => {
   return (
-    <div className={`border-t border-[#133b63]/10 bg-[#f7f6f1] px-6 py-4 ${className}`}>
+    <div className={`border-t border-line bg-canvas px-6 py-4 ${className}`}>
       {children}
     </div>
   );

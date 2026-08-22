@@ -46,11 +46,7 @@ function App() {
     <AuthProvider>
       <ShopProvider>
         <Router>
-          <div className="relative flex min-h-screen flex-col overflow-x-hidden">
-            <div className="pointer-events-none absolute inset-0 -z-10">
-              <div className="absolute left-0 top-24 h-64 w-64 rounded-full bg-[#1d7a72]/15 blur-3xl" />
-              <div className="absolute right-0 top-40 h-72 w-72 rounded-full bg-[#133b63]/15 blur-3xl" />
-            </div>
+          <div className="flex min-h-screen flex-col">
             <Header />
             <main className="flex-grow">
               <Routes>

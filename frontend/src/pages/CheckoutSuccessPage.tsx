@@ -50,13 +50,13 @@ const CheckoutSuccessPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100">
-            <Loader className="h-10 w-10 text-blue-600 animate-spin" />
+      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="rounded-xl border border-line bg-surface p-8 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent-soft">
+            <Loader className="h-10 w-10 animate-spin text-accent" />
           </div>
-          <h1 className="mt-6 text-2xl font-bold text-gray-900">Vérification du paiement...</h1>
-          <p className="mt-4 text-gray-600">
+          <h1 className="mt-6 text-2xl font-bold text-ink">Vérification du paiement...</h1>
+          <p className="mt-4 text-ink-muted">
             Nous vérifions le statut de votre paiement. Veuillez patienter.
           </p>
         </div>
@@ -66,15 +66,15 @@ const CheckoutSuccessPage: React.FC = () => {
 
   if (checkoutStatus === 'failed') {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100">
+      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="rounded-xl border border-line bg-surface p-8 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
             <svg className="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h1 className="mt-6 text-3xl font-bold text-gray-900">Paiement Échoué</h1>
-          <p className="mt-4 text-lg text-gray-600">
+          <h1 className="mt-6 text-2xl font-bold text-ink">Paiement Échoué</h1>
+          <p className="mt-4 text-ink-muted">
             Il y a eu un problème avec votre paiement. Veuillez réessayer.
           </p>
           <div className="mt-8">
@@ -89,81 +89,81 @@ const CheckoutSuccessPage: React.FC = () => {
 
   if (checkoutStatus === 'pending') {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100">
-            <Loader className="h-10 w-10 text-yellow-600 animate-spin" />
+      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="rounded-xl border border-line bg-surface p-8 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50">
+            <Loader className="h-10 w-10 animate-spin text-amber-600" />
           </div>
-          <h1 className="mt-6 text-3xl font-bold text-gray-900">Paiement en Cours</h1>
-          <p className="mt-4 text-lg text-gray-600">
+          <h1 className="mt-6 text-2xl font-bold text-ink">Paiement en Cours</h1>
+          <p className="mt-4 text-ink-muted">
             Votre paiement est en cours de traitement. Nous mettons à jour le statut automatiquement.
           </p>
         </div>
       </div>
     );
   }
-  
+
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100">
-          <CheckCircle className="h-10 w-10 text-green-600" />
+    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="rounded-xl border border-line bg-surface p-8 text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
+          <CheckCircle className="h-10 w-10 text-emerald-600" />
         </div>
-        
-        <h1 className="mt-6 text-3xl font-bold text-gray-900">Réservation Réussie !</h1>
-        
-        <p className="mt-4 text-lg text-gray-600">
+
+        <h1 className="mt-6 text-2xl font-bold text-ink">Réservation Réussie !</h1>
+
+        <p className="mt-4 text-ink-muted">
           Merci pour votre commande. Votre réservation d'uniformes a été enregistrée avec succès.
         </p>
-        
+
         {lastOrder && (
-          <div className="mt-8 border-t border-gray-200 pt-8">
-            <h2 className="text-xl font-medium text-gray-900 mb-4">Détails de la Réservation</h2>
-            
-            <div className="rounded-md bg-gray-50 p-4 mb-6">
-              <p className="text-sm text-gray-700">
-                <span className="font-medium">Numéro de réservation :</span> {lastOrder.id}
+          <div className="mt-8 border-t border-line pt-8 text-left">
+            <h2 className="mb-4 text-lg font-semibold text-ink">Détails de la Réservation</h2>
+
+            <div className="mb-6 rounded-lg bg-canvas p-4">
+              <p className="text-sm text-ink-muted">
+                <span className="font-medium text-ink">Numéro de réservation :</span> {lastOrder.id}
               </p>
-              <p className="text-sm text-gray-700 mt-2">
-                <span className="font-medium">Date :</span> {new Date(lastOrder.created_at).toLocaleDateString('fr-FR')}
+              <p className="mt-2 text-sm text-ink-muted">
+                <span className="font-medium text-ink">Date :</span> {new Date(lastOrder.created_at).toLocaleDateString('fr-FR')}
               </p>
             </div>
-            
+
             <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Articles réservés</h3>
-              <div className="border-t border-gray-200">
+              <h3 className="mb-2 text-base font-medium text-ink">Articles réservés</h3>
+              <div className="border-t border-line">
                 {lastOrder.items.map((item, index) => (
-                  <div key={index} className="py-4 flex justify-between border-b border-gray-200">
+                  <div key={index} className="flex justify-between border-b border-line py-4">
                     <div className="flex">
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-900">{item.product.name}</p>
-                        <p className="text-sm text-gray-600">Taille: {item.selectedSize}</p>
+                      <div>
+                        <p className="text-sm font-medium text-ink">{item.product.name}</p>
+                        <p className="text-sm text-ink-muted">Taille: {item.selectedSize}</p>
                       </div>
                     </div>
-                    <div className="flex items-end flex-col">
-                      <p className="text-sm font-medium text-gray-900">{item.quantity} x {item.product.price.toFixed(2)} €</p>
-                      <p className="text-sm text-gray-600">{(item.quantity * item.product.price).toFixed(2)} €</p>
+                    <div className="flex flex-col items-end">
+                      <p className="text-sm font-medium text-ink">{item.quantity} x {item.product.price.toFixed(2)} €</p>
+                      <p className="text-sm text-ink-muted">{(item.quantity * item.product.price).toFixed(2)} €</p>
                     </div>
                   </div>
                 ))}
-                <div className="py-4 flex justify-between">
-                  <p className="text-base font-medium text-gray-900">Total</p>
-                  <p className="text-base font-medium text-gray-900">{lastOrder.total.toFixed(2)} €</p>
+                <div className="flex justify-between py-4">
+                  <p className="text-base font-medium text-ink">Total</p>
+                  <p className="text-base font-medium text-ink">{lastOrder.total.toFixed(2)} €</p>
                 </div>
               </div>
             </div>
-            
-            <div className="bg-blue-50 rounded-md p-4 mb-6">
-              <h3 className="text-lg font-medium text-blue-900 mb-2">Instructions pour la récupération</h3>
-              <p className="text-sm text-blue-800">
-                Veuillez vous présenter au secrétariat de l'école pendant les heures d'ouverture (lundi au vendredi, 8h30-16h30) pour récupérer vos articles. 
+
+            <div className="mb-6 rounded-lg bg-accent-soft p-4">
+              <h3 className="mb-2 text-base font-medium text-accent">Instructions pour la récupération</h3>
+              <p className="text-sm text-ink">
+                Veuillez vous présenter au secrétariat de l'école pendant les heures d'ouverture (lundi au vendredi, 8h30-16h30) pour récupérer vos articles.
                 Merci de mentionner votre numéro de réservation ({lastOrder.id}).
               </p>
             </div>
           </div>
         )}
-        
-        <div className="mt-8 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+
+        <div className="mt-8 flex flex-col justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
           <Link to="/">
             <Button variant="outline" className="w-full sm:w-auto flex items-center justify-center">
               <ArrowLeft size={16} className="mr-2" />

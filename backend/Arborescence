@@ -1,0 +1,87 @@
+
+
+
+├── backend/
+    ├── config/
+    │   └── database.js
+    ├── middleware/
+    │   └── auth.js
+    ├── migrations/
+    │   ├── 20230801000000_init.js
+    │   ├── 20250804000000_auth_improvements.js
+    ├── routes/
+    │   ├── auth.js
+    │   ├── orders.js
+    │   ├── products.js
+    │   ├── stripe.js
+    │   ├── sumup.js
+    │   ├── telegram.js
+    │   ├── upload.js
+    │   └── whatsapp.js
+    ├── seeds/
+    │   ├── 01_initial_products.js
+    │   ├── 02_initial_orders.js
+    │   └── 03_users.js
+    ├── uploads/
+    │   ├── .gitignore
+    │   ├── .gitkeep
+    │   ├── 1746923512555-930159222.png
+    │   └── 1747136955199-780866163.png
+    ├── utils/
+    │   └── orderUtils.js
+    ├── .dockerignore
+    ├── .env.development.example
+    ├── .gitignore
+    ├── Dockerfile
+    ├── docker-compose.yml
+    ├── index.js
+    ├── knexfile.js
+    ├── package-lock.json
+    ├── package.json
+    └── server.js    
+
+
+├── frontend/
+│   ├── public/
+│   │   ├── arles_group.jpg
+│   │   ├── maps.png
+│   │   ├── placeholder.png
+│   │   └── preview-readme.png
+│   ├── src/
+│   │   ├── assets/
+│   │   │   ├── cnd_logo.svg
+│   │   │   ├── cnd_rounded.png
+│   │   │   └── cnd_rounded1.png
+│   │   ├── components/
+│   │   │   ├── admin/
+│   │   │   ├── layout/
+│   │   │   ├── shop/
+│   │   │   └── ui/
+│   │   ├── context/
+│   │   │   ├── AuthContext.tsx
+│   │   │   └── ShopContext.tsx
+│   │   ├── pages/
+│   │   │   ├── admin/
+│   │   ├── services/
+│   │   │   └── api.ts
+│   │   ├── types/
+│   │   │   └── index.ts
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   ├── main.tsx
+│   │   └── vite-env.d.ts
+│   ├── .dockerignore
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── Dockerfile
+│   ├── index.html
+│   ├── nginx.conf
+│   ├── nginx.prod.conf
+│   ├── package-lock.json
+│   ├── package.json
+│   └── vite.config.ts
+├── .gitignore
+├── README.md
+├── TODO.md
+└── docker-compose.yml
+ 

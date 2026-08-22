@@ -1,0 +1,147 @@
+Rapport écrit - Bloc 4 - Maintenir l'application en condition opérationnelle
+
+Auteur : Raphaël Pietrzak
+École : Ynov Campus
+Projet : CND-Uniformes, boutique en ligne d'uniformes scolaires
+Client : Cours Notre-Dame, Montpellier
+Date : juillet 2026
+
+
+Sommaire
+1. Rappel du contexte
+2. Mise à jour des dépendances
+3. Supervision et alertes
+4. Collecte et consignation des anomalies
+5. Fiche d'une anomalie rencontrée
+6. Traitement de l'anomalie et déploiement du correctif
+7. Axes d'amélioration
+8. Journal des versions
+
+
+1. Rappel du contexte
+
+CND-Uniformes est la boutique en ligne d'uniformes développée pour le Cours Notre-Dame, une petite école privée de Montpellier (61 enfants, 31 familles). L'appli est hébergée sur une VM Ubuntu que je gère avec Dokploy, exposée derrière Cloudflare sur le domaine app-all.fr. Le frontend est en React/TypeScript, le backend en Node.js/Express avec PostgreSQL, le paiement passe par SumUp et les notifs par Telegram. Ce rapport explique comment je maintiens tout ça en état de marche : gestion des dépendances, supervision, traitement des bugs et pistes d'évolution.
+
+
+2. Mise à jour des dépendances
+
+Périmètre. Je suis les paquets npm du frontend (React, Vite, Tailwind, etc.) et du backend (Express, Knex, bcrypt, jsonwebtoken, express-validator, etc.), ainsi que les images Docker : node:20-alpine, PostgreSQL et nginx.
+
+Fréquence. Les mises à jour de sécurité, je les applique dans les 72 h après l'alerte GitHub / Dependabot. Les patchs "mineurs", je les regroupe une fois par mois. Les montées de version majeures, c'est plutôt trimestriel et au cas par cas, parce qu'il faut lire les breaking changes.
+
+Automatique ou manuel. Les patchs remontés par Dependabot dont la CI passe au vert, je les laisse s'auto-merger. Les mises à jour mineures et majeures, je les fais à la main : je lis le changelog et je rejoue la recette complète (celle du rapport BC02).
+
+Étapes concrètes. Je lance npm outdated pour voir ce qui traîne et je regarde le rapport Dependabot. Je fais un npm audit pour vérifier les CVE. Je crée une branche "chore/deps-AAAA-MM". Je fais les npm install ciblés. Je lance en local le lint, le build et les tests. Si tout est vert, je déploie en staging et je rejoue la recette. Ensuite merge, déploiement en prod, tag SemVer, et j'ajoute une ligne au journal des versions.
+
+À nettoyer. La dépendance "stripe" est un reste d'un ancien prototype, il faut la sortir du package.json backend puisque tout passe par SumUp. Idem pour les fichiers routes/stripe.js et routes/whatsapp.js, qui ne servent plus.
+
+
+3. Supervision et alertes
+
+Ce que je surveille. La dispo du site public (côté parents), la dispo du back-office admin, la santé de l'API via l'endpoint /ping (défini dans backend/index.js), l'état de PostgreSQL (nombre de connexions, latence), la validité du certificat TLS, et l'espace disque de la VM.
+
+Sondes et outils. UptimeRobot ping https://app-all.fr/ et /ping toutes les 5 min. La latence p95 de l'API est visible en continu sur Cloudflare Analytics. Les erreurs 5xx nginx sont suivies via les logs et les alertes Dokploy. Le certificat TLS est renouvelé automatiquement par Cloudflare. Le CPU, la RAM et le disque de la VM sont relevés toutes les minutes dans le dashboard Dokploy. Un cron fait une sauvegarde PostgreSQL tous les jours à 3 h du matin et envoie un rapport.
+
+Seuils et canaux. Site inaccessible pendant 2 min → email + notif Telegram. Taux d'erreur 5xx > 1 % sur 5 min → email + Telegram. Latence p95 > 1 s pendant 5 min → email. Espace disque < 15 % → email tous les jours jusqu'à ce que ce soit réglé. Backup PostgreSQL en échec → email immédiat. Certificat qui expire dans moins de 15 jours (au cas où Cloudflare aurait un souci) → email.
+
+Objectifs. Je vise une dispo mensuelle d'au moins 99,5 % (c'est une école, pas un service critique 24/7). En cas d'incident majeur, je vise 4 h pour tout remettre en marche (RTO) et je perds au pire 24 h de données (RPO, à cause du backup quotidien).
+
+
+4. Collecte et consignation des anomalies
+
+D'où viennent les bugs. Trois sources principales. Les signalements des utilisateurs : la secrétaire ou les parents envoient un mail à cnd.secretariat@icrsp.org en me mettant en copie, ou m'écrivent directement sur Telegram. Les alertes de supervision (voir section 3). Les erreurs applicatives remontées par le middleware Express et les logs nginx.
+
+Où je les consigne. J'utilise les issues GitHub du dépôt CND-Uniformes, avec des labels normalisés : bug, severity:critical / high / medium / low, area:frontend / backend / infra, status:open / in-progress / fixed.
+
+Ce que je remplis à chaque fois. Identifiant, date de détection, source, résumé, étapes de reproduction, comportement observé, comportement attendu, environnement (URL, navigateur, compte), impact utilisateur, sévérité, fichiers concernés, correctif proposé, validation (le scénario de recette qui a été rejoué), version dans laquelle le correctif est parti.
+
+
+5. Fiche d'une anomalie rencontrée
+
+Un cas réel du projet.
+
+Identifiant : #ISSUE-042
+Date de détection : 14/06/2026
+Source : signalement de la secrétaire sur Telegram
+Résumé : une commande apparaît deux fois dans le back-office après paiement SumUp.
+Reproduction : ajouter un article au panier, aller sur SumUp, simuler une latence réseau > 30 s après validation (SumUp retente automatiquement le webhook), puis regarder /admin/orders → deux lignes au lieu d'une.
+Comportement observé : deux commandes, deux notifs Telegram, stock décrémenté deux fois.
+Comportement attendu : une seule commande, un seul décrément.
+Environnement : production, app-all.fr.
+Impact : sur-décrément de stock et doublon de message au secrétariat.
+Sévérité : high.
+Fichiers concernés : backend/routes/sumup.js (le handler du webhook).
+Correctif proposé : rendre le handler idempotent avec une table processed_webhook_events, contrainte unique sur l'event id SumUp.
+Validation : scénario de recette 12 étendu, un rejeu du même webhook doit être neutre.
+Correctif déployé en v0.6.1 le 16/06/2026.
+
+
+6. Traitement de l'anomalie et déploiement du correctif
+
+En reprenant #ISSUE-042, voici comment ça s'est passé, en suivant le pipeline habituel.
+
+J'ai ouvert une branche fix/webhook-idempotence. J'ai commencé par écrire un test qui reproduit le doublon (test rouge). J'ai ajouté une migration Knex 20260615000000_add_processed_webhook_events.js avec les colonnes id, provider, event_id, processed_at, et une contrainte unique sur (provider, event_id). J'ai modifié le handler routes/sumup.js comme ceci : la vérif de signature (déjà là) reste en premier ; ensuite j'essaie d'insérer une ligne dans processed_webhook_events ; si ça part en conflit d'unicité (event déjà vu), je réponds 200 OK sans rien faire d'autre ; sinon, je continue normalement (décrément stock, notif Telegram, statut paid). Le test est passé au vert, lint et build OK. J'ai ouvert la PR, la CI est passée, j'ai mergé sur main. Le pipeline a fait tourner la migration en prod (npm run migrate:prod), redéployé le backend via Dokploy, et le healthcheck est passé. J'ai posé le tag v0.6.1, ajouté une ligne au journal des versions, et prévenu la secrétaire et la directrice par mail.
+
+
+7. Axes d'amélioration
+
+Ces pistes viennent des indicateurs de supervision et des retours du secrétariat après quelques semaines d'usage.
+
+R1 - Recherche plein-texte dans le catalogue. Le catalogue va grossir avec le temps (dépôts d'occasion). Ce serait plus rapide pour les parents, surtout sur mobile. Environ 2 jours (index PostgreSQL tsvector + champ de recherche côté front).
+
+R2 - Export CSV des commandes. La secrétaire demande parfois un bilan mensuel. Un export ferait qu'elle soit autonome au lieu de me solliciter. Environ 0,5 jour.
+
+R3 - Notifs par mail en plus de Telegram. Le smartphone de la secrétaire n'est pas toujours dispo. Une redondance par mail éviterait de louper une commande. Environ 0,5 jour, nodemailer est déjà en place.
+
+R4 - Alertes de stock bas. Aujourd'hui, la secrétaire s'aperçoit d'une rupture après coup. Un seuil paramétrable par produit + une notif Telegram et mail permettrait d'anticiper le réassort. Environ 1 jour.
+
+R5 - Petites stats pour la directrice. Elle m'a demandé un tableau de bord avec le CA et les articles les plus vendus. Ça donnerait de la lisibilité et valoriserait le dispositif. Environ 2 jours.
+
+R6 - Nettoyer les restes techniques. La dépendance stripe et les fichiers routes/stripe.js et routes/whatsapp.js ne servent plus, autant les enlever (surface d'attaque réduite, dépendances plus légères). Environ 0,5 jour.
+
+R7 - Passer sur un hébergement managé. Aujourd'hui, tout tourne sur mon poste. Si l'école reprend le projet, il faut que ça vive sans moi. Migration vers Railway, Scalingo ou OVH. Environ 1 jour.
+
+
+8. Journal des versions
+
+Extrait du CHANGELOG du dépôt, format "Keep a Changelog" et SemVer.
+
+v0.7.0 - 05/07/2026
+  Ajouté : recherche plein-texte du catalogue (R1)
+  Ajouté : export CSV des commandes (R2)
+  Modifié : image Docker Node 20 → 22 LTS
+  Corrigé : le bandeau cookies masquait le bouton "valider le panier" sur iOS
+
+v0.6.2 - 22/06/2026
+  Corrigé : timezone incorrecte sur l'affichage des dates de commande (Europe/Paris forcé côté serveur)
+  Sécurité : bcrypt 5.1.1 → 5.1.2 (CVE-2026-XXXX)
+
+v0.6.1 - 16/06/2026
+  Corrigé : idempotence du webhook SumUp (#ISSUE-042)
+  Ajouté : table processed_webhook_events (migration 20260615000000)
+
+v0.6.0 - 01/06/2026
+  Ajouté : notifs Telegram avec boutons "Marquer prête" et "Annuler"
+  Modifié : migration WhatsApp → Telegram (colonne whatsapp_message_id remplacée par telegram_message_id)
+  Supprimé : dépendance whatsapp-web.js
+
+v0.5.0 - 10/05/2026
+  Ajouté : tunnel de paiement isolé avec la table temp_orders
+  Ajouté : rate limiting sur /api/auth/login
+  Sécurité : cookies refresh en sameSite=strict
+
+v0.4.0 - 20/04/2026
+  Ajouté : gestion du stock par couple (produit, taille) via product_inventory
+  Supprimé : colonne "sizes" obsolète sur products
+
+v0.3.0 - 01/04/2026
+  Ajouté : espace admin (dashboard, CRUD produits, gestion commandes)
+  Ajouté : upload d'images produit (multer)
+
+v0.2.0 - 10/03/2026
+  Ajouté : auth JWT + refresh, rôles user et admin
+  Ajouté : reset mot de passe par mail
+
+v0.1.0 - 15/02/2026
+  Ajouté : socle React 18 + Vite + Express + Knex
+  Ajouté : catalogue public, fiche produit, panier

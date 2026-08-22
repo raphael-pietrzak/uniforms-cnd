@@ -2,18 +2,16 @@ import React from 'react';
 
 const CGV: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="flex items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Conditions Générales de Vente</h1>
-          </div>
-          
-          <p className="text-sm text-gray-600 mb-8">Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}</p>
-          
-          <div className="space-y-6 text-gray-700">
+    <div className="min-h-screen bg-canvas py-12">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-xl border border-line bg-surface p-8">
+          <h1 className="mb-6 text-2xl font-bold text-ink">Conditions Générales de Vente</h1>
+
+          <p className="mb-8 text-sm text-ink-muted">Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}</p>
+
+          <div className="space-y-6 text-sm text-ink-muted">
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">1. Objet</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">1. Objet</h2>
               <p>
                 Les présentes conditions générales de vente (CGV) régissent les ventes d'uniformes scolaires 
                 réalisées par l'association Cours Notre Dame - ICRSP (ci-après "l'Association") auprès des 
@@ -22,7 +20,7 @@ const CGV: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">2. Champ d'application</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">2. Champ d'application</h2>
               <p>
                 La vente d'uniformes est réservée exclusivement aux familles des élèves inscrits au Cours Notre Dame. 
                 Toute commande implique l'acceptation sans réserve des présentes CGV.
@@ -30,7 +28,7 @@ const CGV: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">3. Commandes</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">3. Commandes</h2>
               <p className="mb-2">
                 Les commandes peuvent être passées :
               </p>
@@ -44,7 +42,7 @@ const CGV: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">4. Prix</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">4. Prix</h2>
               <p>
                 Les prix sont indiqués en euros, toutes taxes comprises (TTC). L'Association se réserve 
                 le droit de modifier ses prix à tout moment, étant entendu que le prix figurant sur le site 
@@ -53,7 +51,7 @@ const CGV: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">5. Paiement</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">5. Paiement</h2>
               <p className="mb-2">
                 Le paiement peut être effectué :
               </p>
@@ -68,7 +66,7 @@ const CGV: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">6. Livraison et retrait</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">6. Livraison et retrait</h2>
               <p>
                 Les uniformes commandés sont à retirer directement à l'établissement scolaire aux horaires 
                 d'ouverture du secrétariat (du lundi au vendredi, de 8h30 à 16h30). Les familles seront 
@@ -77,7 +75,7 @@ const CGV: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">7. Échanges et retours</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">7. Échanges et retours</h2>
               <p className="mb-2">
                 En cas d'erreur de taille ou de défaut de fabrication, l'Association accepte les échanges 
                 sous les conditions suivantes :
@@ -93,7 +91,7 @@ const CGV: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">8. Responsabilité</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">8. Responsabilité</h2>
               <p>
                 L'Association s'engage à fournir des uniformes de qualité conforme aux descriptions. 
                 Sa responsabilité ne saurait être engagée en cas de mauvaise utilisation ou d'entretien 
@@ -102,19 +100,19 @@ const CGV: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">9. Données personnelles</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">9. Données personnelles</h2>
               <p>
                 Les données personnelles collectées sont utilisées uniquement pour la gestion des commandes. 
                 Conformément au RGPD, les Clients disposent d'un droit d'accès, de rectification et de 
                 suppression de leurs données. Pour plus d'informations, consultez notre 
-                <a href="/politique-confidentialite" className="text-blue-600 hover:underline ml-1">
+                <a href="/politique-confidentialite" className="ml-1 text-accent hover:text-accent-hover hover:underline">
                   politique de confidentialité
                 </a>.
               </p>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">10. Réclamations</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">10. Réclamations</h2>
               <p>
                 Pour toute réclamation, les Clients peuvent contacter l'Association :
               </p>
@@ -126,7 +124,7 @@ const CGV: React.FC = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">11. Droit applicable</h2>
+              <h2 className="mb-3 text-base font-semibold text-ink">11. Droit applicable</h2>
               <p>
                 Les présentes CGV sont soumises au droit français. En cas de litige, une solution amiable 
                 sera recherchée avant toute action judiciaire.
